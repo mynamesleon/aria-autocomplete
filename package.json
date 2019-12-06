@@ -1,0 +1,35 @@
+{
+    "name": "aria-autocomplete",
+    "version": "1.0.0",
+    "description": "Accessible, extensible, dependency-free JavaScript autocomplete",
+    "main": "src/aria-autocomplete.js",
+    "scripts": {
+        "dev": "webpack --mode development",
+        "prod": "webpack --mode production"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mynamesleon/aria-autocomplete.git"
+    },
+    "keywords": [
+        "autocomplete",
+        "typeahead",
+        "a11y",
+        "accessible",
+        "accessibility"
+    ],
+    "author": "Leon Slater (https://www.mynamesleon.com)",
+    "license": "GPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/mynamesleon/aria-autocomplete/issues"
+    },
+    "homepage": "https://github.com/mynamesleon/aria-autocomplete#readme",
+    "devDependencies": {
+        "@babel/core": "^7.7.5",
+        "@babel/preset-env": "^7.7.5",
+        "babel-loader": "^8.0.6",
+        "path": "^0.12.7",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10"
+    }
+}
