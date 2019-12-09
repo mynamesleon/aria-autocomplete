@@ -1040,7 +1040,7 @@ class AriaAutocomplete {
             if (!checkbox.value) {
                 continue;
             }
-            toPush = { element: checkbox, value: checkbox.value };
+            let toPush = { element: checkbox, value: checkbox.value };
             // label searching
             let label = checkbox.closest('label');
             if (!label && checkbox.id) {

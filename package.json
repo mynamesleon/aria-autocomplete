@@ -4,8 +4,8 @@
     "description": "Accessible, extensible, dependency-free JavaScript autocomplete",
     "main": "src/aria-autocomplete.js",
     "scripts": {
-        "dev": "webpack --mode development",
-        "prod": "webpack --mode production"
+        "dev": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.js --no-minify",
+        "build": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.min.js"
     },
     "repository": {
         "type": "git",
@@ -25,11 +25,6 @@
     },
     "homepage": "https://github.com/mynamesleon/aria-autocomplete#readme",
     "devDependencies": {
-        "@babel/core": "^7.7.5",
-        "@babel/preset-env": "^7.7.5",
-        "babel-loader": "^8.0.6",
-        "path": "^0.12.7",
-        "webpack": "^4.41.2",
-        "webpack-cli": "^3.3.10"
+        "parcel-bundler": "^1.12.4"
     }
 }
