@@ -4,8 +4,9 @@
     "description": "Accessible, extensible, dependency-free JavaScript autocomplete",
     "main": "src/aria-autocomplete.js",
     "scripts": {
-        "dev": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.js --no-minify",
-        "build": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.min.js"
+        "dev": "NODE_ENV=development parcel build src/aria-autocomplete.js --out-file aria-autocomplete.js --no-minify",
+        "build": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.min.js",
+        "css": "NODE_ENV=development parcel build src/aria-autocomplete.less --out-file aria-autocomplete.css --no-minify"
     },
     "repository": {
         "type": "git",
@@ -25,6 +26,7 @@
     },
     "homepage": "https://github.com/mynamesleon/aria-autocomplete#readme",
     "devDependencies": {
+        "less": "^3.10.3",
         "parcel-bundler": "^1.12.4"
     }
 }

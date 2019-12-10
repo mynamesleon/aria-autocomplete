@@ -13,7 +13,9 @@ export function trimString(theString) {
  * @param {String} classes - space delimitted class(es) to add
  */
 export function addClass(element, classes) {
-    let currentValue = trimString(element.getAttribute && element.getAttribute('class'));
+    let currentValue = trimString(
+        element.getAttribute && element.getAttribute('class')
+    );
     let current = ' ' + currentValue + ' ';
     let finalValue = '';
 
@@ -22,7 +24,7 @@ export function addClass(element, classes) {
             finalValue += ' ' + cs[i];
         }
     }
-    if (currentValue !== (finalValue = currentValue + finalValue)) {
+    if (currentValue !== (finalValue = trimString(currentValue + finalValue))) {
         element.setAttribute('class', finalValue);
     }
 }
@@ -33,7 +35,9 @@ export function addClass(element, classes) {
  * @param {String} classes - space delimitted class(es) to remove
  */
 export function removeClass(element, classes) {
-    let currentValue = trimString(element.getAttribute && element.getAttribute('class'));
+    let currentValue = trimString(
+        element.getAttribute && element.getAttribute('class')
+    );
     let finalValue = ' ' + currentValue + ' ';
 
     for (let i = 0, cs = classes.split(' '), l = cs.length; i < l; i += 1) {
@@ -58,13 +62,13 @@ export function cleanString(theString) {
     theString = theString.replace(REGEX_TO_IGNORE, ''); // ignore quotes, commas, colons, and hyphens
     theString = theString.replace(REGEX_AMPERSAND, 'and'); // treat & and 'and' as the same
     theString = theString.replace(REGEX_MAKE_SAFE, '\\$&'); // make safe for regex searching
-    theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace 
+    theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
     return trimString(theString.toLowerCase()); // case insensitive
 }
 
 /**
  * @description check if keycode is for a printable/width-affecting character
- * @param {Number} keyCode 
+ * @param {Number} keyCode
  * @returns {Boolean}
  */
 export function isPrintableKey(keyCode) {
@@ -73,7 +77,9 @@ export function isPrintableKey(keyCode) {
         (keyCode >= 65 && keyCode <= 90) || // a-z
         (keyCode >= 96 && keyCode <= 111) || // numpad 0-9, numeric operators
         (keyCode >= 186 && keyCode <= 222) || // semicolon, equal, comma, dash, etc.
-        keyCode === 32 || keyCode === 8 || keyCode === 46 // space, backspace, or delete
+        keyCode === 32 || // space
+        keyCode === 8 || // backspace
+        keyCode === 46 // delete
     );
 }
 
@@ -85,7 +91,7 @@ export function isPrintableKey(keyCode) {
 export function mergeObjects(...args) {
     let n = {};
     for (let i = 0, l = args.length; i < l; i += 1) {
-        let o = a[i];
+        let o = args[i];
         for (let p in o) {
             if (o.hasOwnProperty(p) && typeof o[p] !== 'undefined') {
                 n[p] = o[p];
@@ -120,7 +126,11 @@ export function setElementState(element, selected, instance) {
     selected = !!selected;
     if (element) {
         // handle checkbox
-        if (element.nodeName === 'INPUT' && typeof element.checked === 'boolean' && element.checked !== selected) {
+        if (
+            element.nodeName === 'INPUT' &&
+            typeof element.checked === 'boolean' &&
+            element.checked !== selected
+        ) {
             element.checked = selected;
             dispatchEvent(element, 'change');
         }
@@ -132,7 +142,7 @@ export function setElementState(element, selected, instance) {
             if (instance.elementChangeEventTimer) {
                 clearTimeout(instance.elementChangeEventTimer);
             }
-            instance.elementChangeEventTimer = setTimeout(function () {
+            instance.elementChangeEventTimer = setTimeout(function() {
                 dispatchEvent(element.closest('select'), 'change');
             }, 1);
         }
@@ -142,24 +152,28 @@ export function setElementState(element, selected, instance) {
 /**
  * @description process an array of strings or objects to ensure needed props exist
  * @param {(String|Object)[]} sourceArray
+ * @param {Object=} mapping - value and label mapping used in object cases
  * @param {Boolean=} setCleanedLabel - defaults to true
  * @returns {Array}
  */
-export function processSourceArray(sourceArray, setCleanedLabel) {
+export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
     let toReturn = [];
+    let mapValue = mapping['value'];
+    let mapLabel = mapping['label'];
     for (let i = 0, l = sourceArray.length; i < l; i += 1) {
         let result = {};
         let entry = sourceArray[i];
         // handle array of strings
         if (typeof entry === 'string') {
-            result.value = entry;
-            result.label = entry;
+            result.value = result.label = entry;
         }
         // handle array of objects - ensure value and label exist, and maintain any other properties
         else {
             result = entry;
-            result.value = (result.value || result.label || '').toString();
-            result.label = (result.label || result.value || '').toString();
+            let value = result[mapValue] || result.value || result.label;
+            let label = result[mapLabel] || result.label || result.value;
+            result.value = (value || '').toString();
+            result.label = (label || '').toString();
         }
         // whether to set a cleaned label for static source filtering (in filter method)
         if (setCleanedLabel !== false) {

@@ -179,7 +179,7 @@ function addClass(element, classes) {
     }
   }
 
-  if (currentValue !== (finalValue = currentValue + finalValue)) {
+  if (currentValue !== (finalValue = trimString(currentValue + finalValue))) {
     element.setAttribute('class', finalValue);
   }
 }
@@ -221,13 +221,13 @@ function cleanString(theString) {
 
   theString = theString.replace(REGEX_MAKE_SAFE, '\\$&'); // make safe for regex searching
 
-  theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace 
+  theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
 
   return trimString(theString.toLowerCase()); // case insensitive
 }
 /**
  * @description check if keycode is for a printable/width-affecting character
- * @param {Number} keyCode 
+ * @param {Number} keyCode
  * @returns {Boolean}
  */
 
@@ -237,7 +237,9 @@ function isPrintableKey(keyCode) {
   keyCode >= 65 && keyCode <= 90 || // a-z
   keyCode >= 96 && keyCode <= 111 || // numpad 0-9, numeric operators
   keyCode >= 186 && keyCode <= 222 || // semicolon, equal, comma, dash, etc.
-  keyCode === 32 || keyCode === 8 || keyCode === 46 // space, backspace, or delete
+  keyCode === 32 || // space
+  keyCode === 8 || // backspace
+  keyCode === 46 // delete
   ;
 }
 /**
@@ -251,7 +253,7 @@ function mergeObjects() {
   var n = {};
 
   for (var i = 0, l = arguments.length; i < l; i += 1) {
-    var o = a[i];
+    var o = i < 0 || arguments.length <= i ? undefined : arguments[i];
 
     for (var p in o) {
       if (o.hasOwnProperty(p) && typeof o[p] !== 'undefined') {
@@ -313,26 +315,32 @@ function setElementState(element, selected, instance) {
 /**
  * @description process an array of strings or objects to ensure needed props exist
  * @param {(String|Object)[]} sourceArray
+ * @param {Object=} mapping - value and label mapping used in object cases
  * @param {Boolean=} setCleanedLabel - defaults to true
  * @returns {Array}
  */
 
 
-function processSourceArray(sourceArray, setCleanedLabel) {
+function processSourceArray(sourceArray) {
+  var mapping = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var setCleanedLabel = arguments.length > 2 ? arguments[2] : undefined;
   var toReturn = [];
+  var mapValue = mapping['value'];
+  var mapLabel = mapping['label'];
 
   for (var i = 0, l = sourceArray.length; i < l; i += 1) {
     var result = {};
     var entry = sourceArray[i]; // handle array of strings
 
     if (typeof entry === 'string') {
-      result.value = entry;
-      result.label = entry;
+      result.value = result.label = entry;
     } // handle array of objects - ensure value and label exist, and maintain any other properties
     else {
         result = entry;
-        result.value = (result.value || result.label || '').toString();
-        result.label = (result.label || result.value || '').toString();
+        var value = result[mapValue] || result.value || result.label;
+        var label = result[mapLabel] || result.label || result.value;
+        result.value = (value || '').toString();
+        result.label = (label || '').toString();
       } // whether to set a cleaned label for static source filtering (in filter method)
 
 
@@ -351,7 +359,7 @@ function processSourceArray(sourceArray, setCleanedLabel) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = _default;
+exports.default = void 0;
 
 require("./closest-polyfill");
 
@@ -371,11 +379,14 @@ var DEFAULT_OPTIONS = {
    */
   source: '',
 
+  /** @description properties to use for label and value when using an Array of Objects as source */
+  sourceMapping: {},
+
   /** @description input delay before running a search */
-  delay: 300,
+  delay: 100,
 
   /** @description min number of characters to run a search (includes spaces) */
-  minLength: 0,
+  minLength: 1,
 
   /** @description max number of results to render */
   maxResults: 9999,
@@ -924,13 +935,14 @@ function () {
     value: function setListOptions(results) {
       var toShow = [];
       var optionId = this.ids.OPTION;
-      var cssName = this.cssNameSpace; // if in multiple mode, exclude items already in the selected array
+      var cssName = this.cssNameSpace;
+      var mapping = this.options.sourceMapping; // if in multiple mode, exclude items already in the selected array
 
       var updated = this.removeSelectedFromResults(results); // allow callback to alter the response before rendering
 
       var callback = this.triggerOptionCallback('onResponse', updated); // now commit to setting the filtered source
 
-      this.filteredSource = callback ? (0, _helpers.processSourceArray)(callback) : updated;
+      this.filteredSource = callback ? (0, _helpers.processSourceArray)(callback, mapping) : updated;
       var length = this.filteredSource.length; // build up the list html
 
       var maxResults = this.options.maxResults;
@@ -953,7 +965,7 @@ function () {
       var noText = this.options.noResultsText;
 
       if (!toShow.length && typeof noText === 'string' && noText.length) {
-        announce = noResults;
+        announce = noText;
         var optionClass = "".concat(cssName, "__option");
         toShow.push("<li class=\"".concat(optionClass, " ").concat(optionClass, "--no-results\">").concat(noText, "</li>"));
       } // remove loading class(es) and reset variables
@@ -1004,6 +1016,7 @@ function () {
 
       var canCancel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       var options = this.options;
+      var mapping = options.mapping;
       var xhr = new XMLHttpRequest();
       var encode = encodeURIComponent;
       var isShowAll = this.forceShowAll;
@@ -1024,7 +1037,8 @@ function () {
 
         var callback = _this2.triggerOptionCallback('onAsyncSuccess', [xhr]);
 
-        var items = (0, _helpers.processSourceArray)(callback || xhr.responseText, false);
+        var source = callback || xhr.responseText;
+        var items = (0, _helpers.processSourceArray)(source, mapping, false);
 
         _this2.setListOptions(items);
       };
@@ -1198,7 +1212,7 @@ function () {
     value: function handleComponentBlur(event, force) {
       var _this4 = this;
 
-      var delay = forceClose ? 0 : 100;
+      var delay = force ? 0 : 100;
 
       if (this.componentBlurTimer) {
         clearTimeout(this.componentBlurTimer);
@@ -1219,7 +1233,8 @@ function () {
           }
         }
 
-        var isQueryIn = _this4.isQueryContainedIn; // cancel any running async call
+        var isQueryIn = _this4.isQueryContainedIn.bind(_this4); // cancel any running async call
+
 
         if (_this4.xhr) {
           _this4.xhr.abort();
@@ -1465,10 +1480,10 @@ function () {
 
       this.input.addEventListener('focusin', function () {
         var toAdd = "".concat(_this5.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.addClass)(instance.input, toAdd);
+        (0, _helpers.addClass)(_this5.input, toAdd);
 
         if (!_this5.disabled && !_this5.menuOpen) {
-          instance.filterPrep(event, true);
+          _this5.filterPrep(event, true);
         }
       }); // show all button click
 
@@ -1523,7 +1538,7 @@ function () {
         var label = checkbox.closest('label');
 
         if (!label && checkbox.id) {
-          label = document.querySelector('[for="' + node.id + '"]');
+          label = document.querySelector('[for="' + checkbox.id + '"]');
         }
 
         if (label) {
@@ -1538,7 +1553,7 @@ function () {
         toPush.cleanedLabel = (0, _helpers.cleanString)(toPush.label);
         this.source.push(toPush); // add to selected if applicable
 
-        if (node.checked) {
+        if (checkbox.checked) {
           this.selected.push(toPush);
         }
       }
@@ -1571,7 +1586,7 @@ function () {
         toPush.cleanedLabel = (0, _helpers.cleanString)(toPush.label);
         this.source.push(toPush); // add to selected if applicable
 
-        if (node.selected) {
+        if (option.selected) {
           this.selected.push(toPush);
         }
       }
@@ -1583,7 +1598,8 @@ function () {
   }, {
     key: "prepListSourceArray",
     value: function prepListSourceArray() {
-      this.source = (0, _helpers.processSourceArray)(this.source); // build up selected array if starting element was an input, and had a value
+      var mapping = this.options.sourceMapping;
+      this.source = (0, _helpers.processSourceArray)(this.source, mapping); // build up selected array if starting element was an input, and had a value
 
       if (this.elementIsInput && this.element.value) {
         var value = this.element.value; // account for multiple mode
@@ -1696,16 +1712,22 @@ function () {
     value: function setHtml() {
       var o = this.options;
       var cssName = this.cssNameSpace;
+      var showAll = this.options.showAll;
       var explainerText = o.srExplanatoryText;
       var listClass = o.listClassName ? " ".concat(o.listClassName) : '';
       var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
       var wrapperClass = o.wrapperClassName ? " ".concat(o.wrapperClassName) : '';
       var explainer = explainerText ? " aria-label=\"".concat(explainerText, "\"") : '';
+
+      if (showAll) {
+        wrapperClass += " ".concat(cssName, "__wrapper--show-all");
+      }
+
       var newHtml = ["<div id=\"".concat(this.ids.WRAPPER, "\" class=\"").concat(cssName, "__wrapper").concat(wrapperClass, "\">")]; // add input
 
-      newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(this.options.placeholder, " aria-owns=\"").concat(this.ids.LIST, "\" aria-placeholder=\"").concat(this.options.placeholder, " class=\"").concat(cssName, "__input").concat(inputClass, "\" />")); // button to show all available options
+      newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(this.options.placeholder, "\" aria-owns=\"").concat(this.ids.LIST, "\" aria-placeholder=\"").concat(this.options.placeholder, "\" class=\"").concat(cssName, "__input").concat(inputClass, "\" />")); // button to show all available options
 
-      if (this.options.showAll) {
+      if (showAll) {
         newHtml.push("<span role=\"button\" aria-label=\"Show all\" class=\"".concat(cssName, "__show-all\" tabindex=\"0\" id=\"").concat(this.ids.BUTTON, "\" aria-expanded=\"false\"></span>"));
       } // add the list holder
 
@@ -1812,9 +1834,13 @@ function () {
  */
 
 
-function _default(elem, options) {
+function expose(elem, options) {
   var autocomplete = new AriaAutocomplete(elem, options);
   return autocomplete.api;
 }
+
+window['AriaAutocomplete'] = expose;
+var _default = expose;
+exports.default = _default;
 },{"./closest-polyfill":"kTsq","./helpers":"lTk1"}]},{},["c8cM"], null)
 //# sourceMappingURL=/aria-autocomplete.js.map

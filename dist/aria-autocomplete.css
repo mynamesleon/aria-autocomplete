@@ -1,0 +1,102 @@
+.aria-autocomplete__sr-only {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  padding: 0;
+  margin: -0.1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.aria-autocomplete__input {
+  border: 1px solid #606060;
+  width: 100%;
+  height: 40px;
+  padding: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.aria-autocomplete__wrapper {
+  position: relative;
+  max-width: 420px;
+}
+.aria-autocomplete__wrapper--show-all {
+  padding-right: 44px;
+}
+.aria-autocomplete__list {
+  list-style: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  z-index: 99999;
+  left: 0;
+  margin: 0;
+  padding: 3px 0 !important;
+  height: auto;
+  min-height: 0;
+  max-height: 304px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #606060;
+  border-radius: 2px;
+  font-size: 1em;
+  box-sizing: border-box;
+  box-shadow: none;
+}
+.aria-autocomplete__list--has-results[aria-label]:before {
+  content: attr(aria-label) !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 5px 10px 0;
+  font-size: 13px;
+  text-align: right;
+  opacity: 0.5;
+  box-sizing: border-box;
+}
+@media reader, speech, aural {
+  .aria-autocomplete__list--has-results[aria-label]:before {
+    display: none;
+  }
+}
+.aria-autocomplete__list--has-results[aria-label] li:first-child {
+  margin-top: 20px;
+}
+.aria-autocomplete__option {
+  display: block;
+  color: #434143;
+  text-decoration: none;
+  font-weight: normal;
+  list-style: none;
+  cursor: pointer;
+  padding: 7px 10px;
+  word-break: break-word;
+}
+.aria-autocomplete__option:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+.aria-autocomplete__option:hover,
+.aria-autocomplete__option--focused {
+  background: #f3f3f3;
+  color: #000;
+  border: none;
+  margin: 0;
+  font-weight: normal;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.aria-autocomplete__option--no-results {
+  margin-top: 0 !important;
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  color: #434143 !important;
+}
+
+
+/*# sourceMappingURL=/aria-autocomplete.css.map */

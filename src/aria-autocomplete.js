@@ -19,11 +19,13 @@ const DEFAULT_OPTIONS = {
      * @type {String|String[]|Object[]|Function}
      */
     source: '',
+    /** @description properties to use for label and value when using an Array of Objects as source */
+    sourceMapping: {},
 
     /** @description input delay before running a search */
-    delay: 300,
+    delay: 100,
     /** @description min number of characters to run a search (includes spaces) */
-    minLength: 0,
+    minLength: 1,
     /** @description max number of results to render */
     maxResults: 9999,
     /** @description whether to render a button that triggers showing all options */
@@ -499,13 +501,16 @@ class AriaAutocomplete {
         let toShow = [];
         let optionId = this.ids.OPTION;
         let cssName = this.cssNameSpace;
+        let mapping = this.options.sourceMapping;
         // if in multiple mode, exclude items already in the selected array
         let updated = this.removeSelectedFromResults(results);
         // allow callback to alter the response before rendering
         let callback = this.triggerOptionCallback('onResponse', updated);
 
         // now commit to setting the filtered source
-        this.filteredSource = callback ? processSourceArray(callback) : updated;
+        this.filteredSource = callback
+            ? processSourceArray(callback, mapping)
+            : updated;
         let length = this.filteredSource.length;
 
         // build up the list html
@@ -532,7 +537,7 @@ class AriaAutocomplete {
         let announce;
         let noText = this.options.noResultsText;
         if (!toShow.length && typeof noText === 'string' && noText.length) {
-            announce = noResults;
+            announce = noText;
             let optionClass = `${cssName}__option`;
             toShow.push(
                 `<li class="${optionClass} ${optionClass}--no-results">${noText}</li>`
@@ -579,6 +584,7 @@ class AriaAutocomplete {
      */
     handleAsync(value, canCancel = true) {
         let options = this.options;
+        let mapping = options.mapping;
         let xhr = new XMLHttpRequest();
         let encode = encodeURIComponent;
         let isShowAll = this.forceShowAll;
@@ -597,7 +603,8 @@ class AriaAutocomplete {
         xhr.onload = () => {
             this.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
             let callback = this.triggerOptionCallback('onAsyncSuccess', [xhr]);
-            let items = processSourceArray(callback || xhr.responseText, false);
+            let source = callback || xhr.responseText;
+            let items = processSourceArray(source, mapping, false);
             this.setListOptions(items);
         };
         xhr.send();
@@ -759,7 +766,7 @@ class AriaAutocomplete {
      * @param {Boolean} force - fire instantly and force blurring out of the component
      */
     handleComponentBlur(event, force) {
-        let delay = forceClose ? 0 : 100;
+        let delay = force ? 0 : 100;
         if (this.componentBlurTimer) {
             clearTimeout(this.componentBlurTimer);
         }
@@ -777,7 +784,7 @@ class AriaAutocomplete {
                 }
             }
 
-            let isQueryIn = this.isQueryContainedIn;
+            let isQueryIn = this.isQueryContainedIn.bind(this);
 
             // cancel any running async call
             if (this.xhr) {
@@ -997,9 +1004,9 @@ class AriaAutocomplete {
         // when focusing on input, reset selected index and trigger search handling
         this.input.addEventListener('focusin', () => {
             let toAdd = `${this.cssNameSpace}__input--focused focused focus`;
-            addClass(instance.input, toAdd);
+            addClass(this.input, toAdd);
             if (!this.disabled && !this.menuOpen) {
-                instance.filterPrep(event, true);
+                this.filterPrep(event, true);
             }
         });
 
@@ -1044,7 +1051,7 @@ class AriaAutocomplete {
             // label searching
             let label = checkbox.closest('label');
             if (!label && checkbox.id) {
-                label = document.querySelector('[for="' + node.id + '"]');
+                label = document.querySelector('[for="' + checkbox.id + '"]');
             }
             if (label) {
                 toPush.label = label.textContent;
@@ -1056,7 +1063,7 @@ class AriaAutocomplete {
             toPush.cleanedLabel = cleanString(toPush.label);
             this.source.push(toPush);
             // add to selected if applicable
-            if (node.checked) {
+            if (checkbox.checked) {
                 this.selected.push(toPush);
             }
         }
@@ -1084,7 +1091,7 @@ class AriaAutocomplete {
             toPush.cleanedLabel = cleanString(toPush.label);
             this.source.push(toPush);
             // add to selected if applicable
-            if (node.selected) {
+            if (option.selected) {
                 this.selected.push(toPush);
             }
         }
@@ -1094,7 +1101,8 @@ class AriaAutocomplete {
      * @description adjust starting source array to format needed, and set selected
      */
     prepListSourceArray() {
-        this.source = processSourceArray(this.source);
+        let mapping = this.options.sourceMapping;
+        this.source = processSourceArray(this.source, mapping);
 
         // build up selected array if starting element was an input, and had a value
         if (this.elementIsInput && this.element.value) {
@@ -1202,11 +1210,16 @@ class AriaAutocomplete {
     setHtml() {
         let o = this.options;
         let cssName = this.cssNameSpace;
+        let showAll = this.options.showAll;
         let explainerText = o.srExplanatoryText;
         let listClass = o.listClassName ? ` ${o.listClassName}` : '';
         let inputClass = o.inputClassName ? ` ${o.inputClassName}` : '';
         let wrapperClass = o.wrapperClassName ? ` ${o.wrapperClassName}` : '';
         let explainer = explainerText ? ` aria-label="${explainerText}"` : '';
+
+        if (showAll) {
+            wrapperClass += ` ${cssName}__wrapper--show-all`;
+        }
 
         let newHtml = [
             `<div id="${this.ids.WRAPPER}" class="${cssName}__wrapper${wrapperClass}">`
@@ -1214,11 +1227,11 @@ class AriaAutocomplete {
 
         // add input
         newHtml.push(
-            `<input type="text" autocomplete="off" aria-expanded="false" aria-autocomplete="list" role="combobox" id="${this.ids.INPUT}" placeholder="${this.options.placeholder} aria-owns="${this.ids.LIST}" aria-placeholder="${this.options.placeholder} class="${cssName}__input${inputClass}" />`
+            `<input type="text" autocomplete="off" aria-expanded="false" aria-autocomplete="list" role="combobox" id="${this.ids.INPUT}" placeholder="${this.options.placeholder}" aria-owns="${this.ids.LIST}" aria-placeholder="${this.options.placeholder}" class="${cssName}__input${inputClass}" />`
         );
 
         // button to show all available options
-        if (this.options.showAll) {
+        if (showAll) {
             newHtml.push(
                 `<span role="button" aria-label="Show all" class="${cssName}__show-all" tabindex="0" id="${this.ids.BUTTON}" aria-expanded="false"></span>`
             );
@@ -1326,7 +1339,10 @@ class AriaAutocomplete {
  * @param {Object} options
  * @returns {Object}
  */
-export default function(elem, options) {
+function expose(elem, options) {
     let autocomplete = new AriaAutocomplete(elem, options);
     return autocomplete.api;
 }
+
+window['AriaAutocomplete'] = expose;
+export default expose;
