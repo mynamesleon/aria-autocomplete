@@ -144,6 +144,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.trimString = trimString;
+exports.hasClass = hasClass;
 exports.addClass = addClass;
 exports.removeClass = removeClass;
 exports.cleanString = cleanString;
@@ -152,17 +153,30 @@ exports.mergeObjects = mergeObjects;
 exports.dispatchEvent = dispatchEvent;
 exports.setElementState = setElementState;
 exports.processSourceArray = processSourceArray;
-var REGEX_TRIM = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+exports.htmlToElement = htmlToElement;
+
 /**
- * trim string helper
+ * @description trim string helper
  * @param {string} theString
  */
-
 function trimString(theString) {
-  return theString == null ? '' : (theString + '').replace(REGEX_TRIM, '');
+  return theString == null ? '' : (theString + '').trim();
 }
 /**
- * add class(es) to element
+ * @description check if element has class
+ * @param {Element} element - element to check class on
+ * @param {String} className
+ * @returns {Boolean}
+ */
+
+
+function hasClass(element, className) {
+  var e = element;
+  var cur = trimString(e.getAttribute && e.getAttribute('class'));
+  return " ".concat(cur, " ").indexOf(" ".concat(className, " ")) > -1;
+}
+/**
+ * @description add class(es) to element
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to add
  */
@@ -184,7 +198,7 @@ function addClass(element, classes) {
   }
 }
 /**
- * remove class(es) from element
+ * @description remove class(es) from element
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to remove
  */
@@ -353,6 +367,18 @@ function processSourceArray(sourceArray) {
 
   return toReturn;
 }
+
+var DIV = document.createElement('div');
+/**
+ * @description convert HTML string into an element
+ * @param {String} html
+ * @returns {Element}
+ */
+
+function htmlToElement(html) {
+  DIV.innerHTML = trimString(html);
+  return DIV.firstChild;
+}
 },{}],"c8cM":[function(require,module,exports) {
 "use strict";
 
@@ -392,10 +418,13 @@ var DEFAULT_OPTIONS = {
   maxResults: 9999,
 
   /** @description whether to render a button that triggers showing all options */
-  showAllButton: true,
+  showAllControl: true,
 
   /** @description confirm selection when blurring off of the control */
   confirmOnBlur: true,
+
+  /** @description @todo set input width to match its content */
+  autoGrowInput: false,
 
   /** @description whether to allow multiple items to be selected */
   multiple: false,
@@ -405,6 +434,9 @@ var DEFAULT_OPTIONS = {
 
   /** @description if element is an input, and in multiple mode, character that separates the values */
   multipleSeparator: ',',
+
+  /** @description if input is empty and in multiple mode, delete last selected item on backspace */
+  deleteOnBackspace: false,
 
   /** @description placeholder text to show in generated input */
   placeholder: 'Type to search...',
@@ -435,6 +467,9 @@ var DEFAULT_OPTIONS = {
 
   /** @description in multi mode, screen reader text announced after deletion - appended to label */
   srDeletedText: 'deleted',
+
+  /** @description screen reader text for the show all control */
+  srShowAllText: 'Show all',
 
   /** @description screen reader text announced after selection - appended to label */
   srSelectedText: 'selected',
@@ -473,14 +508,14 @@ var DEFAULT_OPTIONS = {
   /** @description callback when list area opens */
   onOpen: undefined
 };
+/**
+ * @param {Element} element
+ * @param {Object=} options
+ */
 
 var AriaAutocomplete =
 /*#__PURE__*/
 function () {
-  /**
-   * @param {Element} element
-   * @param {Object=} options
-   */
   function AriaAutocomplete(element, options) {
     _classCallCheck(this, AriaAutocomplete);
 
@@ -507,7 +542,6 @@ function () {
     this.ids.BUTTON = "".concat(this.ids.PREFIX, "-button");
     this.ids.OPTION = "".concat(this.ids.PREFIX, "-option");
     this.ids.WRAPPER = "".concat(this.ids.PREFIX, "-wrapper");
-    this.ids.OPTION_SELECTED = "".concat(this.ids.OPTION, "-selected");
     this.ids.OPTION_SELECTED = "".concat(this.ids.OPTION, "-selected");
     this.ids.SR_ASSISTANCE = "".concat(this.ids.PREFIX, "-sr-assistance");
     this.ids.SR_ANNOUNCEMENTS = "".concat(this.ids.PREFIX, "-sr-announcements"); // always have an id on the original element for caching state
@@ -711,12 +745,150 @@ function () {
       }, delay);
     }
     /**
-     * @todo: implement this!
+     * @description check if element is a selected element in the DOM
+     * @param {Element} element
+     * @returns {Boolean}
+     */
+
+  }, {
+    key: "isSelectedElem",
+    value: function isSelectedElem(element) {
+      return this.multiple && element.ariaAutocompleteSelectedOption && (0, _helpers.hasClass)(element, "".concat(this.cssNameSpace, "__selected"));
+    }
+    /**
+     * @description get DOM elements for selected items
+     * @returns {Element[]}
+     */
+
+  }, {
+    key: "getSelectedElems",
+    value: function getSelectedElems() {
+      var n = this.wrapper.childNodes;
+      var a = [];
+
+      for (var i = 0, l = n.length; i < l; i += 1) {
+        if (this.isSelectedElem(n[i])) {
+          a.push(n[i]);
+        }
+      }
+
+      return a;
+    }
+    /**
+     * @description remove object from selected
+     * @param {Object} entry
+     */
+
+  }, {
+    key: "removeEntryFromSelected",
+    value: function removeEntryFromSelected(entry) {
+      var index = this.selected.indexOf(entry);
+
+      if (index === -1) {
+        // value check, in case explicit object reference did not work
+        for (var i = 0, l = this.selected.length; i < l; i += 1) {
+          if (this.selected[i].value === entry.value) {
+            index = i;
+            break;
+          }
+        }
+      } // set element state, dispatch change event, set selected array, and build selected
+
+
+      if (index > -1) {
+        (0, _helpers.setElementState)(this.selected[index].element, false, this);
+        this.selected.splice(index, 1);
+        this.buildMultiSelected();
+      }
+    }
+    /**
+     * @description re-build the html showing the selected items
+     * @todo test performance in old IE - lots of loops here!
      */
 
   }, {
     key: "buildMultiSelected",
-    value: function buildMultiSelected() {}
+    value: function buildMultiSelected() {
+      // only do anything in multiple mode
+      if (!this.multiple) {
+        return;
+      } // no elements, and none selected, do nothing
+
+
+      var currentSelectedElems = this.getSelectedElems();
+
+      if (!this.selected.length && !currentSelectedElems.length) {
+        return;
+      } // cycle through existing elements, and remove any not in the selected array
+
+
+      var current = [];
+      var i = currentSelectedElems.length;
+
+      while (i--) {
+        var option = currentSelectedElems[i].ariaAutocompleteSelectedOption;
+        var l = this.selected.length;
+        var isInSelected = false;
+
+        while (l--) {
+          var selected = this.selected[l];
+
+          if (selected === option || selected.value === option.value) {
+            isInSelected = true;
+            break;
+          }
+        }
+
+        if (isInSelected) {
+          current.push(currentSelectedElems[i]);
+        } else {
+          this.wrapper.removeChild(currentSelectedElems[i]);
+        }
+      } // cycle through selected array, and add elements for any not represented by one
+
+
+      var deleteText = this.options.srDeleteText;
+      var fragment = document.createDocumentFragment();
+      var selectedClass = "".concat(this.cssNameSpace, "__selected");
+
+      for (var _i = 0, _l = this.selected.length; _i < _l; _i += 1) {
+        var _selected = this.selected[_i];
+        var _l2 = current.length;
+        var isInDom = false;
+
+        while (_l2--) {
+          var _option = current[_l2].ariaAutocompleteSelectedOption;
+
+          if (_option === _selected || _option.value === _selected.value) {
+            isInDom = true;
+            break;
+          }
+        }
+
+        if (!isInDom) {
+          var label = _selected.label;
+          var span = (0, _helpers.htmlToElement)("<span role=\"button\" class=\"".concat(selectedClass, "\" ") + "tabindex=\"0\" aria-label=\"".concat(deleteText, " ").concat(label, "\">") + "".concat(label, "</span>"));
+          span.ariaAutocompleteSelectedOption = _selected;
+          fragment.appendChild(span);
+        }
+      }
+
+      this.wrapper.appendChild(fragment); // set ids on elements
+
+      var ids = [this.ids.LIST];
+      current = this.getSelectedElems();
+
+      for (var _i2 = 0, _l3 = current.length; _i2 < _l3; _i2 += 1) {
+        var id = "".concat(this.ids.OPTION_SELECTED, "-").concat(_i2);
+
+        current[_i2].setAttribute('id', id);
+
+        ids.push(id);
+      } // set input aria-owns
+
+
+      this.input.setAttribute('aria-owns', ids.join(' '));
+    }
     /**
      * @description set the aria-describedby attribute on the input
      */
@@ -853,9 +1025,7 @@ function () {
       // defensive check for proper index, that the filteredSource exists, and not exceed max items option
       if (typeof index !== 'number' || index < 0 || this.multiple && this.selected.length >= this.options.maxItems || !this.filteredSource.length || !this.filteredSource[index]) {
         return;
-      } // generate new object from the selected item in case of varying original source
-
-      /** @todo: confirm if a new object actually needs to be generated */
+      } // generate new object from the selected item in case the original source gets altered
 
 
       var option = (0, _helpers.mergeObjects)(this.filteredSource[index]); // detect if selected option is already in selected array
@@ -870,7 +1040,7 @@ function () {
         }
       }
 
-      this.input.value = this.multiple ? '' : option.label; // reset selected array in single select mode
+      this.input.value = this.term = this.multiple ? '' : option.label; // reset selected array in single select mode
 
       if (!alreadySelected && !this.multiple) {
         this.selected = [];
@@ -880,7 +1050,7 @@ function () {
       if (!alreadySelected) {
         this.selected.push(option);
         this.setSourceElementValues();
-        this.buildMultiSelected(option); // rebuild multi-selected if needed
+        this.buildMultiSelected(); // rebuild multi-selected if needed
       }
 
       this.triggerOptionCallback('onSelect', [option]);
@@ -920,7 +1090,7 @@ function () {
           }
         }
 
-        toReturn.push(thisResult);
+        toReturn.push(result);
       }
 
       return toReturn;
@@ -948,7 +1118,7 @@ function () {
       var maxResults = this.options.maxResults;
 
       for (var i = 0; i < length && i < maxResults; i += 1) {
-        toShow.push("<li tabindex=\"-1\" aria-selected=\"false\" role=\"option\" class=\"".concat(cssName, "__option\" id=\"").concat(optionId, "--").concat(i, "\" aria-posinset=\"").concat(i + 1, "\" aria-setsize=\"").concat(length, "\">").concat(this.filteredSource[i].label, "</li>"));
+        toShow.push("<li tabindex=\"-1\" aria-selected=\"false\" role=\"option\" class=\"".concat(cssName, "__option\" ") + "id=\"".concat(optionId, "--").concat(i, "\" aria-posinset=\"").concat(i + 1, "\" ") + "aria-setsize=\"".concat(length, "\">").concat(this.filteredSource[i].label, "</li>"));
       } // set has-results or no-results class on the list element
 
 
@@ -999,7 +1169,7 @@ function () {
       }
 
       this.show(); // reset forceShowAll must be after .show()
-      // aria-expanded attribute on showAllButton is controlled in .show() method
+      // aria-expanded attribute on showAllControl is controlled in .show() method
 
       this.forceShowAll = false;
     }
@@ -1058,7 +1228,7 @@ function () {
     key: "filter",
     value: function filter(value) {
       // fail silently if no value is provided
-      if (typeof value === 'undefined') {
+      if (typeof value !== 'string') {
         this.cancelFilterPrep();
         return;
       }
@@ -1085,6 +1255,7 @@ function () {
 
       if (typeof this.source === 'function') {
         toReturn = this.source.call(this.wrapper, this.term);
+        toReturn = (0, _helpers.processSourceArray)(toReturn, this.options.sourceMapping);
         this.setListOptions(toReturn);
         return;
       } // if empty string, show all
@@ -1177,7 +1348,7 @@ function () {
         } catch (e) {} // if value to use matches last used search term, do nothing
 
 
-        var equalVals = value === _this3.term; // prevent search being run again with the same value
+        var equalVals = value === '' ? false : value === _this3.term; // prevent search being run again with the same value
 
         if (!equalVals || equalVals && !_this3.menuOpen && !modifier) {
           var n = _this3.cssNameSpace;
@@ -1204,14 +1375,15 @@ function () {
     /**
      * @description blur behaviour for hiding list and removing focus class(es)
      * @param {Event} event
-     * @param {Boolean} force - fire instantly and force blurring out of the component
+     * @param {Boolean=} force - fire instantly and force blurring out of the component
      */
 
   }, {
     key: "handleComponentBlur",
-    value: function handleComponentBlur(event, force) {
+    value: function handleComponentBlur(event) {
       var _this4 = this;
 
+      var force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var delay = force ? 0 : 100;
 
       if (this.componentBlurTimer) {
@@ -1222,16 +1394,16 @@ function () {
 
       this.componentBlurTimer = setTimeout(function () {
         // do nothing if blurring to an element within the list
-        var activeElem = document.activeElement; // exception for show all button
+        var activeElem = document.activeElement;
 
-        /** @todo: exception for selected items */
-
-        if (!force && !(_this4.showAll && _this4.showAll === activeElem)) {
-          // must base this on the wrapper to allow scrolling the list in IE
-          if (_this4.wrapper.contains(activeElem)) {
-            return;
+        if (!force && !(_this4.showAll && _this4.showAll === activeElem) && // exception for show all button
+        !activeElem.ariaAutocompleteSelectedOption // exception for selected items
+        ) {
+            // must base this on the wrapper to allow scrolling the list in IE
+            if (_this4.wrapper.contains(activeElem)) {
+              return;
+            }
           }
-        }
 
         var isQueryIn = _this4.isQueryContainedIn.bind(_this4); // cancel any running async call
 
@@ -1283,8 +1455,11 @@ function () {
   }, {
     key: "handleEnterKey",
     value: function handleEnterKey(event) {
-      /** @todo: if in multiple mode, and event target was a selected item, remove it */
-      if (this.multiple) {}
+      // if in multiple mode, and event target was a selected item, remove it
+      if (this.isSelectedElem(event.target)) {
+        var option = event.target.ariaAutocompleteSelectedOption;
+        return this.removeEntryFromSelected(option);
+      }
 
       if (this.disabled) {
         return;
@@ -1363,7 +1538,7 @@ function () {
       var targetIsInput = event.target === this.input; // on space, if focus state is on any other item, treat as enter
 
       if (event.keyCode === 32 && !targetIsInput) {
-        this.handleEnterKey(event);
+        return this.handleEnterKey(event);
       }
 
       if (this.disabled) {
@@ -1373,7 +1548,7 @@ function () {
 
       var selectedLength = this.selected && this.selected.length;
 
-      if (targetIsInput && this.multiple && selectedLength && event.keyCode === 8 && this.input.value === '') {
+      if (this.options.deleteOnBackspace && this.input.value === '' && event.keyCode === 8 && selectedLength && targetIsInput && this.multiple) {
         var lastSelectedLabel = this.selected[selectedLength - 1].label;
         var announcement = "".concat(lastSelectedLabel, " ").concat(this.options.srDeletedText);
         this.announce(announcement, 0);
@@ -1458,6 +1633,14 @@ function () {
       this.wrapper.addEventListener('click', function (event) {
         if (event.target === _this5.wrapper) {
           _this5.input.focus();
+
+          return;
+        }
+
+        if (_this5.isSelectedElem(event.target)) {
+          var option = event.target.ariaAutocompleteSelectedOption;
+
+          _this5.removeEntryFromSelected(option);
         }
       }); // when blurring out of input, check current value against selected one and clear if needed
 
@@ -1686,20 +1869,24 @@ function () {
       } // if selected item(s) already exists
 
 
+      var disable = false;
+
       if (this.selected.length) {
         // for multi select variant, set selected items
         if (this.multiple) {
           this.buildMultiSelected();
+          disable = this.selected.length >= this.options.maxItems;
         } // for single select variant, set value to match
         else {
             this.input.value = this.selected[0].label || '';
+            this.term = this.input.value;
           }
       } // setup input description - done here in case value is affected above
 
 
       this.setInputDescription(); // disable the control if the invoked element was disabled
 
-      if (!!this.element.disabled) {
+      if (disable || !!this.element.disabled) {
         this.disable();
       }
     }
@@ -1711,8 +1898,8 @@ function () {
     key: "setHtml",
     value: function setHtml() {
       var o = this.options;
+      var showAll = o.showAllControl;
       var cssName = this.cssNameSpace;
-      var showAll = this.options.showAll;
       var explainerText = o.srExplanatoryText;
       var listClass = o.listClassName ? " ".concat(o.listClassName) : '';
       var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
@@ -1725,21 +1912,51 @@ function () {
 
       var newHtml = ["<div id=\"".concat(this.ids.WRAPPER, "\" class=\"").concat(cssName, "__wrapper").concat(wrapperClass, "\">")]; // add input
 
-      newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(this.options.placeholder, "\" aria-owns=\"").concat(this.ids.LIST, "\" aria-placeholder=\"").concat(this.options.placeholder, "\" class=\"").concat(cssName, "__input").concat(inputClass, "\" />")); // button to show all available options
+      newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" " + "role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(o.placeholder, "\" ") + "aria-owns=\"".concat(this.ids.LIST, "\" aria-placeholder=\"").concat(o.placeholder, "\" ") + "class=\"".concat(cssName, "__input").concat(inputClass, "\" />")); // button to show all available options
 
       if (showAll) {
-        newHtml.push("<span role=\"button\" aria-label=\"Show all\" class=\"".concat(cssName, "__show-all\" tabindex=\"0\" id=\"").concat(this.ids.BUTTON, "\" aria-expanded=\"false\"></span>"));
+        newHtml.push("<span role=\"button\" aria-label=\"".concat(o.srShowAllText, "\" class=\"").concat(cssName, "__show-all\" ") + "tabindex=\"0\" id=\"".concat(this.ids.BUTTON, "\" aria-expanded=\"false\"></span>"));
       } // add the list holder
 
 
-      newHtml.push("<ul id=\"".concat(this.ids.LIST, "\" class=\"").concat(cssName, "__list").concat(listClass, "\" role=\"listbox\" hidden=\"hidden\"").concat(explainer, "></ul>")); // add the screen reader assistance element
+      newHtml.push("<ul id=\"".concat(this.ids.LIST, "\" class=\"").concat(cssName, "__list").concat(listClass, "\" role=\"listbox\" ") + "hidden=\"hidden\"".concat(explainer, "></ul>")); // add the screen reader assistance element
 
-      newHtml.push("<span class=\"sr-only ".concat(cssName, "__sr-only ").concat(cssName, "__sr-assistance\" id=\"").concat(this.ids.SR_ASSISTANCE, "\">").concat(this.options.srAssistiveText, "</span>")); // add element for added screen reader announcements
+      newHtml.push("<span class=\"sr-only ".concat(cssName, "__sr-only ").concat(cssName, "__sr-assistance\" ") + "id=\"".concat(this.ids.SR_ASSISTANCE, "\">").concat(o.srAssistiveText, "</span>")); // add element for added screen reader announcements
 
-      newHtml.push("<span class=\"sr-only ".concat(cssName, "__sr-only ").concat(cssName, "__sr-announcements\" id=\"").concat(this.ids.SR_ANNOUNCEMENTS, "\" aria-live=\"polite\" aria-atomic=\"true\"></span>")); // close all and append
+      newHtml.push("<span class=\"sr-only ".concat(cssName, "__sr-only ").concat(cssName, "__sr-announcements\" ") + "id=\"".concat(this.ids.SR_ANNOUNCEMENTS, "\" aria-live=\"polite\" aria-atomic=\"true\"></span>")); // close all and append
 
       newHtml.push("</div>");
       this.element.insertAdjacentHTML('afterend', newHtml.join(''));
+    }
+    /**
+     * @description generate api object to expose on the element
+     */
+
+  }, {
+    key: "generateApi",
+    value: function generateApi() {
+      var _this6 = this;
+
+      this.api = {
+        options: this.options,
+        open: function open() {
+          return _this6.show.call(_this6);
+        },
+        close: function close() {
+          return _this6.hide.call(_this6);
+        },
+        refresh: function refresh() {
+          return _this6.refresh.call(_this6);
+        },
+        destroy: function destroy() {
+          return _this6.destroy.call(_this6);
+        },
+        filter: function filter(value) {
+          return _this6.filter.call(_this6, value);
+        }
+      }; // store api on original element
+
+      this.element.ariaAutocomplete = this.api;
     }
     /**
      * @todo: refresh method for use after changing options, source, etc.
@@ -1815,10 +2032,9 @@ function () {
 
       this.bindEvents();
       /** @todo: handling of initial value in async case - other cases handled in setInputStartingStates */
+      // generate api object to expose
 
-      /** @todo: store api on original element */
-
-      this.element.ariaAutocomplete = {}; // fire onready callback
+      this.generateApi(); // fire onready callback
 
       this.triggerOptionCallback('onReady');
     }
@@ -1834,13 +2050,14 @@ function () {
  */
 
 
-function expose(elem, options) {
-  var autocomplete = new AriaAutocomplete(elem, options);
-  return autocomplete.api;
-}
+window['AriaAutocomplete'] = function (elem, options) {
+  return new AriaAutocomplete(elem, options).api;
+};
 
-window['AriaAutocomplete'] = expose;
-var _default = expose;
+var _default = function _default(elem, options) {
+  return new AriaAutocomplete(elem, options).api;
+};
+
 exports.default = _default;
 },{"./closest-polyfill":"kTsq","./helpers":"lTk1"}]},{},["c8cM"], null)
 //# sourceMappingURL=/aria-autocomplete.js.map

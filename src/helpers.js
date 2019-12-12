@@ -1,14 +1,25 @@
-const REGEX_TRIM = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
 /**
- * trim string helper
+ * @description trim string helper
  * @param {string} theString
  */
 export function trimString(theString) {
-    return theString == null ? '' : (theString + '').replace(REGEX_TRIM, '');
+    return theString == null ? '' : (theString + '').trim();
 }
 
 /**
- * add class(es) to element
+ * @description check if element has class
+ * @param {Element} element - element to check class on
+ * @param {String} className
+ * @returns {Boolean}
+ */
+export function hasClass(element, className) {
+    let e = element;
+    let cur = trimString(e.getAttribute && e.getAttribute('class'));
+    return ` ${cur} `.indexOf(` ${className} `) > -1;
+}
+
+/**
+ * @description add class(es) to element
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to add
  */
@@ -30,7 +41,7 @@ export function addClass(element, classes) {
 }
 
 /**
- * remove class(es) from element
+ * @description remove class(es) from element
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to remove
  */
@@ -182,4 +193,15 @@ export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
         toReturn.push(result);
     }
     return toReturn;
+}
+
+const DIV = document.createElement('div');
+/**
+ * @description convert HTML string into an element
+ * @param {String} html
+ * @returns {Element}
+ */
+export function htmlToElement(html) {
+    DIV.innerHTML = trimString(html);
+    return DIV.firstChild;
 }
