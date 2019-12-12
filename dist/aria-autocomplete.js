@@ -424,7 +424,7 @@ var DEFAULT_OPTIONS = {
   confirmOnBlur: true,
 
   /** @description @todo set input width to match its content */
-  autoGrowInput: false,
+  autoGrow: false,
 
   /** @description whether to allow multiple items to be selected */
   multiple: false,
@@ -451,7 +451,7 @@ var DEFAULT_OPTIONS = {
   inputClassName: '',
 
   /** @description class name to add to component wrapper */
-  wrapperClassName: 'form-control',
+  wrapperClassName: '',
 
   /** @description string to use in front of main classes that are used */
   cssNameSpace: 'aria-autocomplete',
@@ -475,7 +475,7 @@ var DEFAULT_OPTIONS = {
   srSelectedText: 'selected',
 
   /** @description screen reader explainer added to the list element via aria-label attribute */
-  srExplanatoryText: 'Search suggestions',
+  srListLabelText: 'Search suggestions',
 
   /** @description screen reader description used for main input when empty */
   srAssistiveText: 'When autocomplete results are available use up and down arrows to review and enter to select. ' + 'Touch device users, explore by touch or with swipe gestures.',
@@ -1900,7 +1900,7 @@ function () {
       var o = this.options;
       var showAll = o.showAllControl;
       var cssName = this.cssNameSpace;
-      var explainerText = o.srExplanatoryText;
+      var explainerText = o.srListLabelText;
       var listClass = o.listClassName ? " ".concat(o.listClassName) : '';
       var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
       var wrapperClass = o.wrapperClassName ? " ".concat(o.wrapperClassName) : '';
@@ -1944,17 +1944,24 @@ function () {
         },
         close: function close() {
           return _this6.hide.call(_this6);
-        },
-        refresh: function refresh() {
-          return _this6.refresh.call(_this6);
-        },
-        destroy: function destroy() {
-          return _this6.destroy.call(_this6);
-        },
-        filter: function filter(value) {
-          return _this6.filter.call(_this6, value);
         }
-      }; // store api on original element
+      };
+      var a = ['refresh', 'destroy', 'filter', 'input', 'wrapper', 'list'];
+
+      var _loop = function _loop(i, l) {
+        _this6.api[a[i]] = typeof _this6[a[i]] === 'function' ? function () {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          _this6[a[i]].apply(_this6, args);
+        } : _this6[a[i]];
+      };
+
+      for (var i = 0, l = a.length; i < l; i += 1) {
+        _loop(i, l);
+      } // store api on original element
+
 
       this.element.ariaAutocomplete = this.api;
     }
@@ -2020,7 +2027,16 @@ function () {
       this.input = document.getElementById(this.ids.INPUT);
       this.wrapper = document.getElementById(this.ids.WRAPPER);
       this.showAll = document.getElementById(this.ids.BUTTON);
-      this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS); // hide element and list manually
+      this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS);
+
+      if (this.multiple) {
+        (0, _helpers.addClass)(this.wrapper, "".concat(this.cssNameSpace, "__wrapper--multiple"));
+      }
+
+      if (this.autoGrow) {
+        (0, _helpers.addClass)(this.wrapper, "".concat(this.cssNameSpace, "__wrapper--autogrow"));
+      } // hide element and list manually
+
 
       this.hide(this.list); // pass in the list so that the onClose is not triggered
 

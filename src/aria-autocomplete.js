@@ -35,7 +35,7 @@ const DEFAULT_OPTIONS = {
     /** @description confirm selection when blurring off of the control */
     confirmOnBlur: true,
     /** @description @todo set input width to match its content */
-    autoGrowInput: false,
+    autoGrow: false,
 
     /** @description whether to allow multiple items to be selected */
     multiple: false,
@@ -56,7 +56,7 @@ const DEFAULT_OPTIONS = {
     /** @description class name to add to input */
     inputClassName: '',
     /** @description class name to add to component wrapper */
-    wrapperClassName: 'form-control',
+    wrapperClassName: '',
     /** @description string to use in front of main classes that are used */
     cssNameSpace: 'aria-autocomplete',
 
@@ -74,7 +74,7 @@ const DEFAULT_OPTIONS = {
     /** @description screen reader text announced after selection - appended to label */
     srSelectedText: 'selected',
     /** @description screen reader explainer added to the list element via aria-label attribute */
-    srExplanatoryText: 'Search suggestions',
+    srListLabelText: 'Search suggestions',
     /** @description screen reader description used for main input when empty */
     srAssistiveText:
         'When autocomplete results are available use up and down arrows to review and enter to select. ' +
@@ -1354,7 +1354,7 @@ class AriaAutocomplete {
         let o = this.options;
         let showAll = o.showAllControl;
         let cssName = this.cssNameSpace;
-        let explainerText = o.srExplanatoryText;
+        let explainerText = o.srListLabelText;
         let listClass = o.listClassName ? ` ${o.listClassName}` : '';
         let inputClass = o.inputClassName ? ` ${o.inputClassName}` : '';
         let wrapperClass = o.wrapperClassName ? ` ${o.wrapperClassName}` : '';
@@ -1411,11 +1411,18 @@ class AriaAutocomplete {
         this.api = {
             options: this.options,
             open: () => this.show.call(this),
-            close: () => this.hide.call(this),
-            refresh: () => this.refresh.call(this),
-            destroy: () => this.destroy.call(this),
-            filter: value => this.filter.call(this, value)
+            close: () => this.hide.call(this)
         };
+
+        let a = ['refresh', 'destroy', 'filter', 'input', 'wrapper', 'list'];
+        for (let i = 0, l = a.length; i < l; i += 1) {
+            this.api[a[i]] =
+                typeof this[a[i]] === 'function'
+                    ? (...args) => {
+                          this[a[i]].apply(this, args);
+                      }
+                    : this[a[i]];
+        }
 
         // store api on original element
         this.element.ariaAutocomplete = this.api;
@@ -1476,6 +1483,13 @@ class AriaAutocomplete {
         this.srAnnouncements = document.getElementById(
             this.ids.SR_ANNOUNCEMENTS
         );
+
+        if (this.multiple) {
+            addClass(this.wrapper, `${this.cssNameSpace}__wrapper--multiple`);
+        }
+        if (this.autoGrow) {
+            addClass(this.wrapper, `${this.cssNameSpace}__wrapper--autogrow`);
+        }
 
         // hide element and list manually
         this.hide(this.list); // pass in the list so that the onClose is not triggered

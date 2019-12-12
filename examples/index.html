@@ -8,16 +8,51 @@
                 color: #434343;
                 font-family: Arial, Helvetica, sans-serif;
                 line-height: 1.5em;
+                background: #fcfcfc;
             }
             pre {
-                font-family: monospace;
-                background: #f3f3f3;
                 padding: 10px;
                 line-height: 1.4em;
+                border: 1px solid #ccc;
+            }
+            pre,
+            code {
+                font-family: monospace;
+                background: #f3f3f3;
+                font-size: 1.125em;
+            }
+            code {
+                border: 3px solid #f3f3f3;
+                font-weight: normal;
+            }
+            label {
+                display: inline-block;
+                font-weight: bold;
+                margin-bottom: 5px;
             }
             #wrapper {
                 max-width: 760px;
                 margin: auto;
+            }
+            .tile {
+                background: #fff;
+                margin: 0 auto 30px;
+                padding: 30px 25px;
+                border: 1px solid #ccc;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            .tile > h2,
+            .tile > h3 {
+                font-size: 22px;
+                font-weight: normal;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #ccc;
+            }
+            .tile > :first-child {
+                margin-top: 0;
+            }
+            .tile > :last-child {
+                margin-bottom: 0;
             }
             h1,
             h2,
@@ -25,11 +60,23 @@
                 font-weight: normal;
             }
             h2 {
-                border-bottom: 1px solid #606060;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 12px;
             }
             small {
                 font-size: 50%;
                 margin-top: 5px;
+            }
+            dt,
+            dd {
+                display: block;
+                padding: 0 0 0 12px;
+                border-left: 3px solid #606060;
+                margin: 0;
+            }
+            dt {
+                font-weight: bold;
+                margin-top: 15px;
             }
         </style>
         <script>
@@ -52,11 +99,12 @@
                 <section>
                     <h2>Autocomplete Source</h2>
                     <p>A variety of sources can be used for the autocomplete options. These include:</p>
-                    <div>
+                    <div class="tile">
                         <h3>Source as Array of Strings</h3>
+                        <label for="countrylist-strings">Select a country</label>
                         <input type="text" id="countrylist-strings" />
                         <script>
-                            new AriaAutocomplete(document.getElementById('countrylist-strings'), { source: countryList, multiple: true });
+                            new AriaAutocomplete(document.getElementById('countrylist-strings'), { source: countryList });
                         </script>
                         <pre>
 new AriaAutocomplete(element, {
@@ -68,8 +116,9 @@ new AriaAutocomplete(element, {
     ]
 });</pre>
                     </div>
-                    <div>
+                    <div class="tile">
                         <h3>Source as Array of Objects</h3>
+                        <label for="countrylist-array">Select a country</label>
                         <input type="text" id="countrylist-array" />
                         <script>
                             new AriaAutocomplete(document.getElementById('countrylist-array'), { source: countryListAllIsoData, sourceMapping: { 'value': 'code3', 'label': 'name' }});
@@ -88,19 +137,15 @@ new AriaAutocomplete(element, {
             code3: "ALB",
             name: "Albania"
         },
-        {
-            code: "DZ",
-            code3: "DZA",
-            name: "Algeria"
-        },
         ...
     ],
     sourceMapping: { 'value': 'code3', 'label': 'name' }
 });</pre>
                     </div>
 
-                    <div>
+                    <div class="tile">
                         <h3>Element as Source</h3>
+                        <label for="countrylist-select">Select a country</label>
                         <select id="countrylist-select">
                             <option value="">Please select</option>
                         </select>
@@ -121,7 +166,7 @@ new AriaAutocomplete(element, {
 new AriaAutocomplete(element);
 </pre>
                     </div>
-                    <div>
+                    <div class="tile">
                         <h3>Function as Source</h3>
                         <label for="countrylist-function">Select a country</label>
                         <input type="text" id="countrylist-function" />
@@ -157,8 +202,9 @@ new AriaAutocomplete(element, {
 });
 </pre>
                     </div>
-                    <div>
+                    <div class="tile">
                         <h3>String (Endpoint) as Source (in progress)</h3>
+                        <label for="countrylist-endpoint">Select a country</label>
                         <input type="text" id="countrylist-endpoint" />
                         <p>If you want to send the query to an endpoint / your server, you can do that too. The current query, and your chosen value for max results to render, will be added to the url. <br>E.g. https://some-url-here/endpoint?q=norway&limit=20</p>
                         <pre>
@@ -174,75 +220,81 @@ new AriaAutocomplete(element, {
                 <section>
                     <h2>Options</h2>
                     <p>The full list of available options is as follows:</p>
-                    <dl>
-                        <dt>source: Array | String | Function</dt>
-                        <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
-                        <dt>sourceMapping: Object</dt>
-                        <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
-                        <dt>delay: Number</dt>
-                        <dd>input delay before running a search<br>Default: 100</dd>
-                        <dt>minLength: Number</dt>
-                        <dd>Minimum number of characters to run a search (includes spaces)<br>Default: 1</dd>
-                            <dt>maxResults: Number</dt>
-                            <dd>Maximum number of results to render<br>Default: 9999</dd>
-                            <dt>showAllButton: Boolean</dt>
-                            <dd>Render a button that triggers showing all options<br>Default: true</dd>
-                            <dt>confirmOnBlur: Boolean</dt>
-                            <dd>Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for an exact text match<br>Default: true</dd>
+                    <dl class="tile">
+                        <dt>source: <code>Array | String | Function</code></dt>
+                        <dd>string for async endpoint, array of strings, array of objects with value and label, or function</code></dd>
+                        <dt>sourceMapping: <code>Object</code></dt>
+                        <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</code></dd>
+                        <dt>delay: <code>Number</code></dt>
+                        <dd>input delay before running a search<br>Default: <code>100</code></dd>
+                        <dt>minLength: <code>Number</code></dt>
+                        <dd>Minimum number of characters to run a search (includes spaces)<br>Default: <code>1</code></dd>
+                        <dt>maxResults: <code>Number</code></dt>
+                        <dd>Maximum number of results to render<br>Default: <code>9999</code></dd>
+                        <dt>showAllButton: <code>Boolean</code></dt>
+                        <dd>Render a button that triggers showing all options<br>Default: <code>true</code></dd>
+                        <dt>confirmOnBlur: <code>Boolean</code></dt>
+                        <dd>Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for an exact text match<br>Default: <code>true</code></dd>
+                        <dt>autoGrow: <code>Boolean</code></dt>
+                        <dd>Set input width to match its content<br>Default: <code>false</code></dd>
 
-                            <dt>multiple: Boolean</dt>
-                            <dd>Allow multiple items to be selected<br>Default: false</dd>
-                            <dt>maxItems: Number</dt>
-                            <dd>Maximum number of items that can be selected in multiple mode<br>Default: 9999</dd>
-                            <dt>multipleSeparator: String</dt>
-                            <dd>In multiple mode, if the original element was an input, the character that separates the values<br>Default: ','</dd>
+                        <dt>multiple: <code>Boolean</code></dt>
+                        <dd>Allow multiple items to be selected<br>Default: <code>false</code></dd>
+                        <dt>maxItems: <code>Number</code></dt>
+                        <dd>Maximum number of items that can be selected in multiple mode<br>Default: <code>9999</code></dd>
+                        <dt>multipleSeparator: <code>String</code></dt>
+                        <dd>In multiple mode, if the original element was an input, the character that separates the values<br>Default: <code>`,`</code></dd>
+                        <dt>deleteOnBackspace: <code>Boolean</code></dt>
+                        <dd>If input is empty and in multiple mode, delete last selected item on backspace<br>Default: <code>false</code></dd>
+                    
+                        <dt>placeholder: <code>String</code></dt>
+                        <dd>Placeholder text to show in generated input<br>Default: <code>`Type to search...`</code></dd>
+                        <dt>noResultsText: <code>String</code></dt>
+                        <dd>Text to show (and announce to screen readers) if no results are found. If this is an empty string, the list will close instead<br>Default: <code>`No results`</code></dd>
+                    
+                        <dt>listClassName: <code>String</code></dt>
+                        <dd>Custom class name to add to the generated list element<br>Default: <code>``</code></dd>
+                        <dt>inputClassName: <code>String</code></dt>
+                        <dd>Custom class name to add to the generated input element<br>Default: <code>``</code></dd>
+                        <dt>wrapperClassName: <code>String</code></dt>
+                        <dd>Custom class name to add to the generated component wrapper<br>Default: <code>``</code></dd>
+                        <dt>cssNameSpace: <code>String</code></dt>
+                        <dd>The string that prepends all internal BEM class names, e.g. 'aria-autocomplete__input'<br>Default: <code>`aria-autocomplete`</code></dd>
+                    
+                        <dt>asyncQueryParam: <code>String</code></dt>
+                        <dd>When source is a string, param to use when adding input value to it<br>Default: <code>`q`</code></dd>
+                        <dt>asyncMaxResultsParam: <code>String</code></dt>
+                        <dd>When source is a string, param to use when adding maxResults option + current selected count to it<br>Default: <code>`limit`</code></dd>
                         
-                            <dt>placeholder: String</dt>
-                            <dd>Placeholder text to show in generated input<br>Default: 'Type to search...'</dd>
-                            <dt>noResultsText: String</dt>
-                            <dd>Text to show (and announce to screen readers) if no results found<br>Default: 'No results'</dd>
-                        
-                            <dt>listClassName: String</dt>
-                            <dd>Custom class name to add to the generated list element<br>Default: ''</dd>
-                            <dt>inputClassName: String</dt>
-                            <dd>Custom class name to add to the generated input element<br>Default: ''</dd>
-                            <dt>wrapperClassName: String</dt>
-                            <dd>Custom class name to add to the generated component wrapper<br>Default: ''</dd>
-                            <dt>cssNameSpace: String</dt>
-                            <dd>The string that prepends all internal BEM class names, e.g. 'aria-autocomplete__input'<br>Default: 'aria-autocomplete'</dd>
-                        
-                            <dt>asyncQueryParam: String</dt>
-                            <dd>When source is a string, param to use when adding input value to it<br>Default: 'q'</dd>
-                            <dt>asyncMaxResultsParam: String</dt>
-                            <dd>When source is a string, param to use when adding maxResults option + current selected count to it<br>Default: 'limit'</dd>
-                            
-                            <dt>srDeleteText: String</dt>
-                            <dd> @description in multi mode, screen reader text used for element deletion - prepended to label<br>Default: 'delete'</dd>
-                            <dt>srDeletedText: String</dt>
-                            <dd> @description in multi mode, screen reader text announced after deletion - appended to label<br>Default: 'deleted'</dd>
-                            <dt>srSelectedText: String</dt>
-                            <dd> @description screen reader text announced after selection - appended to label<br>Default: 'selected'</dd>
-                            <dt>srExplanatoryText: String</dt>
-                            <dd> @description screen reader explainer added to the list element via aria-label attribute<br>'Search suggestions'</dd>
-                            <dt>srAssistiveText: String</dt>
-                            <dd> @description screen reader description used for main input when empty<br>Default: 'When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.'</dd>
-                            <dt>srResultsText: Function</dt>
-                            <dd> @description screen reader announcement after results are rendered<br>Default: length => `${length} ${length === 1 ? 'result' : 'results'} available.`</dd>
-                        
-                            <dt>onAsyncSuccess: Function</dt>
-                            <dd>Callback after async call completes - is passed the xhr Object, and can be used to format the results by returning an Array</dd>
-                            <dt>onResponse: Function</dt>
-                            <dd>Callback prior to rendering - can be used to format the results by returning an Array</dd>
-                            <dt>onSearch: Function</dt>
-                            <dd>Callback before search is performed - can be used to affect search value by returning a new one</dd>
-                            <dt>onSelect: Function</dt>
-                            <dd> @description callback after selection is made </dd>
-                            <dt>onReady: undefined,</dt>
-                            <dd> @description callback when main script processing and initial rendering has finished </dd>
-                            <dt>onClose: undefined,</dt>
-                            <dd> @description callback when list area closes </dd>
-                            <dt>onOpen: undefined</dt>
-                            <dd> @description callback when list area opens </dd>
+                        <dt>srDeleteText: <code>String</code></dt>
+                        <dd> @description in multi mode, screen reader text used for element deletion - prepended to label<br>Default: <code>`delete`</code></dd>
+                        <dt>srDeletedText: <code>String</code></dt>
+                        <dd> @description in multi mode, screen reader text announced after deletion - appended to label<br>Default: <code>`deleted`</code></dd>
+                        <dt>srSelectedText: <code>String</code></dt>
+                        <dd> @description screen reader text announced after selection - appended to label<br>Default: <code>`selected`</code></dd>
+                        <dt>srListLabelText: <code>String</code></dt>
+                        <dd> @description screen reader explainer added to the list element via aria-label attribute<br>Default: <code>`Search suggestions`</code></dd>
+                        <dt>srAssistiveText: <code>String</code></dt>
+                        <dd> @description screen reader description used for main input when empty<br>Default: <code>`When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.`</code></dd>
+                        <dt>srResultsText: <code>Function</code></dt>
+                        <dd> @description screen reader announcement after results are rendered<br>Default: <code>length => `${length} ${length === 1 ? 'result' : 'results'} available.`</code></dd>
+                    </dl>
+                    <h2>Callbacks</h2>
+                    <dl class="tile">
+                        <dt>onAsyncSuccess: <code>Function</code></dt>
+                        <dd>After async call completes - is passed the XHR Object, and can be used to format the results by returning an Array</dd>
+                        <dt>onResponse: <code>Function</code></dt>
+                        <dd>Prior to rendering - can be used to format the results by returning an Array</dd>
+                        <dt>onSearch: <code>Function</code></dt>
+                        <dd>Before search is performed - can be used to affect search value by returning a new one</dd>
+                        <dt>onSelect: <code>Function</code></dt>
+                        <dd>After an autocomplete selection is made</dd>
+                        <dt>onReady: <code>Function</code></dt>
+                        <dd>When main script processing and initial rendering has finished </dd>
+                        <dt>onClose: <code>Function</code></dt>
+                        <dd>When list area closes </dd>
+                        <dt>onOpen: <code>Function</code></dt>
+                        <dd>When list area opens</dd>
                     </dl>
                 </section>
             </main>

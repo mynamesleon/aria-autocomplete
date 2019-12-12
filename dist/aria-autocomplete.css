@@ -1,3 +1,6 @@
+.aria-autocomplete--hide {
+  display: none !important;
+}
 .aria-autocomplete__sr-only {
   position: absolute;
   width: 0.1px;
@@ -11,17 +14,25 @@
 .aria-autocomplete__input {
   border: 1px solid #606060;
   width: 100%;
-  height: 40px;
-  padding: 6px;
+  height: 44px;
+  padding: 6px 10px;
   font-size: 14px;
   box-sizing: border-box;
 }
 .aria-autocomplete__wrapper {
   position: relative;
-  max-width: 420px;
 }
 .aria-autocomplete__wrapper--show-all {
-  padding-right: 44px;
+  padding-right: 43px;
+}
+.aria-autocomplete__show-all {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #606060;
+  box-sizing: border-box;
 }
 .aria-autocomplete__list {
   list-style: none;
