@@ -227,7 +227,7 @@ The full list of options, and their defaults:
      * @description Callback after async call completes - receives the xhr object.
      * Can be used to format the results by returning an Array
      */
-    onAsyncSuccess: xhr => xhr.responseText,
+    onAsyncSuccess: (query, xhr) => xhr.responseText,
     /**
      * @description Callback prior to rendering - receives the options that are going
      * to render. Can be used to format the results by returning an Array

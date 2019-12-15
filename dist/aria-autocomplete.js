@@ -408,15 +408,16 @@ var DEFAULT_OPTIONS = {
   name: '',
 
   /**
-   * @description Specify source. Can be string for async endpoint,
-   * or array of strings, or array of objects with value and label, or function.
-   * See examples file for more specific usage
+   * @type {String | String[] | Object[] | Function}
+   * @description Specify source. See examples file for more specific usage.
+   * @example ['Afghanistan', 'Albania', 'Algeria', ...more]
+   * @example (query, render) => render(arrayToUse)
    */
   source: '',
 
   /**
    * @description Properties to use for label and value
-   * when source is an Array of Objects as source
+   * when source is an Array of Objects
    */
   sourceMapping: {},
 
@@ -453,7 +454,7 @@ var DEFAULT_OPTIONS = {
   multiple: false,
 
   /**
-   * @description Adjust input width to match its value.
+   * @description @todo Adjust input width to match its value.
    * Experimental, and a performance hit
    */
   autoGrow: false,
@@ -560,6 +561,12 @@ var DEFAULT_OPTIONS = {
   srResultsText: function srResultsText(length) {
     return "".concat(length, " ").concat(length === 1 ? 'result' : 'results', " available.");
   },
+
+  /**
+   * @description Callback before async call is made - receives the URL.
+   * Can be used to format the endpoint URL by returning a String
+   */
+  onAsyncPrep: undefined,
 
   /**
    * @description Callback after async call completes - receives the xhr object.
@@ -1316,7 +1323,7 @@ function () {
       var unlimited = isShowAll || isFirstCall;
       var baseAmount = this.multiple ? this.selected.length : 0;
       var ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
-      var url = this.source + ampersandOrQuestionMark + "".concat(encode(this.options.asyncQueryParam), "=").concat(encode(value), "&") + "".concat(encode(this.options.asyncMaxResultsParam), "=") + "".concat((unlimited ? 9999 : baseAmount) + this.options.maxResults); // abort any current call first
+      var url = this.source + ampersandOrQuestionMark + "".concat(encode(this.options.asyncQueryParam), "=").concat(encode(value), "&") + "".concat(encode(this.options.asyncMaxResultsParam), "=") + "".concat(unlimited ? 9999 : baseAmount + this.options.maxResults); // abort any current call first
 
       if (this.xhr) {
         this.xhr.abort();
@@ -1333,7 +1340,7 @@ function () {
 
             var _context = isFirstCall ? null : _this2.api;
 
-            var callbackResponse = _this2.triggerOptionCallback('onAsyncSuccess', [xhr], _context);
+            var callbackResponse = _this2.triggerOptionCallback('onAsyncSuccess', [value, xhr], _context);
 
             var mapping = _this2.options.mapping;
             var source = callbackResponse || xhr.responseText;
@@ -2003,7 +2010,6 @@ function () {
     }
     /**
      * @description trigger source string endpoint to generate selected array
-     * @todo: handling of initial value in async case - other cases handled in setInputStartingStates
      */
 
   }, {

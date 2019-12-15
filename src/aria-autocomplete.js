@@ -850,7 +850,7 @@ class AriaAutocomplete {
             ampersandOrQuestionMark +
             `${encode(this.options.asyncQueryParam)}=${encode(value)}&` +
             `${encode(this.options.asyncMaxResultsParam)}=` +
-            `${(unlimited ? 9999 : baseAmount) + this.options.maxResults}`;
+            `${unlimited ? 9999 : baseAmount + this.options.maxResults}`;
 
         // abort any current call first
         if (this.xhr) {
@@ -868,7 +868,7 @@ class AriaAutocomplete {
                     let context = isFirstCall ? null : this.api;
                     let callbackResponse = this.triggerOptionCallback(
                         'onAsyncSuccess',
-                        [xhr],
+                        [value, xhr],
                         context
                     );
                     let mapping = this.options.mapping;

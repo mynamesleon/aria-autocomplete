@@ -250,13 +250,13 @@ new AriaAutocomplete(element, {
                                 asyncQueryParam: 'q',
                                 maxResults: 10,
                                 sourceMapping: { 'value': 'code3', 'label': 'name' },
-                                onAsyncSuccess: function (xhr) {
+                                onAsyncSuccess: function (query, xhr) {
                                     var result = [];
                                     var isStartingCall = this === null;
-                                    var query = this.input.value.toLowerCase().trim();
+                                    var value = query.toLowerCase().trim();
                                     var response = JSON.parse(xhr.responseText);
                                     response.forEach(function (entry) {
-                                        if (entry.name.toLowerCase().search(query) !== -1) {
+                                        if (entry.name.toLowerCase().search(value) !== -1) {
                                             result.push(entry);
                                         }
                                     });
@@ -268,13 +268,13 @@ new AriaAutocomplete(element, {
 new AriaAutocomplete(element, {
     source: 'countrylistallisodata.json',
     sourceMapping: { 'value': 'code3', 'label': 'name' },
-    onAsyncSuccess: (xhr) => {
+    onAsyncSuccess: (query, xhr) => {
         let result = [];
         let isStartingCall = this === null;
-        let query = this.input.value.toLowerCase().trim();
+        let value = query.toLowerCase().trim();
         let response = JSON.parse(xhr.responseText);
         response.forEach(entry => {
-            if (entry.name.toLowerCase().search(query) !== -1) {
+            if (entry.name.toLowerCase().search(value) !== -1) {
                 result.push(entry);
             }
         });
