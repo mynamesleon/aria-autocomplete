@@ -1342,7 +1342,7 @@ function () {
 
             var callbackResponse = _this2.triggerOptionCallback('onAsyncSuccess', [value, xhr], _context);
 
-            var mapping = _this2.options.mapping;
+            var mapping = _this2.options.sourceMapping;
             var source = callbackResponse || xhr.responseText;
             var items = (0, _helpers.processSourceArray)(source, mapping, false);
 

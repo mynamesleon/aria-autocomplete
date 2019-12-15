@@ -871,7 +871,7 @@ class AriaAutocomplete {
                         [value, xhr],
                         context
                     );
-                    let mapping = this.options.mapping;
+                    let mapping = this.options.sourceMapping;
                     let source = callbackResponse || xhr.responseText;
                     let items = processSourceArray(source, mapping, false);
 
