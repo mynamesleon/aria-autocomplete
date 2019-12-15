@@ -877,6 +877,7 @@ class AriaAutocomplete {
 
                     if (isFirstCall) {
                         this.prepSelectedFromArray(items);
+                        this.setInputStartingStates(false);
                     } else {
                         this.setListOptions(items);
                     }
@@ -1472,6 +1473,7 @@ class AriaAutocomplete {
         if (this.elementIsInput && this.element.value) {
             this.source.call(undefined, this.element.value, response => {
                 this.prepSelectedFromArray(processSourceArray(response));
+                this.setInputStartingStates(false);
             });
         }
     }
@@ -1508,27 +1510,30 @@ class AriaAutocomplete {
 
     /**
      * @description set input starting states - aria attributes, disabled state, starting value
+     * @param {Boolean=} setAriaAttrs
      */
-    setInputStartingStates() {
-        // update corresponding label to now focus on the new input
-        if (this.ids.ELEMENT) {
-            let label = document.querySelector(
-                '[for="' + this.ids.ELEMENT + '"]'
-            );
-            if (label) {
-                label.ariaAutocompleteOriginalFor = this.ids.ELEMENT;
-                label.setAttribute('for', this.ids.INPUT);
+    setInputStartingStates(setAriaAttrs = true) {
+        if (setAriaAttrs) {
+            // update corresponding label to now focus on the new input
+            if (this.ids.ELEMENT) {
+                let label = document.querySelector(
+                    '[for="' + this.ids.ELEMENT + '"]'
+                );
+                if (label) {
+                    label.ariaAutocompleteOriginalFor = this.ids.ELEMENT;
+                    label.setAttribute('for', this.ids.INPUT);
+                }
             }
-        }
 
-        // update aria-describedby and aria-labelledby attributes if present
-        let describedBy = this.element.getAttribute('aria-describedby');
-        if (describedBy) {
-            this.input.setAttribute('aria-describedby', describedBy);
-        }
-        let labelledBy = this.element.getAttribute('aria-labelledby');
-        if (labelledBy) {
-            this.input.setAttribute('aria-labelledby', labelledBy);
+            // update aria-describedby and aria-labelledby attributes if present
+            let describedBy = this.element.getAttribute('aria-describedby');
+            if (describedBy) {
+                this.input.setAttribute('aria-describedby', describedBy);
+            }
+            let labelledBy = this.element.getAttribute('aria-labelledby');
+            if (labelledBy) {
+                this.input.setAttribute('aria-labelledby', labelledBy);
+            }
         }
 
         // if selected item(s) already exists
