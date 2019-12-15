@@ -54,12 +54,9 @@ I would encourage you to style it yourself to match your own site or application
 
 At its core, the autocomplete requires only an element, and a source. When the element is an input, its value will be set using the user's selection(s). If a source isn't provided however, and the element is either a `<select>`, or is an element with child checkboxes, those will be used to build up the source.
 
-```typescript
-const source: { source: String[] | Object[] | String | Function } = {
-    source: ['Afghanistan', 'Albania', 'Algeria', ...more]
-};
+```javascript
 new AriaAutocomplete(document.getElementById('some-input'), {
-    source
+    source: ['Afghanistan', 'Albania', 'Algeria', ...more]
 });
 
 const select = document.getElementById('some-select');
@@ -71,4 +68,91 @@ new AriaAutocomplete(div);
 
 ### Options
 
-Document options here!!
+The full list of options, and their defaults:
+
+```javascript
+{
+    /** @description give the autocomplete a name so it will be included in form submissions */
+    name: '',
+    /**
+     * @description string for async endpoint, array of strings, array of objects with value and label, or function
+     * @type {String[]|Object[]|Function|String}
+     */
+    source: '',
+    /** @description properties to use for label and value when using an Array of Objects as source */
+    sourceMapping: {},
+
+    /** @description input delay before running a search */
+    delay: 100,
+    /** @description min number of characters to run a search (includes spaces) */
+    minLength: 1,
+    /** @description max number of results to render */
+    maxResults: 9999,
+    /** @description whether to render a button that triggers showing all options */
+    showAllControl: false,
+    /** @description confirm selection when blurring off of the control */
+    confirmOnBlur: true,
+
+    /** @description whether to allow multiple items to be selected */
+    multiple: false,
+    /** @description @todo set input width to match its content */
+    autoGrow: false,
+    /** @description max number of items that can be selected */
+    maxItems: 9999,
+    /** @description if element is an input, and in multiple mode, character that separates the values */
+    multipleSeparator: ',',
+    /** @description if input is empty and in multiple mode, delete last selected item on backspace */
+    deleteOnBackspace: false,
+
+    /** @description when source is a string, param to use when adding input value */
+    asyncQueryParam: 'q',
+    /** @description when source is a string, param to use when adding results limit */
+    asyncMaxResultsParam: 'limit',
+
+    /** @description placeholder text to show in generated input */
+    placeholder: 'Type to search...',
+    /** @description text to show (and announce) if no results found */
+    noResultsText: 'No results',
+    /** @description string to prepend to all main classes for BEM naming */
+    cssNameSpace: 'aria-autocomplete',
+    /** @description class name to add to list */
+    listClassName: '',
+    /** @description class name to add to input */
+    inputClassName: '',
+    /** @description class name to add to component wrapper */
+    wrapperClassName: '',
+
+    /** @description in multi mode, screen reader text used for element deletion - prepended to label */
+    srDeleteText: 'delete',
+    /** @description in multi mode, screen reader text announced after deletion - appended to label */
+    srDeletedText: 'deleted',
+    /** @description screen reader text for the show all control */
+    srShowAllText: 'Show all',
+    /** @description screen reader text announced after selection - appended to label */
+    srSelectedText: 'selected',
+    /** @description screen reader explainer added to the list element via aria-label attribute */
+    srListLabelText: 'Search suggestions',
+    /** @description screen reader description used for main input when empty */
+    srAssistiveText: 'When results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.',
+    /** @description screen reader announcement after results are rendered */
+    srResultsText: length =>
+        `${length} ${length === 1 ? 'result' : 'results'} available.`,
+
+    /** @description callback after async call completes - can be used to format the results */
+    onAsyncSuccess: undefined, //  to needed format (onResponse can also be used for this)
+    /** @description callback prior to rendering - can be used to format the results */
+    onResponse: undefined, // before response is processed and rendered - can be used to modify results
+    /** @description callback before search is performed - can be used to affect search value */
+    onSearch: undefined,
+    /** @description callback after selection is made */
+    onConfirm: undefined,
+    /** @description callback after an autocomplete selection is deleted (programmatically in single-select mode, or by user action in multi-select mode) */
+    onDelete: undefined,
+    /** @description callback when main script processing and initial rendering has finished */
+    onReady: undefined,
+    /** @description callback when list area closes */
+    onClose: undefined,
+    /** @description callback when list area opens */
+    onOpen: undefined
+}
+```

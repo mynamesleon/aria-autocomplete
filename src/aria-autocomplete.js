@@ -91,8 +91,8 @@ const DEFAULT_OPTIONS = {
     /** @description callback before search is performed - can be used to affect search value */
     onSearch: undefined,
     /** @description callback after selection is made */
-    onSelect: undefined,
-    /** @description callback after selection is deleted (multi-mode) */
+    onConfirm: undefined,
+    /** @description callback after selection is deleted */
     onDelete: undefined,
     /** @description callback when main script processing and initial rendering has finished */
     onReady: undefined,
@@ -353,11 +353,14 @@ class AriaAutocomplete {
                 }
             }
         }
-        // set element state, dispatch change event, set selected array, and build selected
+        // set element state, dispatch change event, set selected array,
+        // trigger callback, build selected, and do screen reader announcement
         if (index > -1 && this.selected[index]) {
             let label = this.selected[index].label;
+            let option = mergeObjects(this.selected[index]);
             setElementState(this.selected.element, false, this);
             this.selected.splice(index, 1);
+            this.triggerOptionCallback('onDelete', [option]);
             this.buildMultiSelected();
             this.announce(`${label} ${this.options.srDeletedText}`, 0);
         }
@@ -605,7 +608,7 @@ class AriaAutocomplete {
             this.buildMultiSelected(); // rebuild multi-selected if needed
         }
 
-        this.triggerOptionCallback('onSelect', [option]);
+        this.triggerOptionCallback('onConfirm', [option]);
         this.announce(`${option.label} ${this.options.srSelectedText}`, 0);
 
         // return focus to input
@@ -751,18 +754,26 @@ class AriaAutocomplete {
 
         xhr.open('GET', url);
         xhr.onload = () => {
-            this.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
-            let callback = this.triggerOptionCallback('onAsyncSuccess', [xhr]);
-            let source = callback || xhr.responseText;
-            let items = processSourceArray(source, mapping, false);
-            this.setListOptions(items);
+            if (xhr.readyState === xhr.DONE) {
+                if (xhr.status === 200) {
+                    this.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
+                    let callback = this.triggerOptionCallback(
+                        'onAsyncSuccess',
+                        [xhr]
+                    );
+                    let source = callback || xhr.responseText;
+                    let items = processSourceArray(source, mapping, false);
+                    this.setListOptions(items);
+                }
+            }
         };
-        xhr.send();
 
         // allow the creation of an uncancellable call to use on first load
         if (canCancel !== false) {
             this.xhr = xhr;
         }
+
+        xhr.send();
     }
 
     /**
@@ -969,6 +980,10 @@ class AriaAutocomplete {
                 if (isInputOrDdl && this.element.value !== '') {
                     this.element.value = '';
                     dispatchEvent(this.element, 'change');
+                }
+                if (this.selected.length) {
+                    let option = mergeObjects(this.selected[0]);
+                    this.triggerOptionCallback('onDelete', [option]);
                 }
                 this.input.value = '';
                 this.selected = [];

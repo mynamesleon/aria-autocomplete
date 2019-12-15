@@ -500,7 +500,7 @@ var DEFAULT_OPTIONS = {
   onSearch: undefined,
 
   /** @description callback after selection is made */
-  onSelect: undefined,
+  onConfirm: undefined,
 
   /** @description callback after selection is deleted (multi-mode) */
   onDelete: undefined,
@@ -802,13 +802,16 @@ function () {
             break;
           }
         }
-      } // set element state, dispatch change event, set selected array, and build selected
+      } // set element state, dispatch change event, set selected array,
+      // trigger callback, build selected, and do screen reader announcement
 
 
       if (index > -1 && this.selected[index]) {
         var label = this.selected[index].label;
+        var option = (0, _helpers.mergeObjects)(this.selected[index]);
         (0, _helpers.setElementState)(this.selected.element, false, this);
         this.selected.splice(index, 1);
+        this.triggerOptionCallback('onDelete', [option]);
         this.buildMultiSelected();
         this.announce("".concat(label, " ").concat(this.options.srDeletedText), 0);
       }
@@ -1076,7 +1079,7 @@ function () {
         this.buildMultiSelected(); // rebuild multi-selected if needed
       }
 
-      this.triggerOptionCallback('onSelect', [option]);
+      this.triggerOptionCallback('onConfirm', [option]);
       this.announce("".concat(option.label, " ").concat(this.options.srSelectedText), 0); // return focus to input
 
       if (!this.disabled && focusAfterSelection !== false) {
@@ -1227,21 +1230,26 @@ function () {
       xhr.open('GET', url);
 
       xhr.onload = function () {
-        _this2.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
+        if (xhr.readyState === xhr.DONE) {
+          if (xhr.status === 200) {
+            _this2.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
 
-        var callback = _this2.triggerOptionCallback('onAsyncSuccess', [xhr]);
+            var callback = _this2.triggerOptionCallback('onAsyncSuccess', [xhr]);
 
-        var source = callback || xhr.responseText;
-        var items = (0, _helpers.processSourceArray)(source, mapping, false);
+            var source = callback || xhr.responseText;
+            var items = (0, _helpers.processSourceArray)(source, mapping, false);
 
-        _this2.setListOptions(items);
-      };
+            _this2.setListOptions(items);
+          }
+        }
+      }; // allow the creation of an uncancellable call to use on first load
 
-      xhr.send(); // allow the creation of an uncancellable call to use on first load
 
       if (canCancel !== false) {
         this.xhr = xhr;
       }
+
+      xhr.send();
     }
     /**
      * @description trigger filtering using a value
@@ -1468,6 +1476,12 @@ function () {
           if (isInputOrDdl && _this4.element.value !== '') {
             _this4.element.value = '';
             (0, _helpers.dispatchEvent)(_this4.element, 'change');
+          }
+
+          if (_this4.selected.length) {
+            var option = (0, _helpers.mergeObjects)(_this4.selected[0]);
+
+            _this4.triggerOptionCallback('onDelete', [option]);
           }
 
           _this4.input.value = '';
