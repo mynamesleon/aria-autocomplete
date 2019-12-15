@@ -88,7 +88,7 @@ The full list of options, and their defaults:
      * @type {String | String[] | Object[] | Function}
      * @description Specify source. See examples file for more specific usage.
      * @example ['Afghanistan', 'Albania', 'Algeria', ...more]
-     * @example (query, render) => render(arrayToUse)
+     * @example (query: String, render: Function) => render([])
      */
     source: '',
     /**
@@ -222,44 +222,44 @@ The full list of options, and their defaults:
      * @description Callback before async call is made - receives the URL.
      * Can be used to format the endpoint URL by returning a String
      */
-    onAsyncPrep: undefined,
+    onAsyncPrep: url => url,
     /**
      * @description Callback after async call completes - receives the xhr object.
      * Can be used to format the results by returning an Array
      */
-    onAsyncSuccess: (xhr) => {},
+    onAsyncSuccess: xhr => xhr.responseText,
     /**
      * @description Callback prior to rendering - receives the options that are going
      * to render. Can be used to format the results by returning an Array
      */
-    onResponse: (optionsToRender) => {},
+    onResponse: optionsToRender => optionsToRender,
     /**
      * @description Callback before a search is performed - receives the input value.
      * Can be used to alter the search value by returning a String
      */
-    onSearch: (query) => {},
+    onSearch: query => query,
     /**
      * @description Callback after selection is made -
      * receives an object with the option details
      */
-    onConfirm: (selection) => {},
+    onConfirm: selection => {},
     /**
      * @description Callback after an autocomplete selection is deleted.
      * Fires in single-select mode when selection is deleted automatically.
      * Fires in multi-select mode when selected is deleted by user action
      */
-    onDelete: (selection) => {},
+    onDelete: selection => {},
     /**
      * @description Callback when main script processing and initial rendering has finished
      */
-    onReady: (componentWrapper) => {},
+    onReady: componentWrapper => {},
     /**
      * @description Callback when list area closes - receives the list holder element
      */
-    onClose: (listElement) => {},
+    onClose: listElement => {},
     /**
      * @description Callback when list area opens - receives the list holder element
      */
-    onOpen: (listElement) => {}
+    onOpen: listElement => {}
 }
 ```

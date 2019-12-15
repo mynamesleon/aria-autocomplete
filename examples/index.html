@@ -242,7 +242,7 @@ new AriaAutocomplete(element, {
                         <p>As with using a Function as the source, if the autocomplete is initialised on an input with a starting value, the endpoint will be called immediately with that starting value, expecting an Array of possible entries to check to determine what the starting value should be.</p>
                         <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
                         <label for="countrylist-endpoint">Select a country</label>
-                        <input type="text" id="countrylist-endpoint" />
+                        <input type="text" value="CAN" id="countrylist-endpoint" />
                         <script>
                             new AriaAutocomplete(document.getElementById('countrylist-endpoint'), {
                                 source: 'countrylistallisodata.json',
@@ -373,6 +373,8 @@ new AriaAutocomplete(element, {
                     <div class="tile">
                         <h3>Callbacks</h3>
                         <dl>
+                            <dt>onAsyncPrep: <code>Function</code></dt>
+                            <dd>Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String</dd>
                             <dt>onAsyncSuccess: <code>Function</code></dt>
                             <dd>After async call completes - is passed the XHR Object, and can be used to format the results by returning an Array</dd>
                             <dt>onResponse: <code>Function</code></dt>
