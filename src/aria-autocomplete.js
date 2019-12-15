@@ -1107,6 +1107,10 @@ class AriaAutocomplete {
                 this.input.value = '';
             }
 
+            if (this.multiple) {
+                this.input.value = '';
+            }
+
             // unbind document click
             if (this.documentClickBound) {
                 this.documentClickBound = false;
@@ -1211,7 +1215,8 @@ class AriaAutocomplete {
             targetIsInput &&
             this.multiple
         ) {
-            return this.removeEntryFromSelected(this.selected.length - 1);
+            this.removeEntryFromSelected(this.selected[selectedLength - 1]);
+            return;
         }
 
         // any printable character not on input, return focus to input
@@ -1720,7 +1725,7 @@ class AriaAutocomplete {
         // set any further classes on component wrapper based on options
         let wrapperClass = '';
         if (this.options.showAllControl) {
-            wrapperClass += ` ${cssName}__wrapper--show-all`;
+            wrapperClass += ` ${this.cssNameSpace}__wrapper--show-all`;
         }
         if (this.options.autoGrow) {
             wrapperClass += ` ${this.cssNameSpace}__wrapper--autogrow`;

@@ -82,7 +82,8 @@
             }
             a:focus,
             input:focus,
-            [tabindex="0"]:focus {
+            [tabindex="0"]:focus,
+            .aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--focused {
                 outline: none;
                 border-color: #5e9ed6;
                 box-shadow: 0 0 0 1px #5e9ed6, 0 0 8px rgba(94, 158, 214, 0.5);
@@ -188,11 +189,22 @@ new AriaAutocomplete(element, {
                                 countryListSelect.appendChild(opt);
 
                             }
-                            new AriaAutocomplete(countryListSelect);
+                            new AriaAutocomplete(countryListSelect, {
+                                deleteOnBackspace: true,
+                                showAllControl: true,
+                                autoGrow: true,
+                                maxResults: 10
+                            });
                         </script>
                         <p>This example uses a <code>&lt;select&gt;</code>, so the <code>multiple</code> option is automatically set to match its own state (true in this case). If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
                         <p>When an option in the autocomplete is selected, the corresponding <code>&lt;option&gt;</code> or checkbox will be set to selected / checked as well.</p>
-                        <pre>new AriaAutocomplete(element);</pre>
+                        <pre>
+new AriaAutocomplete(element, {
+    deleteOnBackspace: true,
+    showAllControl: true,
+    autoGrow: true,
+    maxResults: 10
+});</pre>
                     </div>
                     <div class="tile">
                         <h3>Function as Source</h3>
@@ -376,7 +388,7 @@ new AriaAutocomplete(element, {
                             <dt>onAsyncPrep: <code>Function</code></dt>
                             <dd>Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String</dd>
                             <dt>onAsyncSuccess: <code>Function</code></dt>
-                            <dd>After async call completes - is passed the XHR Object, and can be used to format the results by returning an Array</dd>
+                            <dd>After async call completes - is passed the value and the XHR Object. Can be used to format the results by returning an Array</dd>
                             <dt>onResponse: <code>Function</code></dt>
                             <dd>Prior to rendering - can be used to format the results by returning an Array</dd>
                             <dt>onSearch: <code>Function</code></dt>

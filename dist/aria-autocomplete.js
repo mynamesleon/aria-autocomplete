@@ -1603,6 +1603,10 @@ function () {
           }
 
           _this5.input.value = '';
+        }
+
+        if (_this5.multiple) {
+          _this5.input.value = '';
         } // unbind document click
 
 
@@ -1714,7 +1718,8 @@ function () {
       var selectedLength = this.selected && this.selected.length;
 
       if (this.options.deleteOnBackspace && this.input.value === '' && event.keyCode === 8 && selectedLength && targetIsInput && this.multiple) {
-        return this.removeEntryFromSelected(this.selected.length - 1);
+        this.removeEntryFromSelected(this.selected[selectedLength - 1]);
+        return;
       } // any printable character not on input, return focus to input
 
 
@@ -2284,7 +2289,7 @@ function () {
       var wrapperClass = '';
 
       if (this.options.showAllControl) {
-        wrapperClass += " ".concat(cssName, "__wrapper--show-all");
+        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--show-all");
       }
 
       if (this.options.autoGrow) {
