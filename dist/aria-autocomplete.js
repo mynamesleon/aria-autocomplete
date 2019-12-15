@@ -399,9 +399,12 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var appIndex = 0;
 var DEFAULT_OPTIONS = {
+  /** @description give the autocomplete a name so it will be included in form submissions */
+  name: '',
+
   /**
    * @description string for async endpoint, array of strings, array of objects with value and label, or function
-   * @type {String|String[]|Object[]|Function}
+   * @type {String[]|Object[]|Function|String}
    */
   source: '',
 
@@ -418,16 +421,16 @@ var DEFAULT_OPTIONS = {
   maxResults: 9999,
 
   /** @description whether to render a button that triggers showing all options */
-  showAllControl: true,
+  showAllControl: false,
 
   /** @description confirm selection when blurring off of the control */
   confirmOnBlur: true,
 
-  /** @description @todo set input width to match its content */
-  autoGrow: false,
-
   /** @description whether to allow multiple items to be selected */
   multiple: false,
+
+  /** @description @todo set input width to match its content */
+  autoGrow: false,
 
   /** @description max number of items that can be selected */
   maxItems: 9999,
@@ -438,11 +441,20 @@ var DEFAULT_OPTIONS = {
   /** @description if input is empty and in multiple mode, delete last selected item on backspace */
   deleteOnBackspace: false,
 
+  /** @description when source is a string, param to use when adding input value */
+  asyncQueryParam: 'q',
+
+  /** @description when source is a string, param to use when adding results limit */
+  asyncMaxResultsParam: 'limit',
+
   /** @description placeholder text to show in generated input */
   placeholder: 'Type to search...',
 
   /** @description text to show (and announce) if no results found */
   noResultsText: 'No results',
+
+  /** @description string to prepend to all main classes for BEM naming */
+  cssNameSpace: 'aria-autocomplete',
 
   /** @description class name to add to list */
   listClassName: '',
@@ -452,15 +464,6 @@ var DEFAULT_OPTIONS = {
 
   /** @description class name to add to component wrapper */
   wrapperClassName: '',
-
-  /** @description string to use in front of main classes that are used */
-  cssNameSpace: 'aria-autocomplete',
-
-  /** @description when source is a string, param to use when adding input value */
-  asyncQueryParam: 'q',
-
-  /** @description when source is a string, param to use when adding results limit */
-  asyncMaxResultsParam: 'limit',
 
   /** @description in multi mode, screen reader text used for element deletion - prepended to label */
   srDeleteText: 'delete',
@@ -478,7 +481,7 @@ var DEFAULT_OPTIONS = {
   srListLabelText: 'Search suggestions',
 
   /** @description screen reader description used for main input when empty */
-  srAssistiveText: 'When autocomplete results are available use up and down arrows to review and enter to select. ' + 'Touch device users, explore by touch or with swipe gestures.',
+  srAssistiveText: 'When results are available use up and down arrows to review and enter to select. ' + 'Touch device users, explore by touch or with swipe gestures.',
 
   /** @description screen reader announcement after results are rendered */
   srResultsText: function srResultsText(length) {
@@ -498,6 +501,9 @@ var DEFAULT_OPTIONS = {
 
   /** @description callback after selection is made */
   onSelect: undefined,
+
+  /** @description callback after selection is deleted (multi-mode) */
+  onDelete: undefined,
 
   /** @description callback when main script processing and initial rendering has finished */
   onReady: undefined,
@@ -529,10 +535,7 @@ function () {
       return element.ariaAutocomplete;
     }
 
-    appIndex += 1;
-    this.element = element;
-    this.elementIsInput = element.nodeName === 'INPUT';
-    this.elementIsSelect = element.nodeName === 'SELECT'; // ids used for DOM queries and accessibility attributes e.g. aria-controls
+    appIndex += 1; // ids used for DOM queries and accessibility attributes e.g. aria-controls
 
     this.ids = {};
     this.ids.ELEMENT = element.id;
@@ -544,13 +547,12 @@ function () {
     this.ids.WRAPPER = "".concat(this.ids.PREFIX, "-wrapper");
     this.ids.OPTION_SELECTED = "".concat(this.ids.OPTION, "-selected");
     this.ids.SR_ASSISTANCE = "".concat(this.ids.PREFIX, "-sr-assistance");
-    this.ids.SR_ANNOUNCEMENTS = "".concat(this.ids.PREFIX, "-sr-announcements"); // always have an id on the original element for caching state
+    this.ids.SR_ANNOUNCEMENTS = "".concat(this.ids.PREFIX, "-sr-announcements"); // vars defined later - related explicitly to core initialising params
 
-    if (!this.ids.ELEMENT) {
-      this.ids.ELEMENT = "".concat(this.ids.PREFIX, "-element");
-      this.element.setAttribute('id', this.ids.ELEMENT);
-    } // vars defined later - elements
-
+    this.options;
+    this.element;
+    this.elementIsInput;
+    this.elementIsSelect; // vars defined later - elements
 
     this.list;
     this.input;
@@ -573,14 +575,17 @@ function () {
 
     this.currentListHtml;
     this.currentSelectedIndex; // for storing index of currently focused option
-    // timers
+    // document click
+
+    this.documentClick;
+    this.documentClickBound; // timers
 
     this.filterTimer;
+    this.pollingTimer;
     this.announcementTimer;
     this.componentBlurTimer;
     this.elementChangeEventTimer;
-    this.options = (0, _helpers.mergeObjects)(DEFAULT_OPTIONS, options);
-    this.init();
+    this.init(element, options);
   }
   /**
    * trigger callbacks included in component options
@@ -593,7 +598,7 @@ function () {
     key: "triggerOptionCallback",
     value: function triggerOptionCallback(name, args) {
       if (typeof this.options[name] === 'function') {
-        return this.options[name].apply(this.wrapper, args);
+        return this.options[name].apply(this.api, args);
       }
     }
     /**
@@ -621,6 +626,11 @@ function () {
         this.show(this.list);
         this.menuOpen = true;
         this.triggerOptionCallback('onOpen', [this.list]);
+
+        if (!this.documentClickBound) {
+          this.documentClickBound = true;
+          document.addEventListener('click', this.documentClick);
+        }
       }
     }
     /**
@@ -795,15 +805,17 @@ function () {
       } // set element state, dispatch change event, set selected array, and build selected
 
 
-      if (index > -1) {
-        (0, _helpers.setElementState)(this.selected[index].element, false, this);
+      if (index > -1 && this.selected[index]) {
+        var label = this.selected[index].label;
+        (0, _helpers.setElementState)(this.selected.element, false, this);
         this.selected.splice(index, 1);
         this.buildMultiSelected();
+        this.announce("".concat(label, " ").concat(this.options.srDeletedText), 0);
       }
     }
     /**
      * @description re-build the html showing the selected items
-     * @todo test performance in old IE - lots of loops here!
+     * @todo: test performance in old IE - lots of loops here!
      */
 
   }, {
@@ -873,9 +885,12 @@ function () {
         }
       }
 
-      this.wrapper.appendChild(fragment); // set ids on elements
+      if (fragment.childNodes && fragment.childNodes.length) {
+        this.wrapper.insertBefore(fragment, this.list);
+      } // set ids on elements
 
-      var ids = [this.ids.LIST];
+
+      var ids = [];
       current = this.getSelectedElems();
 
       for (var _i2 = 0, _l3 = current.length; _i2 < _l3; _i2 += 1) {
@@ -884,10 +899,16 @@ function () {
         current[_i2].setAttribute('id', id);
 
         ids.push(id);
-      } // set input aria-owns
+      }
 
+      ids.push(this.ids.LIST); // set input aria-owns
 
-      this.input.setAttribute('aria-owns', ids.join(' '));
+      this.input.setAttribute('aria-owns', ids.join(' ')); // in autogrow mode, hide the placeholder if there are selected items
+
+      if (this.autoGrow && this.options.placeholder) {
+        var toSet = this.selected.length ? '' : this.options.placeholder;
+        this.input.setAttribute('placeholder', toSet);
+      }
     }
     /**
      * @description set the aria-describedby attribute on the input
@@ -1016,12 +1037,14 @@ function () {
      * @description select option from the list by index
      * @param {Event} event
      * @param {Number} index
-     * @param {Boolean} focusAfterSelection
+     * @param {Boolean=} focusAfterSelection
      */
 
   }, {
     key: "handleOptionSelect",
-    value: function handleOptionSelect(event, index, focusAfterSelection) {
+    value: function handleOptionSelect(event, index) {
+      var focusAfterSelection = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
       // defensive check for proper index, that the filteredSource exists, and not exceed max items option
       if (typeof index !== 'number' || index < 0 || this.multiple && this.selected.length >= this.options.maxItems || !this.filteredSource.length || !this.filteredSource[index]) {
         return;
@@ -1115,7 +1138,7 @@ function () {
       this.filteredSource = callback ? (0, _helpers.processSourceArray)(callback, mapping) : updated;
       var length = this.filteredSource.length; // build up the list html
 
-      var maxResults = this.options.maxResults;
+      var maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
 
       for (var i = 0; i < length && i < maxResults; i += 1) {
         toShow.push("<li tabindex=\"-1\" aria-selected=\"false\" role=\"option\" class=\"".concat(cssName, "__option\" ") + "id=\"".concat(optionId, "--").concat(i, "\" aria-posinset=\"").concat(i + 1, "\" ") + "aria-setsize=\"".concat(length, "\">").concat(this.filteredSource[i].label, "</li>"));
@@ -1165,6 +1188,7 @@ function () {
 
       if (!toShow.length) {
         this.hide();
+        this.forceShowAll = false;
         return;
       }
 
@@ -1190,7 +1214,7 @@ function () {
       var xhr = new XMLHttpRequest();
       var encode = encodeURIComponent;
       var isShowAll = this.forceShowAll;
-      var limit = this.selected.length + options.maxResults;
+      var limit = isShowAll ? 9999 : this.selected.length + options.maxResults;
       var limitParam = "".concat(encode(options.asyncMaxResultsParam), "=").concat(limit);
       var queryParam = "".concat(encode(options.asyncQueryParam), "=").concat(encode(value));
       var params = "".concat(queryParam, "&").concat(limitParam);
@@ -1254,7 +1278,7 @@ function () {
 
 
       if (typeof this.source === 'function') {
-        toReturn = this.source.call(this.wrapper, this.term);
+        toReturn = this.source.call(this.api, this.term);
         toReturn = (0, _helpers.processSourceArray)(toReturn, this.options.sourceMapping);
         this.setListOptions(toReturn);
         return;
@@ -1368,6 +1392,10 @@ function () {
   }, {
     key: "filterPrepShowAll",
     value: function filterPrepShowAll(event) {
+      if (this.componentBlurTimer) {
+        clearTimeout(this.componentBlurTimer);
+      }
+
       event.preventDefault();
       this.forceShowAll = true;
       this.filterPrep(event, false, true);
@@ -1403,15 +1431,15 @@ function () {
             if (_this4.wrapper.contains(activeElem)) {
               return;
             }
-          }
-
-        var isQueryIn = _this4.isQueryContainedIn.bind(_this4); // cancel any running async call
+          } // cancel any running async call
 
 
         if (_this4.xhr) {
           _this4.xhr.abort();
         } // confirmOnBlur behaviour
 
+
+        var isQueryIn = _this4.isQueryContainedIn.bind(_this4);
 
         if (!force && _this4.options.confirmOnBlur && _this4.menuOpen) {
           // if blurring from an option (currentSelectedIndex > -1), select it
@@ -1444,6 +1472,12 @@ function () {
 
           _this4.input.value = '';
           _this4.selected = [];
+        } // unbind document click
+
+
+        if (_this4.documentClickBound) {
+          _this4.documentClickBound = false;
+          document.removeEventListener('click', _this4.documentClick);
         }
       }, delay);
     }
@@ -1604,91 +1638,120 @@ function () {
       }
     }
     /**
+     * @description cancel checking for input value changes from external causes
+     */
+
+  }, {
+    key: "cancelPolling",
+    value: function cancelPolling() {}
+    /**
+     * @description start checking for input value changes from causes that bypass event detection
+     */
+
+  }, {
+    key: "startPolling",
+    value: function startPolling() {
+      var _this5 = this;
+
+      // check if input value does not equal last searched term
+      if (this.input && this.input.value !== this.term) {
+        this.filterPrep({});
+      }
+
+      this.pollingTimer = setTimeout(function () {
+        _this5.startPolling();
+      }, 200);
+    }
+    /**
      * @description bind component events to generated elements
      */
 
   }, {
     key: "bindEvents",
     value: function bindEvents() {
-      var _this5 = this;
+      var _this6 = this;
 
       // when focus is moved outside of the component, close everything
       this.wrapper.addEventListener('focusout', function (event) {
-        _this5.handleComponentBlur(event, false);
+        _this6.handleComponentBlur(event, false);
       }); // set wrapper focus state
 
       this.wrapper.addEventListener('focusin', function (event) {
-        var toAdd = "".concat(_this5.cssNameSpace, "__wrapper--focused focused focus");
-        (0, _helpers.addClass)(_this5.wrapper, toAdd);
+        var toAdd = "".concat(_this6.cssNameSpace, "__wrapper--focused focused focus");
+        (0, _helpers.addClass)(_this6.wrapper, toAdd);
 
-        if (!_this5.list.contains(event.target)) {
-          _this5.currentSelectedIndex = -1;
+        if (!_this6.list.contains(event.target)) {
+          _this6.currentSelectedIndex = -1;
         }
       }); // handle all keydown events inside the component
 
       this.wrapper.addEventListener('keydown', function (event) {
-        _this5.prepKeyDown(event);
+        _this6.prepKeyDown(event);
       }); // if clicking directly on the wrapper, move focus to the input
 
       this.wrapper.addEventListener('click', function (event) {
-        if (event.target === _this5.wrapper) {
-          _this5.input.focus();
+        if (event.target === _this6.wrapper) {
+          _this6.input.focus();
 
           return;
         }
 
-        if (_this5.isSelectedElem(event.target)) {
+        if (_this6.isSelectedElem(event.target)) {
           var option = event.target.ariaAutocompleteSelectedOption;
 
-          _this5.removeEntryFromSelected(option);
+          _this6.removeEntryFromSelected(option);
         }
       }); // when blurring out of input, check current value against selected one and clear if needed
 
       this.input.addEventListener('blur', function () {
-        var toRemove = "".concat(_this5.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.removeClass)(_this5.input, toRemove);
+        var toRemove = "".concat(_this6.cssNameSpace, "__input--focused focused focus");
+        (0, _helpers.removeClass)(_this6.input, toRemove);
+
+        _this6.cancelPolling();
       }); // trigger filter on input event as well as keydown (covering bases)
 
       this.input.addEventListener('input', function (event) {
-        _this5.filterPrep(event);
+        _this6.filterPrep(event);
       }); // when specifically clicking on input, if menu is closed, and value is long enough, search
 
       this.input.addEventListener('click', function (event) {
-        var open = _this5.menuOpen;
+        var open = _this6.menuOpen;
 
-        if (!open && _this5.input.value.length >= _this5.options.minLength) {
-          _this5.filterPrep(event, true);
+        if (!open && _this6.input.value.length >= _this6.options.minLength) {
+          _this6.filterPrep(event, true);
         }
       }); // when focusing on input, reset selected index and trigger search handling
 
       this.input.addEventListener('focusin', function () {
-        var toAdd = "".concat(_this5.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.addClass)(_this5.input, toAdd);
+        var toAdd = "".concat(_this6.cssNameSpace, "__input--focused focused focus");
+        (0, _helpers.addClass)(_this6.input, toAdd);
 
-        if (!_this5.disabled && !_this5.menuOpen) {
-          _this5.filterPrep(event, true);
+        _this6.startPolling();
+
+        if (!_this6.disabled && !_this6.menuOpen) {
+          _this6.filterPrep(event, true);
         }
       }); // show all button click
 
       if (this.showAll) {
         this.showAll.addEventListener('click', function (event) {
-          _this5.filterPrepShowAll(event);
+          _this6.filterPrepShowAll(event);
         });
       } // clear any current focus position when hovering into the list
 
 
       this.list.addEventListener('mouseenter', function (event) {
-        _this5.resetOptionAttributes();
+        _this6.resetOptionAttributes();
       }); // trigger options selection
 
       this.list.addEventListener('click', function (event) {
-        if (event.target !== _this5.list) {
-          var childNodes = _this5.list.childNodes;
+        if (event.target !== _this6.list) {
+          var childNodes = _this6.list.childNodes;
 
           if (childNodes.length) {
             var nodeIndex = [].indexOf.call(childNodes, event.target);
 
-            _this5.handleOptionSelect(event, nodeIndex);
+            _this6.handleOptionSelect(event, nodeIndex);
           }
         }
       });
@@ -1848,11 +1911,13 @@ function () {
     key: "setInputStartingStates",
     value: function setInputStartingStates() {
       // update corresponding label to now focus on the new input
-      var label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
+      if (this.ids.ELEMENT) {
+        var label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
 
-      if (label) {
-        label.ariaAutocompleteOriginalFor = this.ids.ELEMENT;
-        label.setAttribute('for', this.ids.INPUT);
+        if (label) {
+          label.ariaAutocompleteOriginalFor = this.ids.ELEMENT;
+          label.setAttribute('for', this.ids.INPUT);
+        }
       } // update aria-describedby and aria-labelledby attributes if present
 
 
@@ -1901,6 +1966,7 @@ function () {
       var showAll = o.showAllControl;
       var cssName = this.cssNameSpace;
       var explainerText = o.srListLabelText;
+      var name = o.name ? " ".concat(o.name) : "";
       var listClass = o.listClassName ? " ".concat(o.listClassName) : '';
       var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
       var wrapperClass = o.wrapperClassName ? " ".concat(o.wrapperClassName) : '';
@@ -1910,9 +1976,17 @@ function () {
         wrapperClass += " ".concat(cssName, "__wrapper--show-all");
       }
 
+      if (this.multiple) {
+        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--multiple");
+      }
+
+      if (this.options.autoGrow) {
+        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--autogrow");
+      }
+
       var newHtml = ["<div id=\"".concat(this.ids.WRAPPER, "\" class=\"").concat(cssName, "__wrapper").concat(wrapperClass, "\">")]; // add input
 
-      newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" " + "role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(o.placeholder, "\" ") + "aria-owns=\"".concat(this.ids.LIST, "\" aria-placeholder=\"").concat(o.placeholder, "\" ") + "class=\"".concat(cssName, "__input").concat(inputClass, "\" />")); // button to show all available options
+      newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" " + "role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(o.placeholder, "\" ") + "aria-owns=\"".concat(this.ids.LIST, "\" aria-placeholder=\"").concat(o.placeholder, "\" ") + "class=\"".concat(cssName, "__input").concat(inputClass, "\"").concat(name, " />")); // button to show all available options
 
       if (showAll) {
         newHtml.push("<span role=\"button\" aria-label=\"".concat(o.srShowAllText, "\" class=\"").concat(cssName, "__show-all\" ") + "tabindex=\"0\" id=\"".concat(this.ids.BUTTON, "\" aria-expanded=\"false\"></span>"));
@@ -1935,27 +2009,26 @@ function () {
   }, {
     key: "generateApi",
     value: function generateApi() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.api = {
-        options: this.options,
         open: function open() {
-          return _this6.show.call(_this6);
+          return _this7.show.call(_this7);
         },
         close: function close() {
-          return _this6.hide.call(_this6);
+          return _this7.hide.call(_this7);
         }
       };
-      var a = ['refresh', 'destroy', 'filter', 'input', 'wrapper', 'list'];
+      var a = ['options', 'refresh', 'destroy', 'filter', 'input', 'wrapper', 'list', 'selected'];
 
       var _loop = function _loop(i, l) {
-        _this6.api[a[i]] = typeof _this6[a[i]] === 'function' ? function () {
+        _this7.api[a[i]] = typeof _this7[a[i]] === 'function' ? function () {
           for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
             args[_key] = arguments[_key];
           }
 
-          _this6[a[i]].apply(_this6, args);
-        } : _this6[a[i]];
+          return _this7[a[i]].apply(_this7, args);
+        } : _this7[a[i]];
       };
 
       for (var i = 0, l = a.length; i < l; i += 1) {
@@ -1966,40 +2039,50 @@ function () {
       this.element.ariaAutocomplete = this.api;
     }
     /**
-     * @todo: refresh method for use after changing options, source, etc.
+     * refresh method for use after changing options, source, etc. - soft destroy
+     * @todo: test this!
      */
 
   }, {
     key: "refresh",
     value: function refresh() {
-      var options = (0, _helpers.mergeObjects)(this.options); // store new object from existing options
+      // store element, as this is wiped in destroy method
+      var element = this.element; // do not do a hard destroy
 
-      /** @todo: soft destroy in this case */
-
-      this.destroy();
-      this.options = options;
-      this.init();
+      this.destroy(true);
+      this.init(element, this.options);
     }
     /**
      * @description destroy component
+     * @param {Boolean=} isRefresh
      */
 
   }, {
     key: "destroy",
     value: function destroy() {
+      var isRefresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       // return original label 'for' attribute back to element id
       var label = document.querySelector('[for="' + this.ids.INPUT + '"]');
 
       if (label && label.ariaAutocompleteOriginalFor) {
         label.setAttribute('for', label.ariaAutocompleteOriginalFor);
         delete label.ariaAutocompleteOriginalFor;
+      } // remove the document click if still bound
+
+
+      if (this.documentClickBound) {
+        document.removeEventListener('click', this.documentClick);
       } // remove the whole wrapper and set all instance properties to null to clean up DOMNode references
 
 
       this.element.parentNode.removeChild(this.wrapper);
 
+      var destroyCheck = function destroyCheck(prop) {
+        return isRefresh ? prop instanceof Element : true;
+      };
+
       for (var i in this) {
-        if (this.hasOwnProperty(i)) {
+        if (this.hasOwnProperty(i) && destroyCheck(this[i])) {
           this[i] = null;
         }
       }
@@ -2009,17 +2092,27 @@ function () {
       this.show(this.element);
     }
     /**
-     * @description do it!!
+     * @description initialise AriaAutocomplete
+     * @param {Element} element
+     * @param {Object=} options
      */
 
   }, {
     key: "init",
-    value: function init() {
-      this.selected = []; // set these internally so that the component has to be properly refreshed to change them
+    value: function init(element, options) {
+      this.selected = [];
+      this.element = element;
+      this.elementIsInput = element.nodeName === 'INPUT';
+      this.elementIsSelect = element.nodeName === 'SELECT';
+      this.options = (0, _helpers.mergeObjects)(DEFAULT_OPTIONS, options); // set these internally so that the component has to be properly refreshed to change them
 
       this.source = this.options.source;
       this.multiple = this.options.multiple;
-      this.cssNameSpace = this.options.cssNameSpace; // create html structure
+      this.cssNameSpace = this.options.cssNameSpace;
+      this.documentClick = this.handleComponentBlur.bind(this); // set internal source array, from static elements if necessary
+      // done before html is generated as this may set options like multiple
+
+      this.prepListSource(); // create html structure
 
       this.setHtml(); // additional app variables
 
@@ -2027,30 +2120,19 @@ function () {
       this.input = document.getElementById(this.ids.INPUT);
       this.wrapper = document.getElementById(this.ids.WRAPPER);
       this.showAll = document.getElementById(this.ids.BUTTON);
-      this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS);
-
-      if (this.multiple) {
-        (0, _helpers.addClass)(this.wrapper, "".concat(this.cssNameSpace, "__wrapper--multiple"));
-      }
-
-      if (this.autoGrow) {
-        (0, _helpers.addClass)(this.wrapper, "".concat(this.cssNameSpace, "__wrapper--autogrow"));
-      } // hide element and list manually
-
+      this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS); // hide element and list manually
 
       this.hide(this.list); // pass in the list so that the onClose is not triggered
 
-      this.hide(this.element); // set internal source array, from static elements if necessary
+      this.hide(this.element); // generate api object to expose
 
-      this.prepListSource(); // set starting states for input - must be after source has been defined
+      this.generateApi(); // set starting states for input - must be after source has been defined
 
       this.setInputStartingStates(); // bind all necessary events
 
       this.bindEvents();
       /** @todo: handling of initial value in async case - other cases handled in setInputStartingStates */
-      // generate api object to expose
-
-      this.generateApi(); // fire onready callback
+      // fire onready callback
 
       this.triggerOptionCallback('onReady');
     }
