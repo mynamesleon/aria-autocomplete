@@ -224,7 +224,8 @@ new AriaAutocomplete(document.getElementById('countrylist-function'), {
                                 onAsyncSuccess: function (xhr) {
                                     var result = [];
                                     var query = this.input.value.toLowerCase().trim();
-                                    JSON.parse(xhr.responseText).forEach(function (entry) {
+                                    var response = JSON.parse(xhr.responseText);
+                                    response.forEach(function (entry) {
                                         if (entry.name.search(query) !== -1) {
                                             result.push(entry);
                                         }
@@ -240,7 +241,8 @@ new AriaAutocomplete(element, {
     onAsyncSuccess: (xhr) => {
         let result = [];
         let query = this.input.value.toLowerCase().trim();
-        JSON.parse(xhr.responseText).forEach(entry => {
+        let response = JSON.parse(xhr.responseText);
+        response.forEach(entry => {
             if (entry.name.search(query) !== -1) {
                 result.push(entry);
             }
