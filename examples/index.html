@@ -136,7 +136,8 @@
                         <script>
                             new AriaAutocomplete(document.getElementById('countrylist-array'), { 
                                 source: countryListAllIsoData, 
-                                sourceMapping: { 'value': 'code3', 'label': 'name' }});
+                                sourceMapping: { 'value': 'code3', 'label': 'name' }
+                            });
                         </script>
                         <p>The source Array can either be an <b>Array of Strings</b>:</p>
                         <pre>
@@ -145,7 +146,7 @@ new AriaAutocomplete(element, {
         "Afghanistan",
         "Albania",
         "Algeria",
-        ...
+        ...more
     ]
 });</pre>
                         <p>Or alternatively you can use an <b>Array of Objects</b>. The objects used should ideally have <code>value</code> and/or <code>label</code> properties. But if you're unable to transform them ahead of use, there is also a <code>sourceMapping</code> option:</p>
@@ -162,7 +163,7 @@ new AriaAutocomplete(element, {
             code3: "ALB",
             name: "Albania"
         },
-        ...
+        ...more
     ],
     sourceMapping: { 'value': 'code3', 'label': 'name' }
 });</pre>
@@ -171,90 +172,6 @@ new AriaAutocomplete(element, {
                 <section>
                     <h2>Alternative sources</h2>
                     <p>The autocomplete fundamentally expects an Array, and will transform it for use internally. To be as extensible as possible however, built in handling is included for other cases.</p>
-                    <div class="tile">
-                        <h3>Function as Source</h3>
-                        <p>If you want to use your own client-side filtering logic, you can also use a function as the <code>source</code> which returns an Array (using either of the formats mentioned above).</p>
-                        <p>In this example, no matter what you search for, 10 random countries will be returned.</p>
-                        <label for="countrylist-function">Select a country</label>
-                        <input type="text" id="countrylist-function" />
-                        <script>
-                            new AriaAutocomplete(document.getElementById('countrylist-function'), {
-                                maxResults: 10,
-                                source: function () {
-                                    var arr = countryList.slice();
-                                    for (var i = arr.length - 1; i > 0; i--) {
-                                        var j = Math.floor(Math.random() * (i + 1));
-                                        var temp = arr[i];
-                                        arr[i] = arr[j];
-                                        arr[j] = temp;
-                                    }
-                                    return arr;
-                                }
-                            });
-                        </script>
-                        <pre>
-new AriaAutocomplete(document.getElementById('countrylist-function'), {
-    maxResults: 10,
-    source: function () {
-        var arr = countryList.slice();
-        for (var i = arr.length - 1; i > 0; i--) {
-            var j = Math.floor(Math.random() * (i + 1));
-            var temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        }
-        return arr;
-    }
-});
-</pre>
-                    </div>
-                    <div class="tile">
-                        <h3>String (endpoint) as Source - IN PROGRESS</h3>
-                        <p>If you want to send the query to an endpoint / your server, you can do that too. The current query, and your chosen value for max results to render, will be added to the url using the <code>asyncQueryParam</code> and <code>asyncMaxResultsParam</code> respectively. <br>E.g. https://some-url-here/endpoint?q=norway&limit=20</p>
-                        <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback.</p>
-                        <label for="countrylist-endpoint">Select a country</label>
-                        <input type="text" id="countrylist-endpoint" />
-                        <script>
-                            new AriaAutocomplete(document.getElementById('countrylist-endpoint'), {
-                                source: 'countrylistallisodata.json',
-                                asyncMaxResultsParam: 'limit',
-                                asyncQueryParam: 'q',
-                                maxResults: 10,
-                                sourceMapping: { 'value': 'code3', 'label': 'name' },
-                                onAsyncSuccess: function (xhr) {
-                                    var result = [];
-                                    var query = this.input.value.toLowerCase().trim();
-                                    var response = JSON.parse(xhr.responseText);
-                                    response.forEach(function (entry) {
-                                        if (entry.name.toLowerCase().search(query) !== -1) {
-                                            result.push(entry);
-                                        }
-                                    });
-                                    return result;
-                                }
-                            });
-                        </script>
-                        <pre>
-new AriaAutocomplete(element, {
-    source: 'countrylistallisodata.json',
-    sourceMapping: { 'value': 'code3', 'label': 'name' },
-    onAsyncSuccess: (xhr) => {
-        let result = [];
-        let query = this.input.value.toLowerCase().trim();
-        let response = JSON.parse(xhr.responseText);
-        response.forEach(entry => {
-            if (entry.name.toLowerCase().search(query) !== -1) {
-                result.push(entry);
-            }
-        });
-        return result;
-    },
-    asyncMaxResultsParam: 'limit',
-    asyncQueryParam: 'q',
-    maxResults: 10
-});
-</pre>
-                    </div>
                     <div class="tile">
                         <h3>Element(s) as Source</h3>
                         <p>If the <code>source</code> option is falsy, or is an empty Array, the autocomplete will check to see if the element used is a <code>&lt;select&gt;</code>, or if there are any checkboxes inside the element, and will build up a <code>source</code> Array from what's available.</p>
@@ -273,10 +190,103 @@ new AriaAutocomplete(element, {
                             }
                             new AriaAutocomplete(countryListSelect);
                         </script>
-                        <p>This example uses a <code>&lt;select&gt;</code>, so the <code>multiple</code> option is automatically set to match its own state. If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
+                        <p>This example uses a <code>&lt;select&gt;</code>, so the <code>multiple</code> option is automatically set to match its own state (true in this case). If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
                         <p>When an option in the autocomplete is selected, the corresponding <code>&lt;option&gt;</code> or checkbox will be set to selected / checked as well.</p>
                         <pre>new AriaAutocomplete(element);</pre>
                     </div>
+                    <div class="tile">
+                        <h3>Function as Source</h3>
+                        <p>If you want to use your own client-side filtering logic, you can also use a function as the <code>source</code> - it will be passed the search term, and a render function, which expects an Array to be passed to it (using either of the formats mentioned above).</p>
+                        <p>If the autocomplete is initialised on an input, which has a starting value, the source function will also be called immediately with that starting value. In this case, the render function expects an Array of possible entries to check that starting value against, so that the autocomplete can determine internally what the starting label (or multi-select elements) should be.</p>
+                        <p>In this example, no matter what you search for, 10 random countries will be returned. The initialised input's starting value is "GLP,ZWE" (the code3 properties for Guadeloupe and Zimbabwe in the <code>countryListAllIsoData</code> Array) so this example will initialise with two values already selected.</p>
+                        <label for="countrylist-function">Select a country</label>
+                        <input type="text" value="GLP,ZWE" id="countrylist-function" />
+                        <script>
+                            new AriaAutocomplete(document.getElementById('countrylist-function'), {
+                                maxResults: 10,
+                                multiple: true,
+                                source: function (term, render) {
+                                    var isStartingCall = this === null;
+                                    var arr = countryListAllIsoData.slice();
+                                    for (var i = arr.length - 1; i > 0; i--) {
+                                        var j = Math.floor(Math.random() * (i + 1));
+                                        var temp = arr[i];
+                                        arr[i] = arr[j];
+                                        arr[j] = temp;
+                                    }
+                                    render(arr);
+                                }
+                            });
+                        </script>
+                        <pre>
+new AriaAutocomplete(element, {
+    maxResults: 10,
+    multiple: true,
+    source: (term, render) => {
+        let isStartingCall = this === null;
+        let arr = countryListAllIsoData.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            let temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+        render(arr);
+    }
+});
+</pre>
+                    </div>
+                    <div class="tile">
+                        <h3>String (endpoint) as Source</h3>
+                        <p>If you want to send the query to an endpoint / your server, you can do that too. The current query, and your chosen value for max results to render, will be added to the url using the <code>asyncQueryParam</code> and <code>asyncMaxResultsParam</code> respectively. <br>E.g. https://some-url-here/endpoint?q=norway&limit=20</p>
+                        <p>As with using a Function as the source, if the autocomplete is initialised on an input with a starting value, the endpoint will be called immediately with that starting value, expecting an Array of possible entries to check to determine what the starting value should be.</p>
+                        <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
+                        <label for="countrylist-endpoint">Select a country</label>
+                        <input type="text" id="countrylist-endpoint" />
+                        <script>
+                            new AriaAutocomplete(document.getElementById('countrylist-endpoint'), {
+                                source: 'countrylistallisodata.json',
+                                asyncMaxResultsParam: 'limit',
+                                asyncQueryParam: 'q',
+                                maxResults: 10,
+                                sourceMapping: { 'value': 'code3', 'label': 'name' },
+                                onAsyncSuccess: function (xhr) {
+                                    var result = [];
+                                    var isStartingCall = this === null;
+                                    var query = this.input.value.toLowerCase().trim();
+                                    var response = JSON.parse(xhr.responseText);
+                                    response.forEach(function (entry) {
+                                        if (entry.name.toLowerCase().search(query) !== -1) {
+                                            result.push(entry);
+                                        }
+                                    });
+                                    return result;
+                                }
+                            });
+                        </script>
+                        <pre>
+new AriaAutocomplete(element, {
+    source: 'countrylistallisodata.json',
+    sourceMapping: { 'value': 'code3', 'label': 'name' },
+    onAsyncSuccess: (xhr) => {
+        let result = [];
+        let isStartingCall = this === null;
+        let query = this.input.value.toLowerCase().trim();
+        let response = JSON.parse(xhr.responseText);
+        response.forEach(entry => {
+            if (entry.name.toLowerCase().search(query) !== -1) {
+                result.push(entry);
+            }
+        });
+        return result;
+    },
+    asyncMaxResultsParam: 'limit',
+    asyncQueryParam: 'q',
+    maxResults: 10
+});
+</pre>
+                    </div>
+                    <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API. The only exception to this is the Function and Endpoint starting cases mentioned above, where the context will be <code>null</code>. I have included an unnecessary <code>isStartingCall</code> variable in the above examples to illustrate this.</p>
                 </section>
                 <section id="options">
                     <h2>Options</h2>
@@ -284,7 +294,7 @@ new AriaAutocomplete(element, {
                     <dl class="tile">
                         <div>
                             <dt>name: <code>String</code></dt>
-                            <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.</dd>
+                            <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
                             <dt>source: <code>String[] | Object[] | String | Function</code></dt>
                             <dd>string for async endpoint, array of strings, array of objects with value and label, or function</code></dd>
                             <dt>sourceMapping: <code>Object</code></dt>
@@ -316,7 +326,7 @@ new AriaAutocomplete(element, {
                         </div>
                     </dl>
                     <div class="tile">
-                        <h3>Async mode</h3>
+                        <h3>Async mode options</h3>
                         <dl>
                             <dt>asyncQueryParam: <code>String</code></dt>
                             <dd>When source is a string, param to use when adding input value to it<br>Default: <code>`q`</code></dd>
@@ -325,10 +335,10 @@ new AriaAutocomplete(element, {
                         </dl>
                     </div>
                     <div class="tile">
-                        <h3>Styling / rendering</h3>
+                        <h3>Styling / rendering options</h3>
                         <dl>
                             <dt>placeholder: <code>String</code></dt>
-                            <dd>Placeholder text to show in generated input<br>Default: <code>`Type to search...`</code></dd>
+                            <dd>Placeholder text to show in generated input<br>Default: <code>``</code></dd>
                             <dt>noResultsText: <code>String</code></dt>
                             <dd>Text to show (and announce to screen readers) if no results are found. If this is an empty string, the list will close instead<br>Default: <code>`No results`</code></dd>
                             <dt>cssNameSpace: <code>String</code></dt>

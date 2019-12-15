@@ -179,6 +179,30 @@
         padding-right: 43px;
     }
 
+    // loading state
+    &__wrapper--loading:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 24px;
+        height: 24px;
+        margin: 10px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.25);
+        border: 2px solid @dark-grey;
+        border-color: @dark-grey transparent @dark-grey transparent;
+        box-sizing: border-box;
+        animation: lds-dual-ring 1.2s linear infinite;
+    }
+    &__wrapper--loading &__show-all {
+        background-image: none;
+    }
+    &__wrapper--loading&__wrapper--autogrow:after {
+        top: 50%;
+        margin-top: -12px;
+    }
+
     // special cases based on options...
     &__wrapper--autogrow&__wrapper--multiple {
         display: flex;
@@ -221,5 +245,14 @@
 
     &__wrapper--autogrow &__selected {
         order: 1;
+    }
+}
+
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
     }
 }

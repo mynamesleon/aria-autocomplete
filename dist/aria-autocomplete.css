@@ -150,6 +150,28 @@
 .aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple.aria-autocomplete__wrapper--show-all {
   padding-right: 43px;
 }
+.aria-autocomplete__wrapper--loading:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  margin: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.25);
+  border: 2px solid #606060;
+  border-color: #606060 transparent #606060 transparent;
+  box-sizing: border-box;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+.aria-autocomplete__wrapper--loading .aria-autocomplete__show-all {
+  background-image: none;
+}
+.aria-autocomplete__wrapper--loading.aria-autocomplete__wrapper--autogrow:after {
+  top: 50%;
+  margin-top: -12px;
+}
 .aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple {
   display: flex;
   flex-wrap: wrap;
@@ -192,6 +214,14 @@
 }
 .aria-autocomplete__wrapper--autogrow .aria-autocomplete__selected {
   order: 1;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 

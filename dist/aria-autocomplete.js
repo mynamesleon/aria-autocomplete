@@ -399,119 +399,212 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var appIndex = 0;
 var DEFAULT_OPTIONS = {
-  /** @description give the autocomplete a name so it will be included in form submissions */
+  /**
+   * @description Give the autocomplete a name to be included in form submissions
+   * (Instead of using this option, I would advise initialising the autocomplete
+   * on an existing input that will be submitted; this approach is compatible
+   * with the control in multiple mode)
+   */
   name: '',
 
   /**
-   * @description string for async endpoint, array of strings, array of objects with value and label, or function
-   * @type {String[]|Object[]|Function|String}
+   * @description Specify source. Can be string for async endpoint,
+   * or array of strings, or array of objects with value and label, or function.
+   * See examples file for more specific usage
    */
   source: '',
 
-  /** @description properties to use for label and value when using an Array of Objects as source */
+  /**
+   * @description Properties to use for label and value
+   * when source is an Array of Objects as source
+   */
   sourceMapping: {},
 
-  /** @description input delay before running a search */
+  /**
+   * @description Input delay after typing before running a search
+   */
   delay: 100,
 
-  /** @description min number of characters to run a search (includes spaces) */
+  /**
+   * @description Minimum number of characters to run a search (includes spaces)
+   */
   minLength: 1,
 
-  /** @description max number of results to render */
+  /**
+   * @description Maximum number of results to render. Also used with async endpoint
+   */
   maxResults: 9999,
 
-  /** @description whether to render a button that triggers showing all options */
+  /**
+   * @description Render a control that triggers showing all options.
+   * Runs a search with an empty query: '', and maxResults of 9999
+   */
   showAllControl: false,
 
-  /** @description confirm selection when blurring off of the control */
+  /**
+   * Confirm currently active selection when blurring off of the control. If
+   * no active selection, will compare current input value against available labels
+   */
   confirmOnBlur: true,
 
-  /** @description whether to allow multiple items to be selected */
+  /**
+   * @description Allow multiple items to be selected
+   */
   multiple: false,
 
-  /** @description @todo set input width to match its content */
+  /**
+   * @description Adjust input width to match its value.
+   * Experimental, and a performance hit
+   */
   autoGrow: false,
 
-  /** @description max number of items that can be selected */
+  /**
+   * @description Maximum number of items that can be selected
+   */
   maxItems: 9999,
 
-  /** @description if element is an input, and in multiple mode, character that separates the values */
+  /**
+   * @description If initialised element is an input, and in multiple mode,
+   * character that separates the selected values e.g. "GLP,ZWE"
+   */
   multipleSeparator: ',',
 
-  /** @description if input is empty and in multiple mode, delete last selected item on backspace */
+  /**
+   * @description If input is empty and in multiple mode,
+   * delete last selected item on backspace
+   */
   deleteOnBackspace: false,
 
-  /** @description when source is a string, param to use when adding input value */
+  /**
+   * @description In async mode, parameter to use when adding the input value
+   * to the endpoint String. e.g. https://some-endpoint?q=norway&limit=9999
+   */
   asyncQueryParam: 'q',
 
-  /** @description when source is a string, param to use when adding results limit */
+  /**
+   * @description In async mode, parameter to use when adding results limit
+   * to the endpoint String. e.g. https://some-endpoint?q=norway&limit=9999
+   */
   asyncMaxResultsParam: 'limit',
 
-  /** @description placeholder text to show in generated input */
-  placeholder: 'Type to search...',
+  /**
+   * @description Placeholder text to show in generated input
+   */
+  placeholder: '',
 
-  /** @description text to show (and announce) if no results found */
+  /**
+   * @description Text to show (and announce to screen readers) if no results found.
+   * If empty, the list of options will remain hidden when there are no results
+   */
   noResultsText: 'No results',
 
-  /** @description string to prepend to all main classes for BEM naming */
+  /**
+   * @description String to prepend to classes for BEM naming
+   * e.g. aria-autocomplete__input
+   */
   cssNameSpace: 'aria-autocomplete',
 
-  /** @description class name to add to list */
+  /**
+   * @description Custom class name to add to the options list holder
+   */
   listClassName: '',
 
-  /** @description class name to add to input */
+  /**
+   * @description Custom class name to add to the generated input
+   */
   inputClassName: '',
 
-  /** @description class name to add to component wrapper */
+  /**
+   * @description Custom class name to add to the component wrapper
+   */
   wrapperClassName: '',
 
-  /** @description in multi mode, screen reader text used for element deletion - prepended to label */
+  /**
+   * @description In multiple mode, screen reader text used for element deletion.
+   * Prepended to option label in aria-label attribute e.g. 'delete Canada'
+   */
   srDeleteText: 'delete',
 
-  /** @description in multi mode, screen reader text announced after deletion - appended to label */
+  /**
+   * @description Screen reader text announced after deletion.
+   * Apended to option label e.g. 'Canada deleted'
+   */
   srDeletedText: 'deleted',
 
-  /** @description screen reader text for the show all control */
+  /**
+   * @description Value for aria-label attribute on the show all control
+   */
   srShowAllText: 'Show all',
 
-  /** @description screen reader text announced after selection - appended to label */
+  /**
+   * @description Screen reader text announced after confirming a selection.
+   * Appended to option label e.g. 'Canada selected'
+   */
   srSelectedText: 'selected',
 
-  /** @description screen reader explainer added to the list element via aria-label attribute */
+  /**
+   * @description Screen reader explainer added to the list element
+   * via aria-label attribute
+   */
   srListLabelText: 'Search suggestions',
 
-  /** @description screen reader description used for main input when empty */
-  srAssistiveText: 'When results are available use up and down arrows to review and enter to select. ' + 'Touch device users, explore by touch or with swipe gestures.',
+  /**
+   * @description Screen reader description announced when the input receives focus.
+   * Only announced when input is empty
+   */
+  srAssistiveText: 'When results are available use up and down arrows to review and ' + 'enter to select. Touch device users, explore by touch or with swipe gestures.',
 
-  /** @description screen reader announcement after results are rendered */
+  /**
+   * @description Screen reader announcement after results are rendered
+   */
   srResultsText: function srResultsText(length) {
     return "".concat(length, " ").concat(length === 1 ? 'result' : 'results', " available.");
   },
 
-  /** @description callback after async call completes - can be used to format the results */
+  /**
+   * @description Callback after async call completes - receives the xhr object.
+   * Can be used to format the results by returning an Array
+   */
   onAsyncSuccess: undefined,
-  //  to needed format (onResponse can also be used for this)
 
-  /** @description callback prior to rendering - can be used to format the results */
+  /**
+   * @description Callback prior to rendering - receives the options that are going
+   * to render. Can be used to format the results by returning an Array
+   */
   onResponse: undefined,
-  // before response is processed and rendered - can be used to modify results
 
-  /** @description callback before search is performed - can be used to affect search value */
+  /**
+   * @description Callback before a search is performed - receives the input value.
+   * Can be used to alter the search value by returning a String
+   */
   onSearch: undefined,
 
-  /** @description callback after selection is made */
+  /**
+   * @description Callback after selection is made -
+   * receives an object with the option details
+   */
   onConfirm: undefined,
 
-  /** @description callback after selection is deleted (multi-mode) */
+  /**
+   * @description Callback after an autocomplete selection is deleted.
+   * Fires in single-select mode when selection is deleted automatically.
+   * Fires in multi-select mode when selected is deleted by user action
+   */
   onDelete: undefined,
 
-  /** @description callback when main script processing and initial rendering has finished */
+  /**
+   * @description Callback when main script processing and initial rendering has finished
+   */
   onReady: undefined,
 
-  /** @description callback when list area closes */
+  /**
+   * @description Callback when list area closes - receives the list holder element
+   */
   onClose: undefined,
 
-  /** @description callback when list area opens */
+  /**
+   * @description Callback when list area opens - receives the list holder element
+   */
   onOpen: undefined
 };
 /**
@@ -574,6 +667,7 @@ function () {
     this.filteredSource; // filtered source items to render
 
     this.currentListHtml;
+    this.inputPollingValue;
     this.currentSelectedIndex; // for storing index of currently focused option
     // document click
 
@@ -591,14 +685,17 @@ function () {
    * trigger callbacks included in component options
    * @param {String} name
    * @param {Array=} args
+   * @param {Any=} args
    */
 
 
   _createClass(AriaAutocomplete, [{
     key: "triggerOptionCallback",
-    value: function triggerOptionCallback(name, args) {
+    value: function triggerOptionCallback(name, args, context) {
+      context = typeof context === 'undefined' ? this.api : context;
+
       if (typeof this.options[name] === 'function') {
-        return this.options[name].apply(this.api, args);
+        return this.options[name].apply(context, args);
       }
     }
     /**
@@ -807,8 +904,8 @@ function () {
 
 
       if (index > -1 && this.selected[index]) {
-        var label = this.selected[index].label;
         var option = (0, _helpers.mergeObjects)(this.selected[index]);
+        var label = option.label;
         (0, _helpers.setElementState)(this.selected.element, false, this);
         this.selected.splice(index, 1);
         this.triggerOptionCallback('onDelete', [option]);
@@ -1066,7 +1163,8 @@ function () {
         }
       }
 
-      this.input.value = this.term = this.multiple ? '' : option.label; // reset selected array in single select mode
+      var valToSet = this.multiple ? '' : option.label;
+      this.input.value = this.term = this.inputPollingValue = valToSet; // reset selected array in single select mode
 
       if (!alreadySelected && !this.multiple) {
         this.selected = [];
@@ -1203,7 +1301,7 @@ function () {
     /**
      * @description trigger async call for options to render
      * @param {String} value
-     * @param {Boolean=} canCancel
+     * @param {Boolean=} isFirstCall
      */
 
   }, {
@@ -1211,22 +1309,21 @@ function () {
     value: function handleAsync(value) {
       var _this2 = this;
 
-      var canCancel = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      var options = this.options;
-      var mapping = options.mapping;
+      var isFirstCall = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var xhr = new XMLHttpRequest();
       var encode = encodeURIComponent;
       var isShowAll = this.forceShowAll;
-      var limit = isShowAll ? 9999 : this.selected.length + options.maxResults;
-      var limitParam = "".concat(encode(options.asyncMaxResultsParam), "=").concat(limit);
-      var queryParam = "".concat(encode(options.asyncQueryParam), "=").concat(encode(value));
-      var params = "".concat(queryParam, "&").concat(limitParam);
-      var url = this.source + (/\?/.test(this.source) ? '&' : '?') + params; // abort any current call first
+      var unlimited = isShowAll || isFirstCall;
+      var baseAmount = this.multiple ? this.selected.length : 0;
+      var ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
+      var url = this.source + ampersandOrQuestionMark + "".concat(encode(this.options.asyncQueryParam), "=").concat(encode(value), "&") + "".concat(encode(this.options.asyncMaxResultsParam), "=") + "".concat((unlimited ? 9999 : baseAmount) + this.options.maxResults); // abort any current call first
 
       if (this.xhr) {
         this.xhr.abort();
       }
 
+      var context = isFirstCall ? null : this.api;
+      url = this.triggerOptionCallback('onAsyncPrep', [url], context) || url;
       xhr.open('GET', url);
 
       xhr.onload = function () {
@@ -1234,18 +1331,25 @@ function () {
           if (xhr.status === 200) {
             _this2.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
 
-            var callback = _this2.triggerOptionCallback('onAsyncSuccess', [xhr]);
+            var _context = isFirstCall ? null : _this2.api;
 
-            var source = callback || xhr.responseText;
+            var callbackResponse = _this2.triggerOptionCallback('onAsyncSuccess', [xhr], _context);
+
+            var mapping = _this2.options.mapping;
+            var source = callbackResponse || xhr.responseText;
             var items = (0, _helpers.processSourceArray)(source, mapping, false);
 
-            _this2.setListOptions(items);
+            if (isFirstCall) {
+              _this2.prepSelectedFromArray(items);
+            } else {
+              _this2.setListOptions(items);
+            }
           }
         }
       }; // allow the creation of an uncancellable call to use on first load
 
 
-      if (canCancel !== false) {
+      if (!isFirstCall) {
         this.xhr = xhr;
       }
 
@@ -1259,6 +1363,8 @@ function () {
   }, {
     key: "filter",
     value: function filter(value) {
+      var _this3 = this;
+
       // fail silently if no value is provided
       if (typeof value !== 'string') {
         this.cancelFilterPrep();
@@ -1275,7 +1381,7 @@ function () {
       } // store search term - used for comparison in filterPrep
 
 
-      this.term = value; // async handling
+      this.term = this.inputPollingValue = value; // async handling
 
       if (this.async) {
         this.handleAsync(value); // set show all to false immediately as may be used in other places
@@ -1286,9 +1392,12 @@ function () {
 
 
       if (typeof this.source === 'function') {
-        toReturn = this.source.call(this.api, this.term);
-        toReturn = (0, _helpers.processSourceArray)(toReturn, this.options.sourceMapping);
-        this.setListOptions(toReturn);
+        this.source.call(this.api, this.term, function (response) {
+          var mapping = _this3.options.mapping;
+          var result = (0, _helpers.processSourceArray)(response, mapping);
+
+          _this3.setListOptions(result);
+        });
         return;
       } // if empty string, show all
 
@@ -1345,28 +1454,30 @@ function () {
   }, {
     key: "filterPrep",
     value: function filterPrep(e) {
-      var _this3 = this;
+      var _this4 = this;
 
       var doValueOverrideCheck = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var runNow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var forceShowAll = this.forceShowAll;
       var delay = forceShowAll || runNow ? 0 : this.options.delay; // clear timers
 
-      this.filtering = true;
       this.cancelFilterPrep();
+      this.filtering = true;
       this.filterTimer = setTimeout(function () {
-        var value = _this3.input.value; // treat as empty search if...
+        var value = _this4.input.value; // treat as empty search if...
         // forceShowAll, or in single mode and selected item label matches current value
 
-        if (forceShowAll || value === '' || doValueOverrideCheck && !_this3.multiple && _this3.selected.length && (0, _helpers.trimString)(_this3.selected[0].label) === (0, _helpers.trimString)(value)) {
+        if (forceShowAll || value === '' || doValueOverrideCheck && !_this4.multiple && _this4.selected.length && (0, _helpers.trimString)(_this4.selected[0].label) === (0, _helpers.trimString)(value)) {
           value = '';
         } // handle aria-describedby
 
 
-        _this3.setInputDescription();
+        _this4.setInputDescription();
 
-        if (!forceShowAll && value.length < _this3.options.minLength) {
-          _this3.hide();
+        _this4.inputPollingValue = value;
+
+        if (!forceShowAll && value.length < _this4.options.minLength) {
+          _this4.hide();
 
           return;
         } // try catch used due to permissions issues in some cases
@@ -1380,15 +1491,15 @@ function () {
         } catch (e) {} // if value to use matches last used search term, do nothing
 
 
-        var equalVals = value === '' ? false : value === _this3.term; // prevent search being run again with the same value
+        var equalVals = value === '' ? false : value === _this4.term; // prevent search being run again with the same value
 
-        if (!equalVals || equalVals && !_this3.menuOpen && !modifier) {
-          var n = _this3.cssNameSpace;
-          (0, _helpers.addClass)(_this3.wrapper, "".concat(n, "__wrapper--loading loading"));
-          (0, _helpers.addClass)(_this3.input, "".concat(n, "__input--loading loading"));
-          _this3.currentSelectedIndex = -1;
+        if (!equalVals || equalVals && !_this4.menuOpen && !modifier) {
+          var n = _this4.cssNameSpace;
+          (0, _helpers.addClass)(_this4.wrapper, "".concat(n, "__wrapper--loading loading"));
+          (0, _helpers.addClass)(_this4.input, "".concat(n, "__input--loading loading"));
+          _this4.currentSelectedIndex = -1;
 
-          _this3.filter(value);
+          _this4.filter(value);
         }
       }, delay);
     }
@@ -1417,7 +1528,7 @@ function () {
   }, {
     key: "handleComponentBlur",
     value: function handleComponentBlur(event) {
-      var _this4 = this;
+      var _this5 = this;
 
       var force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var delay = force ? 0 : 100;
@@ -1432,66 +1543,63 @@ function () {
         // do nothing if blurring to an element within the list
         var activeElem = document.activeElement;
 
-        if (!force && !(_this4.showAll && _this4.showAll === activeElem) && // exception for show all button
+        if (!force && !(_this5.showAll && _this5.showAll === activeElem) && // exception for show all button
         !activeElem.ariaAutocompleteSelectedOption // exception for selected items
         ) {
             // must base this on the wrapper to allow scrolling the list in IE
-            if (_this4.wrapper.contains(activeElem)) {
+            if (_this5.wrapper.contains(activeElem)) {
               return;
             }
           } // cancel any running async call
 
 
-        if (_this4.xhr) {
-          _this4.xhr.abort();
+        if (_this5.xhr) {
+          _this5.xhr.abort();
         } // confirmOnBlur behaviour
 
 
-        var isQueryIn = _this4.isQueryContainedIn.bind(_this4);
+        var isQueryIn = _this5.isQueryContainedIn.bind(_this5);
 
-        if (!force && _this4.options.confirmOnBlur && _this4.menuOpen) {
+        if (!force && _this5.options.confirmOnBlur && _this5.menuOpen) {
           // if blurring from an option (currentSelectedIndex > -1), select it
-          var toUse = _this4.currentSelectedIndex;
+          var toUse = _this5.currentSelectedIndex;
 
           if (typeof toUse !== 'number' || toUse === -1) {
             // otherwise check for exact match between current input value and available items
-            toUse = isQueryIn('', _this4.filteredSource);
+            toUse = isQueryIn('', _this5.filteredSource);
           }
 
-          _this4.handleOptionSelect({}, toUse, false);
+          _this5.handleOptionSelect({}, toUse, false);
         }
 
-        var n = _this4.cssNameSpace;
-        (0, _helpers.removeClass)(_this4.wrapper, "".concat(n, "__wrapper--focused focused focus"));
-        (0, _helpers.removeClass)(_this4.input, "".concat(n, "__input--focused focused focus"));
+        var n = _this5.cssNameSpace;
+        (0, _helpers.removeClass)(_this5.wrapper, "".concat(n, "__wrapper--focused focused focus"));
+        (0, _helpers.removeClass)(_this5.input, "".concat(n, "__input--focused focused focus"));
 
-        _this4.cancelFilterPrep();
+        _this5.cancelFilterPrep();
 
-        _this4.hide(); // in single select case, if current value and chosen value differ, clear selected and input value
+        _this5.hide(); // in single select case, if current value and chosen value differ, clear selected and input value
 
 
-        if (!_this4.multiple && isQueryIn('', _this4.selected) === -1) {
-          var isInputOrDdl = _this4.elementIsInput || _this4.elementIsSelect;
+        if (!_this5.multiple && isQueryIn('', _this5.selected) === -1) {
+          var isInputOrDdl = _this5.elementIsInput || _this5.elementIsSelect;
 
-          if (isInputOrDdl && _this4.element.value !== '') {
-            _this4.element.value = '';
-            (0, _helpers.dispatchEvent)(_this4.element, 'change');
+          if (isInputOrDdl && _this5.element.value !== '') {
+            _this5.element.value = '';
+            (0, _helpers.dispatchEvent)(_this5.element, 'change');
           }
 
-          if (_this4.selected.length) {
-            var option = (0, _helpers.mergeObjects)(_this4.selected[0]);
-
-            _this4.triggerOptionCallback('onDelete', [option]);
+          if (_this5.selected.length) {
+            _this5.removeEntryFromSelected(_this5.selected[0]);
           }
 
-          _this4.input.value = '';
-          _this4.selected = [];
+          _this5.input.value = '';
         } // unbind document click
 
 
-        if (_this4.documentClickBound) {
-          _this4.documentClickBound = false;
-          document.removeEventListener('click', _this4.documentClick);
+        if (_this5.documentClickBound) {
+          _this5.documentClickBound = false;
+          document.removeEventListener('click', _this5.documentClick);
         }
       }, delay);
     }
@@ -1597,12 +1705,7 @@ function () {
       var selectedLength = this.selected && this.selected.length;
 
       if (this.options.deleteOnBackspace && this.input.value === '' && event.keyCode === 8 && selectedLength && targetIsInput && this.multiple) {
-        var lastSelectedLabel = this.selected[selectedLength - 1].label;
-        var announcement = "".concat(lastSelectedLabel, " ").concat(this.options.srDeletedText);
-        this.announce(announcement, 0);
-        this.selected.pop();
-        this.buildMultiSelected();
-        return;
+        return this.removeEntryFromSelected(this.selected.length - 1);
       } // any printable character not on input, return focus to input
 
 
@@ -1657,7 +1760,11 @@ function () {
 
   }, {
     key: "cancelPolling",
-    value: function cancelPolling() {}
+    value: function cancelPolling() {
+      if (this.pollingTimer) {
+        clearTimeout(this.pollingTimer);
+      }
+    }
     /**
      * @description start checking for input value changes from causes that bypass event detection
      */
@@ -1665,15 +1772,15 @@ function () {
   }, {
     key: "startPolling",
     value: function startPolling() {
-      var _this5 = this;
+      var _this6 = this;
 
       // check if input value does not equal last searched term
-      if (this.input && this.input.value !== this.term) {
+      if (!this.filtering && this.input.value !== this.inputPollingValue) {
         this.filterPrep({});
       }
 
       this.pollingTimer = setTimeout(function () {
-        _this5.startPolling();
+        _this6.startPolling();
       }, 200);
     }
     /**
@@ -1683,89 +1790,89 @@ function () {
   }, {
     key: "bindEvents",
     value: function bindEvents() {
-      var _this6 = this;
+      var _this7 = this;
 
       // when focus is moved outside of the component, close everything
       this.wrapper.addEventListener('focusout', function (event) {
-        _this6.handleComponentBlur(event, false);
+        _this7.handleComponentBlur(event, false);
       }); // set wrapper focus state
 
       this.wrapper.addEventListener('focusin', function (event) {
-        var toAdd = "".concat(_this6.cssNameSpace, "__wrapper--focused focused focus");
-        (0, _helpers.addClass)(_this6.wrapper, toAdd);
+        var toAdd = "".concat(_this7.cssNameSpace, "__wrapper--focused focused focus");
+        (0, _helpers.addClass)(_this7.wrapper, toAdd);
 
-        if (!_this6.list.contains(event.target)) {
-          _this6.currentSelectedIndex = -1;
+        if (!_this7.list.contains(event.target)) {
+          _this7.currentSelectedIndex = -1;
         }
       }); // handle all keydown events inside the component
 
       this.wrapper.addEventListener('keydown', function (event) {
-        _this6.prepKeyDown(event);
+        _this7.prepKeyDown(event);
       }); // if clicking directly on the wrapper, move focus to the input
 
       this.wrapper.addEventListener('click', function (event) {
-        if (event.target === _this6.wrapper) {
-          _this6.input.focus();
+        if (event.target === _this7.wrapper) {
+          _this7.input.focus();
 
           return;
         }
 
-        if (_this6.isSelectedElem(event.target)) {
+        if (_this7.isSelectedElem(event.target)) {
           var option = event.target.ariaAutocompleteSelectedOption;
 
-          _this6.removeEntryFromSelected(option);
+          _this7.removeEntryFromSelected(option);
         }
       }); // when blurring out of input, check current value against selected one and clear if needed
 
       this.input.addEventListener('blur', function () {
-        var toRemove = "".concat(_this6.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.removeClass)(_this6.input, toRemove);
+        var toRemove = "".concat(_this7.cssNameSpace, "__input--focused focused focus");
+        (0, _helpers.removeClass)(_this7.input, toRemove);
 
-        _this6.cancelPolling();
+        _this7.cancelPolling();
       }); // trigger filter on input event as well as keydown (covering bases)
 
       this.input.addEventListener('input', function (event) {
-        _this6.filterPrep(event);
+        _this7.filterPrep(event);
       }); // when specifically clicking on input, if menu is closed, and value is long enough, search
 
       this.input.addEventListener('click', function (event) {
-        var open = _this6.menuOpen;
+        var open = _this7.menuOpen;
 
-        if (!open && _this6.input.value.length >= _this6.options.minLength) {
-          _this6.filterPrep(event, true);
+        if (!open && _this7.input.value.length >= _this7.options.minLength) {
+          _this7.filterPrep(event, true);
         }
       }); // when focusing on input, reset selected index and trigger search handling
 
       this.input.addEventListener('focusin', function () {
-        var toAdd = "".concat(_this6.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.addClass)(_this6.input, toAdd);
+        var toAdd = "".concat(_this7.cssNameSpace, "__input--focused focused focus");
+        (0, _helpers.addClass)(_this7.input, toAdd);
 
-        _this6.startPolling();
+        _this7.startPolling();
 
-        if (!_this6.disabled && !_this6.menuOpen) {
-          _this6.filterPrep(event, true);
+        if (!_this7.disabled && !_this7.menuOpen) {
+          _this7.filterPrep(event, true);
         }
       }); // show all button click
 
       if (this.showAll) {
         this.showAll.addEventListener('click', function (event) {
-          _this6.filterPrepShowAll(event);
+          _this7.filterPrepShowAll(event);
         });
       } // clear any current focus position when hovering into the list
 
 
       this.list.addEventListener('mouseenter', function (event) {
-        _this6.resetOptionAttributes();
+        _this7.resetOptionAttributes();
       }); // trigger options selection
 
       this.list.addEventListener('click', function (event) {
-        if (event.target !== _this6.list) {
-          var childNodes = _this6.list.childNodes;
+        if (event.target !== _this7.list) {
+          var childNodes = _this7.list.childNodes;
 
           if (childNodes.length) {
             var nodeIndex = [].indexOf.call(childNodes, event.target);
 
-            _this6.handleOptionSelect(event, nodeIndex);
+            _this7.handleOptionSelect(event, nodeIndex);
           }
         }
       });
@@ -1852,18 +1959,17 @@ function () {
       }
     }
     /**
-     * @description adjust starting source array to format needed, and set selected
+     * @description build up selected array if starting element was an input, and had a value
+     * @param {Object[]} source
      */
 
   }, {
-    key: "prepListSourceArray",
-    value: function prepListSourceArray() {
-      var mapping = this.options.sourceMapping;
-      this.source = (0, _helpers.processSourceArray)(this.source, mapping); // build up selected array if starting element was an input, and had a value
+    key: "prepSelectedFromArray",
+    value: function prepSelectedFromArray(source) {
+      var value = this.elementIsInput && this.element.value;
 
-      if (this.elementIsInput && this.element.value) {
-        var value = this.element.value; // account for multiple mode
-
+      if (value && source && source.length) {
+        // account for multiple mode
         var multiple = this.options.multiple;
         var separator = this.options.multipleSeparator;
         var valueArr = multiple ? value.split(separator) : [value];
@@ -1875,13 +1981,53 @@ function () {
           var isInSelected = isQueryIn(val, this.selected, 'value') > -1; // but is in the source array (check via 'value', not 'label')
 
           if (!isInSelected) {
-            var indexInSource = isQueryIn(val, this.source, 'value');
+            var indexInSource = isQueryIn(val, source, 'value');
 
             if (indexInSource > -1) {
-              this.selected.push(this.source[indexInSource]);
+              this.selected.push(source[indexInSource]);
             }
           }
         }
+      }
+    }
+    /**
+     * @description adjust starting source array to format needed, and set selected
+     */
+
+  }, {
+    key: "prepListSourceArray",
+    value: function prepListSourceArray() {
+      var mapping = this.options.sourceMapping;
+      this.source = (0, _helpers.processSourceArray)(this.source, mapping);
+      this.prepSelectedFromArray(this.source);
+    }
+    /**
+     * @description trigger source string endpoint to generate selected array
+     * @todo: handling of initial value in async case - other cases handled in setInputStartingStates
+     */
+
+  }, {
+    key: "prepListSourceAsync",
+    value: function prepListSourceAsync() {
+      this.async = true;
+
+      if (this.elementIsInput && this.element.value) {
+        this.handleAsync(this.element.value, true);
+      }
+    }
+    /**
+     * @description process source function to generate selected array
+     */
+
+  }, {
+    key: "prepListSourceFunction",
+    value: function prepListSourceFunction() {
+      var _this8 = this;
+
+      if (this.elementIsInput && this.element.value) {
+        this.source.call(undefined, this.element.value, function (response) {
+          _this8.prepSelectedFromArray((0, _helpers.processSourceArray)(response));
+        });
       }
     }
     /**
@@ -1891,15 +2037,14 @@ function () {
   }, {
     key: "prepListSource",
     value: function prepListSource() {
-      this.async = false; // allow complete control over the source handling via custom function
-
+      // allow complete control over the source handling via custom function
       if (typeof this.source === 'function') {
-        return;
+        return this.prepListSourceFunction();
       } // string source - treat as async endpoint
 
 
       if (typeof this.source === 'string' && this.source.length) {
-        return this.async = true;
+        return this.prepListSourceAsync();
       } // array source - copy array
 
 
@@ -1948,7 +2093,7 @@ function () {
       } // if selected item(s) already exists
 
 
-      var disable = false;
+      var disable = this.disabled;
 
       if (this.selected.length) {
         // for multi select variant, set selected items
@@ -1958,7 +2103,7 @@ function () {
         } // for single select variant, set value to match
         else {
             this.input.value = this.selected[0].label || '';
-            this.term = this.input.value;
+            this.term = this.inputPollingValue = this.input.value;
           }
       } // setup input description - done here in case value is affected above
 
@@ -1977,7 +2122,6 @@ function () {
     key: "setHtml",
     value: function setHtml() {
       var o = this.options;
-      var showAll = o.showAllControl;
       var cssName = this.cssNameSpace;
       var explainerText = o.srListLabelText;
       var name = o.name ? " ".concat(o.name) : "";
@@ -1985,24 +2129,11 @@ function () {
       var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
       var wrapperClass = o.wrapperClassName ? " ".concat(o.wrapperClassName) : '';
       var explainer = explainerText ? " aria-label=\"".concat(explainerText, "\"") : '';
-
-      if (showAll) {
-        wrapperClass += " ".concat(cssName, "__wrapper--show-all");
-      }
-
-      if (this.multiple) {
-        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--multiple");
-      }
-
-      if (this.options.autoGrow) {
-        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--autogrow");
-      }
-
       var newHtml = ["<div id=\"".concat(this.ids.WRAPPER, "\" class=\"").concat(cssName, "__wrapper").concat(wrapperClass, "\">")]; // add input
 
       newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" " + "role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(o.placeholder, "\" ") + "aria-owns=\"".concat(this.ids.LIST, "\" aria-placeholder=\"").concat(o.placeholder, "\" ") + "class=\"".concat(cssName, "__input").concat(inputClass, "\"").concat(name, " />")); // button to show all available options
 
-      if (showAll) {
+      if (o.showAllControl) {
         newHtml.push("<span role=\"button\" aria-label=\"".concat(o.srShowAllText, "\" class=\"").concat(cssName, "__show-all\" ") + "tabindex=\"0\" id=\"".concat(this.ids.BUTTON, "\" aria-expanded=\"false\"></span>"));
       } // add the list holder
 
@@ -2023,26 +2154,26 @@ function () {
   }, {
     key: "generateApi",
     value: function generateApi() {
-      var _this7 = this;
+      var _this9 = this;
 
       this.api = {
         open: function open() {
-          return _this7.show.call(_this7);
+          return _this9.show.call(_this9);
         },
         close: function close() {
-          return _this7.hide.call(_this7);
+          return _this9.hide.call(_this9);
         }
       };
       var a = ['options', 'refresh', 'destroy', 'filter', 'input', 'wrapper', 'list', 'selected'];
 
       var _loop = function _loop(i, l) {
-        _this7.api[a[i]] = typeof _this7[a[i]] === 'function' ? function () {
+        _this9.api[a[i]] = typeof _this9[a[i]] === 'function' ? function () {
           for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
             args[_key] = arguments[_key];
           }
 
-          return _this7[a[i]].apply(_this7, args);
-        } : _this7[a[i]];
+          return _this9[a[i]].apply(_this9, args);
+        } : _this9[a[i]];
       };
 
       for (var i = 0, l = a.length; i < l; i += 1) {
@@ -2123,10 +2254,7 @@ function () {
       this.source = this.options.source;
       this.multiple = this.options.multiple;
       this.cssNameSpace = this.options.cssNameSpace;
-      this.documentClick = this.handleComponentBlur.bind(this); // set internal source array, from static elements if necessary
-      // done before html is generated as this may set options like multiple
-
-      this.prepListSource(); // create html structure
+      this.documentClick = this.handleComponentBlur.bind(this); // create html structure
 
       this.setHtml(); // additional app variables
 
@@ -2134,7 +2262,28 @@ function () {
       this.input = document.getElementById(this.ids.INPUT);
       this.wrapper = document.getElementById(this.ids.WRAPPER);
       this.showAll = document.getElementById(this.ids.BUTTON);
-      this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS); // hide element and list manually
+      this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS); // set internal source array, from static elements if necessary
+
+      this.prepListSource(); // set any further classes on component wrapper based on options
+
+      var wrapperClass = '';
+
+      if (this.options.showAllControl) {
+        wrapperClass += " ".concat(cssName, "__wrapper--show-all");
+      }
+
+      if (this.options.autoGrow) {
+        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--autogrow");
+      }
+
+      if (this.multiple) {
+        wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--multiple");
+      }
+
+      if (wrapperClass) {
+        (0, _helpers.addClass)(this.wrapper, wrapperClass);
+      } // hide element and list manually
+
 
       this.hide(this.list); // pass in the list so that the onClose is not triggered
 
@@ -2144,11 +2293,9 @@ function () {
 
       this.setInputStartingStates(); // bind all necessary events
 
-      this.bindEvents();
-      /** @todo: handling of initial value in async case - other cases handled in setInputStartingStates */
-      // fire onready callback
+      this.bindEvents(); // fire onready callback
 
-      this.triggerOptionCallback('onReady');
+      this.triggerOptionCallback('onReady', [this.wrapper]);
     }
   }]);
 
