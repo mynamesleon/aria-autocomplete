@@ -62,19 +62,24 @@ export function removeClass(element, classes) {
 // regex constants used for string cleaning
 const REGEX_AMPERSAND = /&/g;
 const REGEX_DUPE_WHITESPACE = /\s\s+/g;
-const REGEX_MAKE_SAFE = /[.*+?^${}()|[\]\\]/g;
 const REGEX_TO_IGNORE = /[\u2018\u2019',:\u2013-]/g;
+const REGEX_MAKE_SAFE = /[\-\[\]{}()*+?.,\\\^$|#\s]/g;
 /**
  * @description clean string of some characters, and make safe for regex searching
  * @param {String} theString
+ * @param {Boolean=} makeSafeForRegex
  * @returns {String}
  */
-export function cleanString(theString) {
+export function cleanString(theString, makeSafeForRegex = false) {
+    theString = trimString(theString).toLowerCase(); // case insensitive
     theString = theString.replace(REGEX_TO_IGNORE, ''); // ignore quotes, commas, colons, and hyphens
     theString = theString.replace(REGEX_AMPERSAND, 'and'); // treat & and 'and' as the same
-    theString = theString.replace(REGEX_MAKE_SAFE, '\\$&'); // make safe for regex searching
     theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
-    return trimString(theString.toLowerCase()); // case insensitive
+    // make safe for regex searching
+    if (makeSafeForRegex) {
+        theString = theString.replace(REGEX_MAKE_SAFE, '\\$&');
+    }
+    return theString;
 }
 
 /**

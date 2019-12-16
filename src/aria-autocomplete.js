@@ -943,7 +943,7 @@ class AriaAutocomplete {
         // existing list handling
         if (this.source && this.source.length) {
             if (!forceShowAll) {
-                value = cleanString(value);
+                value = cleanString(value, true);
             }
             for (let i = 0, l = this.source.length; i < l; i += 1) {
                 let entry = this.source[i];
@@ -1037,12 +1037,18 @@ class AriaAutocomplete {
      * @param {Event} event
      */
     filterPrepShowAll(event) {
-        if (this.componentBlurTimer) {
-            clearTimeout(this.componentBlurTimer);
+        // need to use a timer, as the wrapper focus out will fire after the click event
+        if (this.showAllPrepTimer) {
+            clearTimeout(this.showAllPrepTimer);
         }
-        event.preventDefault();
-        this.forceShowAll = true;
-        this.filterPrep(event, false, true);
+        this.showAllPrepTimer = setTimeout(() => {
+            if (this.componentBlurTimer) {
+                clearTimeout(this.componentBlurTimer);
+            }
+            event.preventDefault();
+            this.forceShowAll = true;
+            this.filterPrep(event, false, true);
+        });
     }
 
     /**
@@ -1676,17 +1682,18 @@ class AriaAutocomplete {
         if (this.documentClickBound) {
             document.removeEventListener('click', this.documentClick);
         }
-        // remove the whole wrapper and set all instance properties to null to clean up DOMNode references
+        // remove the whole wrapper
         this.element.parentNode.removeChild(this.wrapper);
+        delete this.element.ariaAutocomplete;
+        // re-show original element
+        this.show(this.element);
+        // set all instance properties to null to clean up DOMNode references
         let destroyCheck = prop => (isRefresh ? prop instanceof Element : true);
         for (let i in this) {
             if (this.hasOwnProperty(i) && destroyCheck(this[i])) {
                 this[i] = null;
             }
         }
-        delete this.element.ariaAutocomplete;
-        // re-show original element
-        this.show(this.element);
     }
 
     /**

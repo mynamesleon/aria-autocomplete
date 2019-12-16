@@ -220,24 +220,31 @@ function removeClass(element, classes) {
 
 var REGEX_AMPERSAND = /&/g;
 var REGEX_DUPE_WHITESPACE = /\s\s+/g;
-var REGEX_MAKE_SAFE = /[.*+?^${}()|[\]\\]/g;
 var REGEX_TO_IGNORE = /[\u2018\u2019',:\u2013-]/g;
+var REGEX_MAKE_SAFE = /[\-\[\]{}()*+?.,\\\^$|#\s]/g;
 /**
  * @description clean string of some characters, and make safe for regex searching
  * @param {String} theString
+ * @param {Boolean=} makeSafeForRegex
  * @returns {String}
  */
 
 function cleanString(theString) {
+  var makeSafeForRegex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  theString = trimString(theString).toLowerCase(); // case insensitive
+
   theString = theString.replace(REGEX_TO_IGNORE, ''); // ignore quotes, commas, colons, and hyphens
 
   theString = theString.replace(REGEX_AMPERSAND, 'and'); // treat & and 'and' as the same
 
-  theString = theString.replace(REGEX_MAKE_SAFE, '\\$&'); // make safe for regex searching
-
   theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
+  // make safe for regex searching
 
-  return trimString(theString.toLowerCase()); // case insensitive
+  if (makeSafeForRegex) {
+    theString = theString.replace(REGEX_MAKE_SAFE, '\\$&');
+  }
+
+  return theString;
 }
 /**
  * @description check if keycode is for a printable/width-affecting character
@@ -1418,7 +1425,7 @@ function () {
 
       if (this.source && this.source.length) {
         if (!forceShowAll) {
-          value = (0, _helpers.cleanString)(value);
+          value = (0, _helpers.cleanString)(value, true);
         }
 
         for (var i = 0, l = this.source.length; i < l; i += 1) {
@@ -1520,13 +1527,23 @@ function () {
   }, {
     key: "filterPrepShowAll",
     value: function filterPrepShowAll(event) {
-      if (this.componentBlurTimer) {
-        clearTimeout(this.componentBlurTimer);
+      var _this5 = this;
+
+      // need to use a timer, as the wrapper focus out will fire after the click event
+      if (this.showAllPrepTimer) {
+        clearTimeout(this.showAllPrepTimer);
       }
 
-      event.preventDefault();
-      this.forceShowAll = true;
-      this.filterPrep(event, false, true);
+      this.showAllPrepTimer = setTimeout(function () {
+        if (_this5.componentBlurTimer) {
+          clearTimeout(_this5.componentBlurTimer);
+        }
+
+        event.preventDefault();
+        _this5.forceShowAll = true;
+
+        _this5.filterPrep(event, false, true);
+      });
     }
     /**
      * @description blur behaviour for hiding list and removing focus class(es)
@@ -1537,7 +1554,7 @@ function () {
   }, {
     key: "handleComponentBlur",
     value: function handleComponentBlur(event) {
-      var _this5 = this;
+      var _this6 = this;
 
       var force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var delay = force ? 0 : 100;
@@ -1552,67 +1569,67 @@ function () {
         // do nothing if blurring to an element within the list
         var activeElem = document.activeElement;
 
-        if (!force && !(_this5.showAll && _this5.showAll === activeElem) && // exception for show all button
+        if (!force && !(_this6.showAll && _this6.showAll === activeElem) && // exception for show all button
         !activeElem.ariaAutocompleteSelectedOption // exception for selected items
         ) {
             // must base this on the wrapper to allow scrolling the list in IE
-            if (_this5.wrapper.contains(activeElem)) {
+            if (_this6.wrapper.contains(activeElem)) {
               return;
             }
           } // cancel any running async call
 
 
-        if (_this5.xhr) {
-          _this5.xhr.abort();
+        if (_this6.xhr) {
+          _this6.xhr.abort();
         } // confirmOnBlur behaviour
 
 
-        var isQueryIn = _this5.isQueryContainedIn.bind(_this5);
+        var isQueryIn = _this6.isQueryContainedIn.bind(_this6);
 
-        if (!force && _this5.options.confirmOnBlur && _this5.menuOpen) {
+        if (!force && _this6.options.confirmOnBlur && _this6.menuOpen) {
           // if blurring from an option (currentSelectedIndex > -1), select it
-          var toUse = _this5.currentSelectedIndex;
+          var toUse = _this6.currentSelectedIndex;
 
           if (typeof toUse !== 'number' || toUse === -1) {
             // otherwise check for exact match between current input value and available items
-            toUse = isQueryIn('', _this5.filteredSource);
+            toUse = isQueryIn('', _this6.filteredSource);
           }
 
-          _this5.handleOptionSelect({}, toUse, false);
+          _this6.handleOptionSelect({}, toUse, false);
         }
 
-        var n = _this5.cssNameSpace;
-        (0, _helpers.removeClass)(_this5.wrapper, "".concat(n, "__wrapper--focused focused focus"));
-        (0, _helpers.removeClass)(_this5.input, "".concat(n, "__input--focused focused focus"));
+        var n = _this6.cssNameSpace;
+        (0, _helpers.removeClass)(_this6.wrapper, "".concat(n, "__wrapper--focused focused focus"));
+        (0, _helpers.removeClass)(_this6.input, "".concat(n, "__input--focused focused focus"));
 
-        _this5.cancelFilterPrep();
+        _this6.cancelFilterPrep();
 
-        _this5.hide(); // in single select case, if current value and chosen value differ, clear selected and input value
+        _this6.hide(); // in single select case, if current value and chosen value differ, clear selected and input value
 
 
-        if (!_this5.multiple && isQueryIn('', _this5.selected) === -1) {
-          var isInputOrDdl = _this5.elementIsInput || _this5.elementIsSelect;
+        if (!_this6.multiple && isQueryIn('', _this6.selected) === -1) {
+          var isInputOrDdl = _this6.elementIsInput || _this6.elementIsSelect;
 
-          if (isInputOrDdl && _this5.element.value !== '') {
-            _this5.element.value = '';
-            (0, _helpers.dispatchEvent)(_this5.element, 'change');
+          if (isInputOrDdl && _this6.element.value !== '') {
+            _this6.element.value = '';
+            (0, _helpers.dispatchEvent)(_this6.element, 'change');
           }
 
-          if (_this5.selected.length) {
-            _this5.removeEntryFromSelected(_this5.selected[0]);
+          if (_this6.selected.length) {
+            _this6.removeEntryFromSelected(_this6.selected[0]);
           }
 
-          _this5.input.value = '';
+          _this6.input.value = '';
         }
 
-        if (_this5.multiple) {
-          _this5.input.value = '';
+        if (_this6.multiple) {
+          _this6.input.value = '';
         } // unbind document click
 
 
-        if (_this5.documentClickBound) {
-          _this5.documentClickBound = false;
-          document.removeEventListener('click', _this5.documentClick);
+        if (_this6.documentClickBound) {
+          _this6.documentClickBound = false;
+          document.removeEventListener('click', _this6.documentClick);
         }
       }, delay);
     }
@@ -1786,7 +1803,7 @@ function () {
   }, {
     key: "startPolling",
     value: function startPolling() {
-      var _this6 = this;
+      var _this7 = this;
 
       // check if input value does not equal last searched term
       if (!this.filtering && this.input.value !== this.inputPollingValue) {
@@ -1794,7 +1811,7 @@ function () {
       }
 
       this.pollingTimer = setTimeout(function () {
-        _this6.startPolling();
+        _this7.startPolling();
       }, 200);
     }
     /**
@@ -1804,89 +1821,89 @@ function () {
   }, {
     key: "bindEvents",
     value: function bindEvents() {
-      var _this7 = this;
+      var _this8 = this;
 
       // when focus is moved outside of the component, close everything
       this.wrapper.addEventListener('focusout', function (event) {
-        _this7.handleComponentBlur(event, false);
+        _this8.handleComponentBlur(event, false);
       }); // set wrapper focus state
 
       this.wrapper.addEventListener('focusin', function (event) {
-        var toAdd = "".concat(_this7.cssNameSpace, "__wrapper--focused focused focus");
-        (0, _helpers.addClass)(_this7.wrapper, toAdd);
+        var toAdd = "".concat(_this8.cssNameSpace, "__wrapper--focused focused focus");
+        (0, _helpers.addClass)(_this8.wrapper, toAdd);
 
-        if (!_this7.list.contains(event.target)) {
-          _this7.currentSelectedIndex = -1;
+        if (!_this8.list.contains(event.target)) {
+          _this8.currentSelectedIndex = -1;
         }
       }); // handle all keydown events inside the component
 
       this.wrapper.addEventListener('keydown', function (event) {
-        _this7.prepKeyDown(event);
+        _this8.prepKeyDown(event);
       }); // if clicking directly on the wrapper, move focus to the input
 
       this.wrapper.addEventListener('click', function (event) {
-        if (event.target === _this7.wrapper) {
-          _this7.input.focus();
+        if (event.target === _this8.wrapper) {
+          _this8.input.focus();
 
           return;
         }
 
-        if (_this7.isSelectedElem(event.target)) {
+        if (_this8.isSelectedElem(event.target)) {
           var option = event.target.ariaAutocompleteSelectedOption;
 
-          _this7.removeEntryFromSelected(option);
+          _this8.removeEntryFromSelected(option);
         }
       }); // when blurring out of input, check current value against selected one and clear if needed
 
       this.input.addEventListener('blur', function () {
-        var toRemove = "".concat(_this7.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.removeClass)(_this7.input, toRemove);
+        var toRemove = "".concat(_this8.cssNameSpace, "__input--focused focused focus");
+        (0, _helpers.removeClass)(_this8.input, toRemove);
 
-        _this7.cancelPolling();
+        _this8.cancelPolling();
       }); // trigger filter on input event as well as keydown (covering bases)
 
       this.input.addEventListener('input', function (event) {
-        _this7.filterPrep(event);
+        _this8.filterPrep(event);
       }); // when specifically clicking on input, if menu is closed, and value is long enough, search
 
       this.input.addEventListener('click', function (event) {
-        var open = _this7.menuOpen;
+        var open = _this8.menuOpen;
 
-        if (!open && _this7.input.value.length >= _this7.options.minLength) {
-          _this7.filterPrep(event, true);
+        if (!open && _this8.input.value.length >= _this8.options.minLength) {
+          _this8.filterPrep(event, true);
         }
       }); // when focusing on input, reset selected index and trigger search handling
 
       this.input.addEventListener('focusin', function () {
-        var toAdd = "".concat(_this7.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.addClass)(_this7.input, toAdd);
+        var toAdd = "".concat(_this8.cssNameSpace, "__input--focused focused focus");
+        (0, _helpers.addClass)(_this8.input, toAdd);
 
-        _this7.startPolling();
+        _this8.startPolling();
 
-        if (!_this7.disabled && !_this7.menuOpen) {
-          _this7.filterPrep(event, true);
+        if (!_this8.disabled && !_this8.menuOpen) {
+          _this8.filterPrep(event, true);
         }
       }); // show all button click
 
       if (this.showAll) {
         this.showAll.addEventListener('click', function (event) {
-          _this7.filterPrepShowAll(event);
+          _this8.filterPrepShowAll(event);
         });
       } // clear any current focus position when hovering into the list
 
 
       this.list.addEventListener('mouseenter', function (event) {
-        _this7.resetOptionAttributes();
+        _this8.resetOptionAttributes();
       }); // trigger options selection
 
       this.list.addEventListener('click', function (event) {
-        if (event.target !== _this7.list) {
-          var childNodes = _this7.list.childNodes;
+        if (event.target !== _this8.list) {
+          var childNodes = _this8.list.childNodes;
 
           if (childNodes.length) {
             var nodeIndex = [].indexOf.call(childNodes, event.target);
 
-            _this7.handleOptionSelect(event, nodeIndex);
+            _this8.handleOptionSelect(event, nodeIndex);
           }
         }
       });
@@ -2035,13 +2052,13 @@ function () {
   }, {
     key: "prepListSourceFunction",
     value: function prepListSourceFunction() {
-      var _this8 = this;
+      var _this9 = this;
 
       if (this.elementIsInput && this.element.value) {
         this.source.call(undefined, this.element.value, function (response) {
-          _this8.prepSelectedFromArray((0, _helpers.processSourceArray)(response));
+          _this9.prepSelectedFromArray((0, _helpers.processSourceArray)(response));
 
-          _this8.setInputStartingStates(false);
+          _this9.setInputStartingStates(false);
         });
       }
     }
@@ -2174,26 +2191,26 @@ function () {
   }, {
     key: "generateApi",
     value: function generateApi() {
-      var _this9 = this;
+      var _this10 = this;
 
       this.api = {
         open: function open() {
-          return _this9.show.call(_this9);
+          return _this10.show.call(_this10);
         },
         close: function close() {
-          return _this9.hide.call(_this9);
+          return _this10.hide.call(_this10);
         }
       };
       var a = ['options', 'refresh', 'destroy', 'filter', 'input', 'wrapper', 'list', 'selected'];
 
       var _loop = function _loop(i, l) {
-        _this9.api[a[i]] = typeof _this9[a[i]] === 'function' ? function () {
+        _this10.api[a[i]] = typeof _this10[a[i]] === 'function' ? function () {
           for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
             args[_key] = arguments[_key];
           }
 
-          return _this9[a[i]].apply(_this9, args);
-        } : _this9[a[i]];
+          return _this10[a[i]].apply(_this10, args);
+        } : _this10[a[i]];
       };
 
       for (var i = 0, l = a.length; i < l; i += 1) {
@@ -2237,10 +2254,13 @@ function () {
 
       if (this.documentClickBound) {
         document.removeEventListener('click', this.documentClick);
-      } // remove the whole wrapper and set all instance properties to null to clean up DOMNode references
+      } // remove the whole wrapper
 
 
       this.element.parentNode.removeChild(this.wrapper);
+      delete this.element.ariaAutocomplete; // re-show original element
+
+      this.show(this.element); // set all instance properties to null to clean up DOMNode references
 
       var destroyCheck = function destroyCheck(prop) {
         return isRefresh ? prop instanceof Element : true;
@@ -2251,10 +2271,6 @@ function () {
           this[i] = null;
         }
       }
-
-      delete this.element.ariaAutocomplete; // re-show original element
-
-      this.show(this.element);
     }
     /**
      * @description initialise AriaAutocomplete

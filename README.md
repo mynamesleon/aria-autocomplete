@@ -115,8 +115,8 @@ The full list of options, and their defaults:
      */
     showAllControl: false,
     /**
-     * Confirm currently active selection when blurring off of the control. If
-     * no active selection, will compare current input value against available labels
+     * @description Confirm currently active selection when blurring off of the control.
+     * If no active selection, will compare current input value against available labels
      */
     confirmOnBlur: true,
 

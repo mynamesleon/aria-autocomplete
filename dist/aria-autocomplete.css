@@ -143,6 +143,11 @@
   color: #f3f3f3;
   transform: translateY(-50%);
 }
+@media speech {
+  .aria-autocomplete__selected:after {
+    display: none;
+  }
+}
 .aria-autocomplete__wrapper--multiple .aria-autocomplete__input {
   margin-bottom: 5px;
 }
