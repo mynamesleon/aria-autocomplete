@@ -210,3 +210,42 @@ export function htmlToElement(html) {
     DIV.innerHTML = trimString(html);
     return DIV.firstChild;
 }
+
+/**
+ * @description set styles on an element
+ * @param {Element} element
+ * @param {Object} s
+ */
+export function setCss(element, s) {
+    if (!element) {
+        return;
+    }
+    for (let i in s) {
+        let style = typeof s[i] === 'number' ? s[i] + 'px' : s[i];
+        element.style[i] = style + ''; // force to be a string
+    }
+}
+
+/**
+ * @description transfer styles from one Element to another
+ * @param {Element} from
+ * @param {Element} to
+ * @param {Array=} properties
+ */
+export function transferStyles(from, to, properties) {
+    if (!from || !to) {
+        return;
+    }
+    let fromStyles = getComputedStyle(from);
+    let styles = {};
+
+    if (properties && properties.length) {
+        for (let i = 0, l = properties.length; i < l; i += 1) {
+            styles[properties[i]] = fromStyles[properties[i]];
+        }
+    } else {
+        styles = fromStyles;
+    }
+
+    setCss(to, styles);
+}

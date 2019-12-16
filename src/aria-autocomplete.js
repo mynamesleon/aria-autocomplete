@@ -1,4 +1,5 @@
 import './closest-polyfill';
+import AutoGrow from './autogrow';
 import {
     trimString,
     hasClass,
@@ -64,7 +65,7 @@ const DEFAULT_OPTIONS = {
      */
     multiple: false,
     /**
-     * @description @todo Adjust input width to match its value.
+     * @description Adjust input width to match its value.
      * Experimental, and a performance hit
      */
     autoGrow: false,
@@ -219,20 +220,6 @@ class AriaAutocomplete {
             return element.ariaAutocomplete;
         }
 
-        appIndex += 1;
-        // ids used for DOM queries and accessibility attributes e.g. aria-controls
-        this.ids = {};
-        this.ids.ELEMENT = element.id;
-        this.ids.PREFIX = `${element.id || ''}aria-autocomplete-${appIndex}`;
-        this.ids.LIST = `${this.ids.PREFIX}-list`;
-        this.ids.INPUT = `${this.ids.PREFIX}-input`;
-        this.ids.BUTTON = `${this.ids.PREFIX}-button`;
-        this.ids.OPTION = `${this.ids.PREFIX}-option`;
-        this.ids.WRAPPER = `${this.ids.PREFIX}-wrapper`;
-        this.ids.OPTION_SELECTED = `${this.ids.OPTION}-selected`;
-        this.ids.SR_ASSISTANCE = `${this.ids.PREFIX}-sr-assistance`;
-        this.ids.SR_ANNOUNCEMENTS = `${this.ids.PREFIX}-sr-announcements`;
-
         // vars defined later - related explicitly to core initialising params
         this.options;
         this.element;
@@ -247,6 +234,7 @@ class AriaAutocomplete {
         this.srAnnouncements;
 
         // vars defined later - non elements
+        this.ids;
         this.xhr;
         this.term;
         this.async;
@@ -255,6 +243,7 @@ class AriaAutocomplete {
         this.multiple;
         this.selected;
         this.disabled;
+        this.autoGrow;
         this.filtering;
         this.cssNameSpace;
         this.forceShowAll;
@@ -274,6 +263,10 @@ class AriaAutocomplete {
         this.componentBlurTimer;
         this.elementChangeEventTimer;
 
+        // storage for autoGrow class
+        this.AutoGrowInput;
+
+        // get going!
         this.init(element, options);
     }
 
@@ -369,6 +362,27 @@ class AriaAutocomplete {
                 this.showAll.setAttribute('tabindex', '-1');
                 addClass(this.showAll, `${n}__show-all--disabled disabled`);
             }
+        }
+    }
+
+    /**
+     * @description trigger input resizing if autogrow is enabled
+     */
+    triggerAutoGrow() {
+        if (this.autoGrow && this.AutoGrowInput) {
+            this.AutoGrowInput.trigger();
+        }
+    }
+
+    /**
+     * @description set input value to specific string, and related component vars
+     * @param {String} value
+     * @param {Boolean=} setPollingValue
+     */
+    setInputValue(value, setPollingValue = false) {
+        this.input.value = this.term = value;
+        if (setPollingValue) {
+            this.inputPollingValue = value;
         }
     }
 
@@ -472,12 +486,19 @@ class AriaAutocomplete {
 
     /**
      * @description re-build the html showing the selected items
-     * @todo: test performance in old IE - lots of loops here!
+     * note: there are a lot of loops here - could affect performance
      */
     buildMultiSelected() {
         // only do anything in multiple mode
         if (!this.multiple) {
             return;
+        }
+
+        // disable or enable as needed
+        if (this.multiple && this.selected.length >= this.options.maxItems) {
+            this.disable();
+        } else {
+            this.enable();
         }
 
         // no elements, and none selected, do nothing
@@ -539,6 +560,7 @@ class AriaAutocomplete {
 
         // set ids on elements
         let ids = [];
+        // get selected elements again, as some may have been added or removed
         current = this.getSelectedElems();
         for (let i = 0, l = current.length; i < l; i += 1) {
             let id = `${this.ids.OPTION_SELECTED}-${i}`;
@@ -659,12 +681,6 @@ class AriaAutocomplete {
         if (!this.selected.length && this.elementIsSelect) {
             this.element.value = '';
         }
-
-        // set disabled state as needed
-        if (this.multiple && this.selected.length >= this.options.maxItems) {
-            return this.disable();
-        }
-        this.enable();
     }
 
     /**
@@ -698,8 +714,8 @@ class AriaAutocomplete {
             }
         }
 
-        let valToSet = this.multiple ? '' : option.label;
-        this.input.value = this.term = this.inputPollingValue = valToSet;
+        this.setInputValue(this.multiple ? '' : option.label, true);
+        this.triggerAutoGrow();
 
         // reset selected array in single select mode
         if (!alreadySelected && !this.multiple) {
@@ -1004,7 +1020,7 @@ class AriaAutocomplete {
 
             // handle aria-describedby
             this.setInputDescription();
-            this.inputPollingValue = value;
+            this.inputPollingValue = value; // set polling value, even if search criteria not met
 
             if (!forceShowAll && value.length < this.options.minLength) {
                 this.hide();
@@ -1037,6 +1053,9 @@ class AriaAutocomplete {
      * @param {Event} event
      */
     filterPrepShowAll(event) {
+        if (this.disabled) {
+            return;
+        }
         // need to use a timer, as the wrapper focus out will fire after the click event
         if (this.showAllPrepTimer) {
             clearTimeout(this.showAllPrepTimer);
@@ -1094,9 +1113,6 @@ class AriaAutocomplete {
                 this.handleOptionSelect({}, toUse, false);
             }
 
-            let n = this.cssNameSpace;
-            removeClass(this.wrapper, `${n}__wrapper--focused focused focus`);
-            removeClass(this.input, `${n}__input--focused focused focus`);
             this.cancelFilterPrep();
             this.hide();
 
@@ -1110,12 +1126,15 @@ class AriaAutocomplete {
                 if (this.selected.length) {
                     this.removeEntryFromSelected(this.selected[0]);
                 }
-                this.input.value = '';
+                this.setInputValue('', true);
             }
 
             if (this.multiple) {
-                this.input.value = '';
+                this.setInputValue('', true);
             }
+
+            // trigger input resizing
+            this.triggerAutoGrow();
 
             // unbind document click
             if (this.documentClickBound) {
@@ -1204,6 +1223,7 @@ class AriaAutocomplete {
         const targetIsInput = event.target === this.input;
         // on space, if focus state is on any other item, treat as enter
         if (event.keyCode === 32 && !targetIsInput) {
+            event.preventDefault();
             return this.handleEnterKey(event);
         }
 
@@ -1291,10 +1311,8 @@ class AriaAutocomplete {
         this.wrapper.addEventListener('focusout', event => {
             this.handleComponentBlur(event, false);
         });
-        // set wrapper focus state
+        // reset selected index
         this.wrapper.addEventListener('focusin', event => {
-            let toAdd = `${this.cssNameSpace}__wrapper--focused focused focus`;
-            addClass(this.wrapper, toAdd);
             if (!this.list.contains(event.target)) {
                 this.currentSelectedIndex = -1;
             }
@@ -1315,10 +1333,12 @@ class AriaAutocomplete {
             }
         });
 
-        // when blurring out of input, check current value against selected one and clear if needed
+        let wrapperFocusClasses = `${this.cssNameSpace}__wrapper--focused focused focus`;
+        let inputFocusClasses = `${this.cssNameSpace}__input--focused focused focus`;
+        // when blurring out of input, remove classes
         this.input.addEventListener('blur', () => {
-            let toRemove = `${this.cssNameSpace}__input--focused focused focus`;
-            removeClass(this.input, toRemove);
+            removeClass(this.wrapper, wrapperFocusClasses);
+            removeClass(this.input, inputFocusClasses);
             this.cancelPolling();
         });
         // trigger filter on input event as well as keydown (covering bases)
@@ -1334,8 +1354,8 @@ class AriaAutocomplete {
         });
         // when focusing on input, reset selected index and trigger search handling
         this.input.addEventListener('focusin', () => {
-            let toAdd = `${this.cssNameSpace}__input--focused focused focus`;
-            addClass(this.input, toAdd);
+            addClass(this.wrapper, wrapperFocusClasses);
+            addClass(this.input, inputFocusClasses);
             this.startPolling();
             if (!this.disabled && !this.menuOpen) {
                 this.filterPrep(event, true);
@@ -1363,6 +1383,11 @@ class AriaAutocomplete {
                 }
             }
         });
+
+        // setup input autogrow behaviour
+        if (this.autoGrow) {
+            this.AutoGrowInput = new AutoGrow(this.input);
+        }
     }
 
     /**
@@ -1548,17 +1573,15 @@ class AriaAutocomplete {
         }
 
         // if selected item(s) already exists
-        let disable = this.disabled;
         if (this.selected.length) {
             // for multi select variant, set selected items
             if (this.multiple) {
                 this.buildMultiSelected();
-                disable = this.selected.length >= this.options.maxItems;
             }
             // for single select variant, set value to match
             else {
-                this.input.value = this.selected[0].label || '';
-                this.term = this.inputPollingValue = this.input.value;
+                this.setInputValue(this.selected[0].label || '', true);
+                this.triggerAutoGrow();
             }
         }
 
@@ -1566,7 +1589,7 @@ class AriaAutocomplete {
         this.setInputDescription();
 
         // disable the control if the invoked element was disabled
-        if (disable || !!this.element.disabled) {
+        if (!!this.element.disabled) {
             this.disable();
         }
     }
@@ -1656,22 +1679,21 @@ class AriaAutocomplete {
     }
 
     /**
-     * refresh method for use after changing options, source, etc. - soft destroy
-     * @todo: test this!
+     * @description refresh method for use after changing options, source, etc.
      */
     refresh() {
         // store element, as this is wiped in destroy method
         let element = this.element;
+        let options = mergeObjects(this.options);
         // do not do a hard destroy
-        this.destroy(true);
-        this.init(element, this.options);
+        this.destroy();
+        this.init(element, options);
     }
 
     /**
      * @description destroy component
-     * @param {Boolean=} isRefresh
      */
-    destroy(isRefresh = false) {
+    destroy() {
         // return original label 'for' attribute back to element id
         let label = document.querySelector('[for="' + this.ids.INPUT + '"]');
         if (label && label.ariaAutocompleteOriginalFor) {
@@ -1682,15 +1704,18 @@ class AriaAutocomplete {
         if (this.documentClickBound) {
             document.removeEventListener('click', this.documentClick);
         }
+        // destroy autogrow behaviour and events
+        if (this.autoGrow && this.AutoGrowInput) {
+            this.AutoGrowInput.destroy();
+        }
         // remove the whole wrapper
         this.element.parentNode.removeChild(this.wrapper);
         delete this.element.ariaAutocomplete;
         // re-show original element
         this.show(this.element);
         // set all instance properties to null to clean up DOMNode references
-        let destroyCheck = prop => (isRefresh ? prop instanceof Element : true);
         for (let i in this) {
-            if (this.hasOwnProperty(i) && destroyCheck(this[i])) {
+            if (this.hasOwnProperty(i)) {
                 this[i] = null;
             }
         }
@@ -1702,6 +1727,20 @@ class AriaAutocomplete {
      * @param {Object=} options
      */
     init(element, options) {
+        // ids used for DOM queries and accessibility attributes e.g. aria-controls
+        appIndex += 1;
+        this.ids = {};
+        this.ids.ELEMENT = element.id;
+        this.ids.PREFIX = `${element.id || ''}aria-autocomplete-${appIndex}`;
+        this.ids.LIST = `${this.ids.PREFIX}-list`;
+        this.ids.INPUT = `${this.ids.PREFIX}-input`;
+        this.ids.BUTTON = `${this.ids.PREFIX}-button`;
+        this.ids.OPTION = `${this.ids.PREFIX}-option`;
+        this.ids.WRAPPER = `${this.ids.PREFIX}-wrapper`;
+        this.ids.OPTION_SELECTED = `${this.ids.OPTION}-selected`;
+        this.ids.SR_ASSISTANCE = `${this.ids.PREFIX}-sr-assistance`;
+        this.ids.SR_ANNOUNCEMENTS = `${this.ids.PREFIX}-sr-announcements`;
+
         this.selected = [];
         this.element = element;
         this.elementIsInput = element.nodeName === 'INPUT';
@@ -1711,6 +1750,7 @@ class AriaAutocomplete {
         // set these internally so that the component has to be properly refreshed to change them
         this.source = this.options.source;
         this.multiple = this.options.multiple;
+        this.autoGrow = this.options.autoGrow;
         this.cssNameSpace = this.options.cssNameSpace;
         this.documentClick = this.handleComponentBlur.bind(this);
 

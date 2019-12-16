@@ -154,6 +154,8 @@ exports.dispatchEvent = dispatchEvent;
 exports.setElementState = setElementState;
 exports.processSourceArray = processSourceArray;
 exports.htmlToElement = htmlToElement;
+exports.setCss = setCss;
+exports.transferStyles = transferStyles;
 
 /**
  * @description trim string helper
@@ -386,7 +388,239 @@ function htmlToElement(html) {
   DIV.innerHTML = trimString(html);
   return DIV.firstChild;
 }
-},{}],"c8cM":[function(require,module,exports) {
+/**
+ * @description set styles on an element
+ * @param {Element} element
+ * @param {Object} s
+ */
+
+
+function setCss(element, s) {
+  if (!element) {
+    return;
+  }
+
+  for (var i in s) {
+    var style = typeof s[i] === 'number' ? s[i] + 'px' : s[i];
+    element.style[i] = style + ''; // force to be a string
+  }
+}
+/**
+ * @description transfer styles from one Element to another
+ * @param {Element} from
+ * @param {Element} to
+ * @param {Array=} properties
+ */
+
+
+function transferStyles(from, to, properties) {
+  if (!from || !to) {
+    return;
+  }
+
+  var fromStyles = getComputedStyle(from);
+  var styles = {};
+
+  if (properties && properties.length) {
+    for (var i = 0, l = properties.length; i < l; i += 1) {
+      styles[properties[i]] = fromStyles[properties[i]];
+    }
+  } else {
+    styles = fromStyles;
+  }
+
+  setCss(to, styles);
+}
+},{}],"KnPF":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _helpers = require("./helpers");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+ * @description storage for element used to detect value width
+ */
+var testSpan;
+/**
+ * @description set an input element to autogrow based on its value
+ * @param {Element} input
+ */
+
+var AutoGrow =
+/*#__PURE__*/
+function () {
+  function AutoGrow(input) {
+    _classCallCheck(this, AutoGrow);
+
+    this.input = input;
+    this.eventHandler;
+    this.currentWidth;
+    this.init();
+  }
+  /**
+   * @description trigger an autogrow check
+   */
+
+
+  _createClass(AutoGrow, [{
+    key: "trigger",
+    value: function trigger() {
+      this.checkAndSet.call(this);
+    }
+    /**
+     * @description get current user selection from within the input
+     */
+
+  }, {
+    key: "getInputSelection",
+    value: function getInputSelection() {
+      var result = {};
+
+      if ('selectionStart' in this.input) {
+        result.start = this.input.selectionStart;
+        result.length = this.input.selectionEnd - result.start;
+      } else if (document.selection) {
+        this.input.focus();
+        var selection = document.selection.createRange();
+        var selectionLength = selection.text.length;
+        selection.moveStart('character', -this.input.value.length);
+        result.start = selection.text.length - selectionLength;
+        result.length = selectionLength;
+      }
+
+      return result;
+    }
+    /**
+     * @description measure the pixel width of a string in an input
+     * @param {String} str
+     * @returns {Number}
+     */
+
+  }, {
+    key: "measureString",
+    value: function measureString(str) {
+      if (!str) {
+        return 0;
+      }
+
+      if (!testSpan) {
+        testSpan = document.createElement('span');
+        (0, _helpers.setCss)(testSpan, {
+          position: 'absolute',
+          top: -99999,
+          left: -99999,
+          width: 'auto',
+          padding: 0,
+          whiteSpace: 'pre'
+        });
+        document.body.appendChild(testSpan);
+      }
+
+      testSpan.textContent = str;
+      (0, _helpers.transferStyles)(this.input, testSpan, ['letterSpacing', 'fontSize', 'fontFamily', 'fontWeight', 'textTransform']);
+      return testSpan.offsetWidth || testSpan.clientWidth;
+    }
+    /**
+     * @description check the current input value and set width
+     * @param {Event} event
+     */
+
+  }, {
+    key: "checkAndSet",
+    value: function checkAndSet() {
+      var event = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      if (event.metaKey || event.altKey) {
+        return;
+      }
+
+      var value = this.input.value;
+
+      if (event.type && event.type.toLowerCase() === 'keydown') {
+        var keyCode = event.keyCode;
+        var keyCodeIsDelete = keyCode === 46;
+        var keyCodeIsBackspace = keyCode === 8; // delete or backspace
+
+        if (keyCodeIsDelete || keyCodeIsBackspace) {
+          var selection = this.getInputSelection();
+
+          if (selection.length) {
+            value = value.substring(0, selection.start) + value.substring(selection.start + selection.length);
+          } else if (keyCodeIsBackspace && selection.start) {
+            value = value.substring(0, selection.start - 1) + value.substring(selection.start + 1);
+          } else if (keyCodeIsDelete && selection.start !== undefined) {
+            value = value.substring(0, selection.start) + value.substring(selection.start + 1);
+          }
+        } // any other width affecting character
+        else if ((0, _helpers.isPrintableKey)(keyCode)) {
+            var shift = event.shiftKey;
+            var character = String.fromCharCode(keyCode);
+
+            if (shift) {
+              character = character.toUpperCase();
+            } else {
+              character = character.toLowerCase();
+            }
+
+            value += character;
+          }
+      }
+
+      var placeholder;
+
+      if (!value && (placeholder = this.input.getAttribute('placeholder'))) {
+        value = placeholder;
+      }
+
+      var width = this.measureString(value) + 4;
+
+      if (width !== this.currentWidth) {
+        this.currentWidth = width;
+        this.input.style.width = "".concat(width, "px");
+      }
+    }
+    /**
+     * @description destroy the autogrow behaviour
+     */
+
+  }, {
+    key: "destroy",
+    value: function destroy() {
+      this.input.removeEventListener('blur', this.eventHandler);
+      this.input.removeEventListener('keyup', this.eventHandler);
+      this.input.removeEventListener('keydown', this.eventHandler);
+      this.input = null;
+    }
+    /**
+     * @description initialise the autogrow behaviour and bind events
+     */
+
+  }, {
+    key: "init",
+    value: function init() {
+      this.checkAndSet();
+      this.eventHandler = this.checkAndSet.bind(this);
+      this.input.addEventListener('blur', this.eventHandler);
+      this.input.addEventListener('keyup', this.eventHandler);
+      this.input.addEventListener('keydown', this.eventHandler);
+    }
+  }]);
+
+  return AutoGrow;
+}();
+
+exports.default = AutoGrow;
+},{"./helpers":"lTk1"}],"c8cM":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -396,7 +630,11 @@ exports.default = void 0;
 
 require("./closest-polyfill");
 
+var _autogrow = _interopRequireDefault(require("./autogrow"));
+
 var _helpers = require("./helpers");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -461,7 +699,7 @@ var DEFAULT_OPTIONS = {
   multiple: false,
 
   /**
-   * @description @todo Adjust input width to match its value.
+   * @description Adjust input width to match its value.
    * Experimental, and a performance hit
    */
   autoGrow: false,
@@ -640,21 +878,8 @@ function () {
 
     if (element.ariaAutocomplete) {
       return element.ariaAutocomplete;
-    }
+    } // vars defined later - related explicitly to core initialising params
 
-    appIndex += 1; // ids used for DOM queries and accessibility attributes e.g. aria-controls
-
-    this.ids = {};
-    this.ids.ELEMENT = element.id;
-    this.ids.PREFIX = "".concat(element.id || '', "aria-autocomplete-").concat(appIndex);
-    this.ids.LIST = "".concat(this.ids.PREFIX, "-list");
-    this.ids.INPUT = "".concat(this.ids.PREFIX, "-input");
-    this.ids.BUTTON = "".concat(this.ids.PREFIX, "-button");
-    this.ids.OPTION = "".concat(this.ids.PREFIX, "-option");
-    this.ids.WRAPPER = "".concat(this.ids.PREFIX, "-wrapper");
-    this.ids.OPTION_SELECTED = "".concat(this.ids.OPTION, "-selected");
-    this.ids.SR_ASSISTANCE = "".concat(this.ids.PREFIX, "-sr-assistance");
-    this.ids.SR_ANNOUNCEMENTS = "".concat(this.ids.PREFIX, "-sr-announcements"); // vars defined later - related explicitly to core initialising params
 
     this.options;
     this.element;
@@ -667,6 +892,7 @@ function () {
     this.showAll;
     this.srAnnouncements; // vars defined later - non elements
 
+    this.ids;
     this.xhr;
     this.term;
     this.async;
@@ -675,6 +901,7 @@ function () {
     this.multiple;
     this.selected;
     this.disabled;
+    this.autoGrow;
     this.filtering;
     this.cssNameSpace;
     this.forceShowAll;
@@ -692,7 +919,10 @@ function () {
     this.pollingTimer;
     this.announcementTimer;
     this.componentBlurTimer;
-    this.elementChangeEventTimer;
+    this.elementChangeEventTimer; // storage for autoGrow class
+
+    this.AutoGrowInput; // get going!
+
     this.init(element, options);
   }
   /**
@@ -808,6 +1038,33 @@ function () {
           this.showAll.setAttribute('tabindex', '-1');
           (0, _helpers.addClass)(this.showAll, "".concat(n, "__show-all--disabled disabled"));
         }
+      }
+    }
+    /**
+     * @description trigger input resizing if autogrow is enabled
+     */
+
+  }, {
+    key: "triggerAutoGrow",
+    value: function triggerAutoGrow() {
+      if (this.autoGrow && this.AutoGrowInput) {
+        this.AutoGrowInput.trigger();
+      }
+    }
+    /**
+     * @description set input value to specific string, and related component vars
+     * @param {String} value
+     * @param {Boolean=} setPollingValue
+     */
+
+  }, {
+    key: "setInputValue",
+    value: function setInputValue(value) {
+      var setPollingValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      this.input.value = this.term = value;
+
+      if (setPollingValue) {
+        this.inputPollingValue = value;
       }
     }
     /**
@@ -929,7 +1186,7 @@ function () {
     }
     /**
      * @description re-build the html showing the selected items
-     * @todo: test performance in old IE - lots of loops here!
+     * note: there are a lot of loops here - could affect performance
      */
 
   }, {
@@ -938,6 +1195,13 @@ function () {
       // only do anything in multiple mode
       if (!this.multiple) {
         return;
+      } // disable or enable as needed
+
+
+      if (this.multiple && this.selected.length >= this.options.maxItems) {
+        this.disable();
+      } else {
+        this.enable();
       } // no elements, and none selected, do nothing
 
 
@@ -1004,7 +1268,8 @@ function () {
       } // set ids on elements
 
 
-      var ids = [];
+      var ids = []; // get selected elements again, as some may have been added or removed
+
       current = this.getSelectedElems();
 
       for (var _i2 = 0, _l3 = current.length; _i2 < _l3; _i2 += 1) {
@@ -1138,14 +1403,7 @@ function () {
 
       if (!this.selected.length && this.elementIsSelect) {
         this.element.value = '';
-      } // set disabled state as needed
-
-
-      if (this.multiple && this.selected.length >= this.options.maxItems) {
-        return this.disable();
       }
-
-      this.enable();
     }
     /**
      * @description select option from the list by index
@@ -1177,8 +1435,8 @@ function () {
         }
       }
 
-      var valToSet = this.multiple ? '' : option.label;
-      this.input.value = this.term = this.inputPollingValue = valToSet; // reset selected array in single select mode
+      this.setInputValue(this.multiple ? '' : option.label, true);
+      this.triggerAutoGrow(); // reset selected array in single select mode
 
       if (!alreadySelected && !this.multiple) {
         this.selected = [];
@@ -1490,7 +1748,7 @@ function () {
 
         _this4.setInputDescription();
 
-        _this4.inputPollingValue = value;
+        _this4.inputPollingValue = value; // set polling value, even if search criteria not met
 
         if (!forceShowAll && value.length < _this4.options.minLength) {
           _this4.hide();
@@ -1529,7 +1787,11 @@ function () {
     value: function filterPrepShowAll(event) {
       var _this5 = this;
 
-      // need to use a timer, as the wrapper focus out will fire after the click event
+      if (this.disabled) {
+        return;
+      } // need to use a timer, as the wrapper focus out will fire after the click event
+
+
       if (this.showAllPrepTimer) {
         clearTimeout(this.showAllPrepTimer);
       }
@@ -1598,10 +1860,6 @@ function () {
           _this6.handleOptionSelect({}, toUse, false);
         }
 
-        var n = _this6.cssNameSpace;
-        (0, _helpers.removeClass)(_this6.wrapper, "".concat(n, "__wrapper--focused focused focus"));
-        (0, _helpers.removeClass)(_this6.input, "".concat(n, "__input--focused focused focus"));
-
         _this6.cancelFilterPrep();
 
         _this6.hide(); // in single select case, if current value and chosen value differ, clear selected and input value
@@ -1619,12 +1877,15 @@ function () {
             _this6.removeEntryFromSelected(_this6.selected[0]);
           }
 
-          _this6.input.value = '';
+          _this6.setInputValue('', true);
         }
 
         if (_this6.multiple) {
-          _this6.input.value = '';
-        } // unbind document click
+          _this6.setInputValue('', true);
+        } // trigger input resizing
+
+
+        _this6.triggerAutoGrow(); // unbind document click
 
 
         if (_this6.documentClickBound) {
@@ -1724,6 +1985,7 @@ function () {
       var targetIsInput = event.target === this.input; // on space, if focus state is on any other item, treat as enter
 
       if (event.keyCode === 32 && !targetIsInput) {
+        event.preventDefault();
         return this.handleEnterKey(event);
       }
 
@@ -1826,12 +2088,9 @@ function () {
       // when focus is moved outside of the component, close everything
       this.wrapper.addEventListener('focusout', function (event) {
         _this8.handleComponentBlur(event, false);
-      }); // set wrapper focus state
+      }); // reset selected index
 
       this.wrapper.addEventListener('focusin', function (event) {
-        var toAdd = "".concat(_this8.cssNameSpace, "__wrapper--focused focused focus");
-        (0, _helpers.addClass)(_this8.wrapper, toAdd);
-
         if (!_this8.list.contains(event.target)) {
           _this8.currentSelectedIndex = -1;
         }
@@ -1853,11 +2112,13 @@ function () {
 
           _this8.removeEntryFromSelected(option);
         }
-      }); // when blurring out of input, check current value against selected one and clear if needed
+      });
+      var wrapperFocusClasses = "".concat(this.cssNameSpace, "__wrapper--focused focused focus");
+      var inputFocusClasses = "".concat(this.cssNameSpace, "__input--focused focused focus"); // when blurring out of input, remove classes
 
       this.input.addEventListener('blur', function () {
-        var toRemove = "".concat(_this8.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.removeClass)(_this8.input, toRemove);
+        (0, _helpers.removeClass)(_this8.wrapper, wrapperFocusClasses);
+        (0, _helpers.removeClass)(_this8.input, inputFocusClasses);
 
         _this8.cancelPolling();
       }); // trigger filter on input event as well as keydown (covering bases)
@@ -1875,8 +2136,8 @@ function () {
       }); // when focusing on input, reset selected index and trigger search handling
 
       this.input.addEventListener('focusin', function () {
-        var toAdd = "".concat(_this8.cssNameSpace, "__input--focused focused focus");
-        (0, _helpers.addClass)(_this8.input, toAdd);
+        (0, _helpers.addClass)(_this8.wrapper, wrapperFocusClasses);
+        (0, _helpers.addClass)(_this8.input, inputFocusClasses);
 
         _this8.startPolling();
 
@@ -1906,7 +2167,11 @@ function () {
             _this8.handleOptionSelect(event, nodeIndex);
           }
         }
-      });
+      }); // setup input autogrow behaviour
+
+      if (this.autoGrow) {
+        this.AutoGrowInput = new _autogrow.default(this.input);
+      }
     }
     /**
      * @description set starting source array based on child checkboxes
@@ -2130,24 +2395,21 @@ function () {
       } // if selected item(s) already exists
 
 
-      var disable = this.disabled;
-
       if (this.selected.length) {
         // for multi select variant, set selected items
         if (this.multiple) {
           this.buildMultiSelected();
-          disable = this.selected.length >= this.options.maxItems;
         } // for single select variant, set value to match
         else {
-            this.input.value = this.selected[0].label || '';
-            this.term = this.inputPollingValue = this.input.value;
+            this.setInputValue(this.selected[0].label || '', true);
+            this.triggerAutoGrow();
           }
       } // setup input description - done here in case value is affected above
 
 
       this.setInputDescription(); // disable the control if the invoked element was disabled
 
-      if (disable || !!this.element.disabled) {
+      if (!!this.element.disabled) {
         this.disable();
       }
     }
@@ -2221,28 +2483,26 @@ function () {
       this.element.ariaAutocomplete = this.api;
     }
     /**
-     * refresh method for use after changing options, source, etc. - soft destroy
-     * @todo: test this!
+     * @description refresh method for use after changing options, source, etc.
      */
 
   }, {
     key: "refresh",
     value: function refresh() {
       // store element, as this is wiped in destroy method
-      var element = this.element; // do not do a hard destroy
+      var element = this.element;
+      var options = (0, _helpers.mergeObjects)(this.options); // do not do a hard destroy
 
-      this.destroy(true);
-      this.init(element, this.options);
+      this.destroy();
+      this.init(element, options);
     }
     /**
      * @description destroy component
-     * @param {Boolean=} isRefresh
      */
 
   }, {
     key: "destroy",
     value: function destroy() {
-      var isRefresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       // return original label 'for' attribute back to element id
       var label = document.querySelector('[for="' + this.ids.INPUT + '"]');
 
@@ -2254,6 +2514,11 @@ function () {
 
       if (this.documentClickBound) {
         document.removeEventListener('click', this.documentClick);
+      } // destroy autogrow behaviour and events
+
+
+      if (this.autoGrow && this.AutoGrowInput) {
+        this.AutoGrowInput.destroy();
       } // remove the whole wrapper
 
 
@@ -2262,12 +2527,8 @@ function () {
 
       this.show(this.element); // set all instance properties to null to clean up DOMNode references
 
-      var destroyCheck = function destroyCheck(prop) {
-        return isRefresh ? prop instanceof Element : true;
-      };
-
       for (var i in this) {
-        if (this.hasOwnProperty(i) && destroyCheck(this[i])) {
+        if (this.hasOwnProperty(i)) {
           this[i] = null;
         }
       }
@@ -2281,6 +2542,19 @@ function () {
   }, {
     key: "init",
     value: function init(element, options) {
+      // ids used for DOM queries and accessibility attributes e.g. aria-controls
+      appIndex += 1;
+      this.ids = {};
+      this.ids.ELEMENT = element.id;
+      this.ids.PREFIX = "".concat(element.id || '', "aria-autocomplete-").concat(appIndex);
+      this.ids.LIST = "".concat(this.ids.PREFIX, "-list");
+      this.ids.INPUT = "".concat(this.ids.PREFIX, "-input");
+      this.ids.BUTTON = "".concat(this.ids.PREFIX, "-button");
+      this.ids.OPTION = "".concat(this.ids.PREFIX, "-option");
+      this.ids.WRAPPER = "".concat(this.ids.PREFIX, "-wrapper");
+      this.ids.OPTION_SELECTED = "".concat(this.ids.OPTION, "-selected");
+      this.ids.SR_ASSISTANCE = "".concat(this.ids.PREFIX, "-sr-assistance");
+      this.ids.SR_ANNOUNCEMENTS = "".concat(this.ids.PREFIX, "-sr-announcements");
       this.selected = [];
       this.element = element;
       this.elementIsInput = element.nodeName === 'INPUT';
@@ -2289,6 +2563,7 @@ function () {
 
       this.source = this.options.source;
       this.multiple = this.options.multiple;
+      this.autoGrow = this.options.autoGrow;
       this.cssNameSpace = this.options.cssNameSpace;
       this.documentClick = this.handleComponentBlur.bind(this); // create html structure
 
@@ -2354,5 +2629,5 @@ var _default = function _default(elem, options) {
 };
 
 exports.default = _default;
-},{"./closest-polyfill":"kTsq","./helpers":"lTk1"}]},{},["c8cM"], null)
+},{"./closest-polyfill":"kTsq","./autogrow":"KnPF","./helpers":"lTk1"}]},{},["c8cM"], null)
 //# sourceMappingURL=/aria-autocomplete.js.map

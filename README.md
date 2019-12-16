@@ -125,7 +125,7 @@ The full list of options, and their defaults:
      */
     multiple: false,
     /**
-     * @description @todo Adjust input width to match its value.
+     * @description Adjust input width to match its value.
      * Experimental, and a performance hit
      */
     autoGrow: false,

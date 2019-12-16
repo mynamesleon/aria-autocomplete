@@ -11,6 +11,11 @@
     box-sizing: border-box;
 }
 
+.disabled-style() {
+    background-color: #ebebeb;
+    cursor: not-allowed;
+}
+
 .aria-autocomplete {
     &__wrapper {
         position: relative;
@@ -34,7 +39,12 @@
 
     &__input {
         .input-style();
+        font-family: inherit;
         font-size: 14px;
+
+        &--disabled {
+            .disabled-style();
+        }
     }
 
     &__show-all {
@@ -48,6 +58,10 @@
         background-position: center center;
         background-image: url("data:image/svg+xml;charset=utf8,%3Csvg width='17' height='10' viewBox='0 0 17 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.023L8.488 8 16 1' stroke-width='1' stroke='%23434143' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
         box-sizing: border-box;
+
+        &--disabled {
+            .disabled-style();
+        }
     }
 
     &__list {
@@ -78,7 +92,7 @@
                 top: 0;
                 left: 0;
                 width: 100%;
-                padding: 5px 10px 0;
+                padding: 3px 10px 0;
                 font-size: 13px;
                 text-align: right;
                 opacity: 0.5;
@@ -213,6 +227,10 @@
         flex-wrap: wrap;
         align-items: center;
         .input-style();
+    }
+
+    &__wrapper--autogrow&__wrapper--multiple&__wrapper--disabled {
+        .disabled-style();
     }
 
     &__wrapper--autogrow&__wrapper--multiple &__show-all {

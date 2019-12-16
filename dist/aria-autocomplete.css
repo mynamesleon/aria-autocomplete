@@ -22,7 +22,12 @@
   padding: 6px 10px;
   border-radius: 2px;
   box-sizing: border-box;
+  font-family: inherit;
   font-size: 14px;
+}
+.aria-autocomplete__input--disabled {
+  background-color: #ebebeb;
+  cursor: not-allowed;
 }
 .aria-autocomplete__show-all {
   position: absolute;
@@ -35,6 +40,10 @@
   background-position: center center;
   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg width='17' height='10' viewBox='0 0 17 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.023L8.488 8 16 1' stroke-width='1' stroke='%23434143' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
   box-sizing: border-box;
+}
+.aria-autocomplete__show-all--disabled {
+  background-color: #ebebeb;
+  cursor: not-allowed;
 }
 .aria-autocomplete__list {
   list-style: none;
@@ -63,7 +72,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding: 5px 10px 0;
+  padding: 3px 10px 0;
   font-size: 13px;
   text-align: right;
   opacity: 0.5;
@@ -187,6 +196,10 @@
   padding: 6px 10px;
   border-radius: 2px;
   box-sizing: border-box;
+}
+.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple.aria-autocomplete__wrapper--disabled {
+  background-color: #ebebeb;
+  cursor: not-allowed;
 }
 .aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple .aria-autocomplete__show-all {
   order: 3;
