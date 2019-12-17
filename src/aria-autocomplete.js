@@ -555,11 +555,11 @@ class AriaAutocomplete {
             }
         }
         if (fragment.childNodes && fragment.childNodes.length) {
-            this.wrapper.insertBefore(fragment, this.list);
+            this.wrapper.appendChild(fragment);
         }
 
         // set ids on elements
-        let ids = [];
+        let ids = [this.ids.LIST];
         // get selected elements again, as some may have been added or removed
         current = this.getSelectedElems();
         for (let i = 0, l = current.length; i < l; i += 1) {
@@ -567,7 +567,6 @@ class AriaAutocomplete {
             current[i].setAttribute('id', id);
             ids.push(id);
         }
-        ids.push(this.ids.LIST);
 
         // set input aria-owns
         this.input.setAttribute('aria-owns', ids.join(' '));
@@ -829,7 +828,7 @@ class AriaAutocomplete {
         let newListHtml = toShow.join('');
         if (this.currentListHtml !== newListHtml) {
             this.currentListHtml = newListHtml;
-            /** @todo: test innerHTML vs insertAdjacentHtml performance in old IE */
+            // innerHTML vs insertAdjacentHtml performance in old IE ?
             this.list.innerHTML = newListHtml;
         } else {
             // if list html matches, and not re-rendered, clear aria-selected and focus classes
@@ -1087,6 +1086,7 @@ class AriaAutocomplete {
             let activeElem = document.activeElement;
             if (
                 !force &&
+                activeElem &&
                 !(this.showAll && this.showAll === activeElem) && // exception for show all button
                 !activeElem.ariaAutocompleteSelectedOption // exception for selected items
             ) {
@@ -1246,13 +1246,14 @@ class AriaAutocomplete {
         }
 
         // any printable character not on input, return focus to input
-        let focusInput = !targetIsInput && isPrintableKey(event.keyCode);
+        let printableKey = isPrintableKey(event.keyCode);
+        let focusInput = !targetIsInput && printableKey;
         if (focusInput) {
             this.input.focus();
         }
 
         // trigger filtering - done here, instead of using input event, due to IE9 issues
-        if (focusInput || targetIsInput) {
+        if (focusInput || (targetIsInput && printableKey)) {
             this.filterPrep(event);
         }
     }
