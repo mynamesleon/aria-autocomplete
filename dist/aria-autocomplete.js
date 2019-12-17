@@ -463,6 +463,7 @@ function () {
     _classCallCheck(this, AutoGrow);
 
     this.input = input;
+    this.currentString;
     this.eventHandler;
     this.currentWidth;
     this.init();
@@ -510,7 +511,14 @@ function () {
     key: "measureString",
     value: function measureString(str) {
       if (!str) {
+        this.currentString = str;
         return 0;
+      } // check for matching string
+      // risky, as styles could change between checks, but better for performance
+
+
+      if (str === this.currentString) {
+        return this.currentWidth;
       }
 
       if (!testSpan) {
@@ -527,6 +535,7 @@ function () {
       }
 
       testSpan.textContent = str;
+      this.currentString = str;
       (0, _helpers.transferStyles)(this.input, testSpan, ['letterSpacing', 'fontSize', 'fontFamily', 'fontWeight', 'textTransform']);
       return testSpan.offsetWidth || testSpan.clientWidth;
     }
@@ -597,6 +606,7 @@ function () {
     key: "destroy",
     value: function destroy() {
       this.input.removeEventListener('blur', this.eventHandler);
+      this.input.removeEventListener('input', this.eventHandler);
       this.input.removeEventListener('keyup', this.eventHandler);
       this.input.removeEventListener('keydown', this.eventHandler);
       this.input = null;
@@ -611,6 +621,7 @@ function () {
       this.checkAndSet();
       this.eventHandler = this.checkAndSet.bind(this);
       this.input.addEventListener('blur', this.eventHandler);
+      this.input.addEventListener('input', this.eventHandler);
       this.input.addEventListener('keyup', this.eventHandler);
       this.input.addEventListener('keydown', this.eventHandler);
     }
