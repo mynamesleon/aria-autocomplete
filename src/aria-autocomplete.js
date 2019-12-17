@@ -555,11 +555,11 @@ class AriaAutocomplete {
             }
         }
         if (fragment.childNodes && fragment.childNodes.length) {
-            this.wrapper.appendChild(fragment);
+            this.wrapper.insertBefore(fragment, this.list);
         }
 
         // set ids on elements
-        let ids = [this.ids.LIST];
+        let ids = [];
         // get selected elements again, as some may have been added or removed
         current = this.getSelectedElems();
         for (let i = 0, l = current.length; i < l; i += 1) {
@@ -567,6 +567,7 @@ class AriaAutocomplete {
             current[i].setAttribute('id', id);
             ids.push(id);
         }
+        ids.push(this.ids.LIST);
 
         // set input aria-owns
         this.input.setAttribute('aria-owns', ids.join(' '));

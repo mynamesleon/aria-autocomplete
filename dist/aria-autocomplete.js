@@ -1275,11 +1275,11 @@ function () {
       }
 
       if (fragment.childNodes && fragment.childNodes.length) {
-        this.wrapper.appendChild(fragment);
+        this.wrapper.insertBefore(fragment, this.list);
       } // set ids on elements
 
 
-      var ids = [this.ids.LIST]; // get selected elements again, as some may have been added or removed
+      var ids = []; // get selected elements again, as some may have been added or removed
 
       current = this.getSelectedElems();
 
@@ -1289,8 +1289,9 @@ function () {
         current[_i2].setAttribute('id', id);
 
         ids.push(id);
-      } // set input aria-owns
+      }
 
+      ids.push(this.ids.LIST); // set input aria-owns
 
       this.input.setAttribute('aria-owns', ids.join(' ')); // in autogrow mode, hide the placeholder if there are selected items
 
