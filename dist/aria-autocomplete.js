@@ -359,7 +359,8 @@ function processSourceArray(sourceArray) {
       result.value = result.label = entry;
     } // handle array of objects - ensure value and label exist, and maintain any other properties
     else {
-        result = entry;
+        // generate new object to not modify original
+        result = mergeObjects(entry);
         var value = result[mapValue] || result.value || result.label;
         var label = result[mapLabel] || result.label || result.value;
         result.value = (value || '').toString();
@@ -1188,7 +1189,7 @@ function () {
       if (index > -1 && this.selected[index]) {
         var option = (0, _helpers.mergeObjects)(this.selected[index]);
         var label = option.label;
-        (0, _helpers.setElementState)(this.selected.element, false, this);
+        (0, _helpers.setElementState)(option.element, false, this);
         this.selected.splice(index, 1);
         this.triggerOptionCallback('onDelete', [option]);
         this.buildMultiSelected();
@@ -1677,7 +1678,7 @@ function () {
 
       if (typeof this.source === 'function') {
         this.source.call(this.api, this.term, function (response) {
-          var mapping = _this3.options.mapping;
+          var mapping = _this3.options.sourceMapping;
           var result = (0, _helpers.processSourceArray)(response, mapping);
 
           _this3.setListOptions(result);
@@ -2332,7 +2333,7 @@ function () {
 
       if (this.elementIsInput && this.element.value) {
         this.source.call(undefined, this.element.value, function (response) {
-          _this9.prepSelectedFromArray((0, _helpers.processSourceArray)(response));
+          _this9.prepSelectedFromArray((0, _helpers.processSourceArray)(response, _this9.options.sourceMapping));
 
           _this9.setInputStartingStates(false);
         });
@@ -2472,17 +2473,16 @@ function () {
         },
         close: function close() {
           return _this10.hide.call(_this10);
+        },
+        filter: function filter(val) {
+          return _this10.filter.call(val);
         }
       };
-      var a = ['options', 'refresh', 'destroy', 'filter', 'input', 'wrapper', 'list', 'selected'];
+      var a = ['options', 'refresh', 'destroy', 'enable', 'disable', 'input', 'wrapper', 'list', 'selected'];
 
       var _loop = function _loop(i, l) {
         _this10.api[a[i]] = typeof _this10[a[i]] === 'function' ? function () {
-          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-          }
-
-          return _this10[a[i]].apply(_this10, args);
+          return _this10[a[i]].call(_this10);
         } : _this10[a[i]];
       };
 

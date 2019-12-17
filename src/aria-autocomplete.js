@@ -476,7 +476,7 @@ class AriaAutocomplete {
         if (index > -1 && this.selected[index]) {
             let option = mergeObjects(this.selected[index]);
             let label = option.label;
-            setElementState(this.selected.element, false, this);
+            setElementState(option.element, false, this);
             this.selected.splice(index, 1);
             this.triggerOptionCallback('onDelete', [option]);
             this.buildMultiSelected();
@@ -944,7 +944,7 @@ class AriaAutocomplete {
         // handle the source as a function
         if (typeof this.source === 'function') {
             this.source.call(this.api, this.term, response => {
-                let mapping = this.options.mapping;
+                let mapping = this.options.sourceMapping;
                 let result = processSourceArray(response, mapping);
                 this.setListOptions(result);
             });
@@ -1510,7 +1510,9 @@ class AriaAutocomplete {
     prepListSourceFunction() {
         if (this.elementIsInput && this.element.value) {
             this.source.call(undefined, this.element.value, response => {
-                this.prepSelectedFromArray(processSourceArray(response));
+                this.prepSelectedFromArray(
+                    processSourceArray(response, this.options.sourceMapping)
+                );
                 this.setInputStartingStates(false);
             });
         }
@@ -1655,14 +1657,16 @@ class AriaAutocomplete {
     generateApi() {
         this.api = {
             open: () => this.show.call(this),
-            close: () => this.hide.call(this)
+            close: () => this.hide.call(this),
+            filter: val => this.filter.call(val)
         };
 
         let a = [
             'options',
             'refresh',
             'destroy',
-            'filter',
+            'enable',
+            'disable',
             'input',
             'wrapper',
             'list',
@@ -1672,7 +1676,7 @@ class AriaAutocomplete {
         for (let i = 0, l = a.length; i < l; i += 1) {
             this.api[a[i]] =
                 typeof this[a[i]] === 'function'
-                    ? (...args) => this[a[i]].apply(this, args)
+                    ? () => this[a[i]].call(this)
                     : this[a[i]];
         }
 

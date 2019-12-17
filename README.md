@@ -1,23 +1,18 @@
-# Aria Autocomplete - IN PROGRESS
+# Aria Autocomplete
 
-Accessible, extensible, dependency-free autocomplete
+Accessible, extensible, dependency-free autocomplete with multi-select.
 
-I've used a lot of autocomplete plugins, but the combination of **accessibility**, **performance**, and **functionality** that I needed wasn't out there. So I've tried to build on [GOV.UK's brilliant example](https://accessibility.blog.gov.uk/2018/05/15/what-we-learned-from-getting-our-autocomplete-tested-for-accessibility/) and standards of accessibility, but with more functionality.
+I've used a lot of autocomplete plugins, but the combination of **accessibility**, **performance**, and **functionality** that I needed wasn't out there. So I've tried to build on the [brilliant accessibility of GOV.UK's accessible-autocomplete](https://accessibility.blog.gov.uk/2018/05/15/what-we-learned-from-getting-our-autocomplete-tested-for-accessibility/), but with more functionality and (in my testing) better performance.
+
+[Try out the examples](https://mynamesleon.github.io/aria-autocomplete/examples/)
 
 Key design goals and features are:
 
 -   **multiple selection**
 -   **extensible source options**: Array of Strings, Array of Objects, a Function, or an endpoint String
--   **progressive enhancement**: automatic source building through specifying a `<select>` as the element, or an element with child checkboxes.
--   **accessibility**: use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
--   **compatibility**: broad browser and device support (e.g. IE9+)
-
-[Try out the examples](https://mynamesleon.github.io/aria-autocomplete/examples/)
-
-Still to do:
-
--   `autogrow` handling
--   old IE testing
+-   **progressive enhancement**: Automatic source building through specifying a `<select>` as the element, or an element with child checkboxes.
+-   **accessibility**: Use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
+-   **compatibility**: Broad browser and device support (e.g. IE9+)
 
 ## Installation / usage
 
@@ -26,13 +21,13 @@ Still to do:
 First install it
 
 ```
-npm install ...
+npm install --save aria-autocomplete
 ```
 
 Then import it, and call it on an element (ideally a text `<input />`, but not necessarily...) with a source for your autocomplete options.
 
 ```javascript
-import AriaAutocomplete from '...';
+import AriaAutocomplete from 'aria-autocomplete';
 
 new AriaAutocomplete(document.getElementById('some-element'), {
     source: ArrayOrStringOrFunction

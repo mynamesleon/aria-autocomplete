@@ -185,7 +185,8 @@ export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
         }
         // handle array of objects - ensure value and label exist, and maintain any other properties
         else {
-            result = entry;
+            // generate new object to not modify original
+            result = mergeObjects(entry);
             let value = result[mapValue] || result.value || result.label;
             let label = result[mapLabel] || result.label || result.value;
             result.value = (value || '').toString();
