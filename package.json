@@ -1,7 +1,7 @@
 {
     "name": "aria-autocomplete",
     "version": "1.0.0-beta.1",
-    "description": "Accessible, extensible, dependency-free JavaScript autocomplete",
+    "description": "Accessible, extensible, dependency-free JavaScript autocomplete with multi-select",
     "main": "src/aria-autocomplete.js",
     "scripts": {
         "dev": "NODE_ENV=development parcel build src/aria-autocomplete.js --out-file aria-autocomplete.js --no-minify",
@@ -15,9 +15,18 @@
     "keywords": [
         "autocomplete",
         "typeahead",
+        "autosuggest",
         "a11y",
+        "ARIA",
+        "WAI-ARIA",
         "accessible",
-        "accessibility"
+        "accessibility",
+        "dropdown",
+        "enhanced input",
+        "select",
+        "combobox",
+        "multiselect",
+        "multiple selection"
     ],
     "author": "Leon Slater (https://www.mynamesleon.com)",
     "license": "GPL-3.0-or-later",
