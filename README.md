@@ -13,6 +13,7 @@ Key design goals and features are:
 -   **progressive enhancement**: Automatic source building through specifying a `<select>` as the element, or an element with child checkboxes.
 -   **accessibility**: Use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
 -   **compatibility**: Broad browser and device support (e.g. IE9+)
+-   **starting values**: Automatic selection based on starting values, including for checkboxes, `select` options, and for async handling.
 
 ## Installation / usage
 
