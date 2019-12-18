@@ -11,17 +11,19 @@ import {
     dispatchEvent,
     setElementState,
     processSourceArray,
-    htmlToElement
-} from './helpers';
+    htmlToElement,
+    searchVarPropsFor,
+    removeDuplicatesAndLabel
+} from './autocomplete-helpers';
 
 let appIndex = 0;
 
 const DEFAULT_OPTIONS = {
     /**
      * @description Give the autocomplete a name to be included in form submissions
-     * (Instead of using this option, I would advise initialising the autocomplete
-     * on an existing input that will be submitted; this approach is compatible
-     * with the control in multiple mode)
+     * (Instead of using this option, I would advise initialising the autocomplete on
+     * an existing input that will be submitted, to also use any existing validation;
+     * this approach is also compatible with the control in multiple mode)
      */
     name: '',
     /**
@@ -36,6 +38,12 @@ const DEFAULT_OPTIONS = {
      * when source is an Array of Objects
      */
     sourceMapping: {},
+    /**
+     * @type {String[]}
+     * @description Additional properties to use when searching for a match.
+     * `label` will always be used
+     */
+    alsoSearchIn: [],
 
     /**
      * @description Input delay after typing before running a search
@@ -216,8 +224,8 @@ class AriaAutocomplete {
         }
 
         // if instance already exists on the list element, do not re-initialise
-        if (element.ariaAutocomplete) {
-            return element.ariaAutocomplete;
+        if (element.ariaAutocomplete && element.ariaAutocomplete.open) {
+            return { api: element.ariaAutocomplete };
         }
 
         // vars defined later - related explicitly to core initialising params
@@ -388,13 +396,13 @@ class AriaAutocomplete {
 
     /**
      * @description check if current input value is contained in a selection of options
-     * @param {String} query - string to use - checks input value otherwise
      * @param {Array} options - array of objects with value and label properties
+     * @param {String=} query - string to use - checks input value otherwise
      * @param {String=} prop - prop to check against in options array - defaults to 'label'
      * @returns {Number} index of array entry that matches, or -1 if none found
      */
-    isQueryContainedIn(query, options, prop) {
-        query = trimString(query || this.input.value).toLowerCase();
+    indexOfQueryIn(options, query = this.input.value, prop) {
+        query = trimString(query).toLowerCase();
         if (query) {
             prop = prop || 'label';
             for (let i = 0, l = options.length; i < l; i += 1) {
@@ -880,8 +888,8 @@ class AriaAutocomplete {
         xhr.onload = () => {
             if (xhr.readyState === xhr.DONE) {
                 if (xhr.status === 200) {
-                    this.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
-                    let context = isFirstCall ? null : this.api;
+                    // return forceShowAll to previous state before the options render
+                    this.forceShowAll = isShowAll;
                     let callbackResponse = this.triggerOptionCallback(
                         'onAsyncSuccess',
                         [value, xhr],
@@ -958,12 +966,17 @@ class AriaAutocomplete {
 
         // existing list handling
         if (this.source && this.source.length) {
+            let check = ['ariaAutocompleteCleanedLabel'];
             if (!forceShowAll) {
                 value = cleanString(value, true);
+                let searchIn = this.options.alsoSearchIn;
+                if (Array.isArray(searchIn) && searchIn.length) {
+                    check = removeDuplicatesAndLabel(check.concat(searchIn));
+                }
             }
             for (let i = 0, l = this.source.length; i < l; i += 1) {
                 let entry = this.source[i];
-                if (forceShowAll || entry.cleanedLabel.search(value) !== -1) {
+                if (forceShowAll || searchVarPropsFor(entry, check, value)) {
                     toReturn.push({
                         element: entry.element,
                         staticSourceIndex: i,
@@ -1103,13 +1116,13 @@ class AriaAutocomplete {
             }
 
             // confirmOnBlur behaviour
-            let isQueryIn = this.isQueryContainedIn.bind(this);
+            let isQueryIn = this.indexOfQueryIn.bind(this);
             if (!force && this.options.confirmOnBlur && this.menuOpen) {
                 // if blurring from an option (currentSelectedIndex > -1), select it
                 let toUse = this.currentSelectedIndex;
                 if (typeof toUse !== 'number' || toUse === -1) {
                     // otherwise check for exact match between current input value and available items
-                    toUse = isQueryIn('', this.filteredSource);
+                    toUse = isQueryIn(this.filteredSource);
                 }
                 this.handleOptionSelect({}, toUse, false);
             }
@@ -1118,7 +1131,7 @@ class AriaAutocomplete {
             this.hide();
 
             // in single select case, if current value and chosen value differ, clear selected and input value
-            if (!this.multiple && isQueryIn('', this.selected) === -1) {
+            if (!this.multiple && isQueryIn(this.selected) === -1) {
                 let isInputOrDdl = this.elementIsInput || this.elementIsSelect;
                 if (isInputOrDdl && this.element.value !== '') {
                     this.element.value = '';
@@ -1419,7 +1432,7 @@ class AriaAutocomplete {
             if (!toPush.label) {
                 toPush.label = toPush.value;
             }
-            toPush.cleanedLabel = cleanString(toPush.label);
+            toPush.ariaAutocompleteCleanedLabel = cleanString(toPush.label);
             this.source.push(toPush);
             // add to selected if applicable
             if (checkbox.checked) {
@@ -1447,7 +1460,7 @@ class AriaAutocomplete {
                 value: option.value,
                 label: option.textContent
             };
-            toPush.cleanedLabel = cleanString(toPush.label);
+            toPush.ariaAutocompleteCleanedLabel = cleanString(toPush.label);
             this.source.push(toPush);
             // add to selected if applicable
             if (option.selected) {
@@ -1470,13 +1483,13 @@ class AriaAutocomplete {
 
             for (let i = 0, l = valueArr.length; i < l; i += 1) {
                 let val = valueArr[i];
-                let isQueryIn = this.isQueryContainedIn;
+                let isQueryIn = this.indexOfQueryIn;
                 // make sure it is not already in the selected array
-                let isInSelected = isQueryIn(val, this.selected, 'value') > -1;
+                let isInSelected = isQueryIn(this.selected, val, 'value') > -1;
 
                 // but is in the source array (check via 'value', not 'label')
                 if (!isInSelected) {
-                    let indexInSource = isQueryIn(val, source, 'value');
+                    let indexInSource = isQueryIn(source, val, 'value');
                     if (indexInSource > -1) {
                         this.selected.push(source[indexInSource]);
                     }
@@ -1663,7 +1676,6 @@ class AriaAutocomplete {
 
         let a = [
             'options',
-            'refresh',
             'destroy',
             'enable',
             'disable',
@@ -1682,18 +1694,6 @@ class AriaAutocomplete {
 
         // store api on original element
         this.element.ariaAutocomplete = this.api;
-    }
-
-    /**
-     * @description refresh method for use after changing options, source, etc.
-     */
-    refresh() {
-        // store element, as this is wiped in destroy method
-        let element = this.element;
-        let options = mergeObjects(this.options);
-        // do not do a hard destroy
-        this.destroy();
-        this.init(element, options);
     }
 
     /**
@@ -1753,7 +1753,7 @@ class AriaAutocomplete {
         this.elementIsSelect = element.nodeName === 'SELECT';
         this.options = mergeObjects(DEFAULT_OPTIONS, options);
 
-        // set these internally so that the component has to be properly refreshed to change them
+        // set these internally so that the component has to be properly destroyed to change them
         this.source = this.options.source;
         this.multiple = this.options.multiple;
         this.autoGrow = this.options.autoGrow;
@@ -1780,7 +1780,7 @@ class AriaAutocomplete {
         if (this.options.showAllControl) {
             wrapperClass += ` ${this.cssNameSpace}__wrapper--show-all`;
         }
-        if (this.options.autoGrow) {
+        if (this.autoGrow) {
             wrapperClass += ` ${this.cssNameSpace}__wrapper--autogrow`;
         }
         if (this.multiple) {

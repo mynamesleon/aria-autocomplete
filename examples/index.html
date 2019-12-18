@@ -21,7 +21,7 @@
             pre,
             code {
                 font-family: monospace;
-                font-size: 1.125em;
+                font-size: 1.025em;
             }
             pre {
                 padding: 10px;
@@ -135,7 +135,7 @@
                 <script src="../dist/aria-autocomplete.js" type="text/javascript"></script>
                 <section>
                     <div class="tile">
-                        <h2>Default options with Source as an Array</h2>
+                        <h2>Array as Source, using default options</h2>
                         <label for="countrylist-array">Select a country</label>
                         <input type="text" id="countrylist-array" />
                         <script>
@@ -154,7 +154,17 @@ new AriaAutocomplete(element, {
         ...more
     ]
 });</pre>
-                        <p>Or you can use an <b>Array of Objects</b>. The objects used should have <code>value</code> and/or <code>label</code> properties. But if you're unable to transform them ahead of use, there is also a <code>sourceMapping</code> option:</p>
+                        <p>Or you can use an <b>Array of Objects</b>. The objects used should have <code>value</code> and/or <code>label</code> properties. But if you're unable to transform them ahead of use, there is also a <code>sourceMapping</code> option.</p>
+                        <p>By default, the autocomplete will filter by only the <code>label</code> property, but you can add an Array of Strings to the <code>alsoSearchIn</code> option to indicate other properties to filter by. The following example filters by the <code>label</code> <i>and</i> <code>code3</code> properties, so searching for <code>SGS</code> will return the option for "South Georgia and the South Sandwich Islands" for example.</p>
+                        <label for="countrylist-array-more">Select a country</label>
+                        <input type="text" id="countrylist-array-more" />
+                        <script>
+                            new AriaAutocomplete(document.getElementById('countrylist-array-more'), { 
+                                source: countryListAllIsoData, 
+                                sourceMapping: { 'value': 'code3', 'label': 'name' },
+                                alsoSearchIn: ['label', 'cleanedLabel', 'code3']
+                            });
+                        </script>
                         <pre>
 new AriaAutocomplete(element, {
     source: [
@@ -170,13 +180,14 @@ new AriaAutocomplete(element, {
         },
         ...more
     ],
-    sourceMapping: { 'value': 'code3', 'label': 'name' }
+    sourceMapping: { 'value': 'code3', 'label': 'name' },
+    alsoSearchIn: ['code3']
 });</pre>
                     </div>
                     <p>The autocomplete fundamentally expects an Array, and will transform it for use internally. To be as extensible as possible however, built in handling is included for other cases.</p>
                 </section>
                 <section class="tile">
-                    <h2>Multi-select, autogrow, with results limit and show all control, using Element(s) as Source</h2>
+                    <h2>Element(s) as Source, with Multi-select, autogrow, results limit, and show all control</h2>
                     <p>If the <code>source</code> option is falsy, or is an empty Array, the autocomplete will check to see if the element used is a <code>&lt;select&gt;</code>, or if there are any checkboxes inside the element, and will build up a <code>source</code> Array from what's available.</p>
                     <label for="constituencylist-select">Select up to 5 UK constituencies (650 items)</label>
                     <select id="constituencylist-select" multiple="">
@@ -205,11 +216,11 @@ new AriaAutocomplete(element, {
 });</pre>
                 </section>
                 <section class="tile">
-                    <h3>Multi-select, <i>without autogrow</i>, using a Function as Source</h3>
+                    <h2>Function as Source, with Multi-select, but <i>without</i> autogrow</h2>
                     <p>If you want to use your own client-side filtering logic, you can also use a function as the <code>source</code> - it will be passed the search term, and a render function, which expects an Array to be passed to it (using either of the formats mentioned above).</p>
                     <p>If the autocomplete is initialised on an input, which has a starting value, the source function will also be called immediately with that value passed to it. In this case, the render function expects an Array of possible entries to check that starting value against, so that it can internally determine what the starting label (or multi-select elements) should be.</p>
-                    <p>In this example, the <code>source</code> Function is randomising the country list order, but not doing any filtering. So no matter what you search for, 10 random countries will be returned.</p>
-                    <p>The initialised input's starting value is "GLP,ZWE" (the code3 properties for Guadeloupe and Zimbabwe in the <code>countryListAllIsoData</code> Array) so this example will initialise with two values already selected.</p>
+                    <p>This example <b>searches based on each country's 3 letter country code</b>, instead of its name, e.g. "DZA" for "Algeria", or "GBR" for the United Kingdom.</p>
+                    <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively - so this will also initialise with two values already selected.</p>
                     <label for="countrylist-function">Select up to 4 countries</label>
                     <input type="text" value="GLP,ZWE" id="countrylist-function" />
                     <script>
@@ -217,16 +228,24 @@ new AriaAutocomplete(element, {
                             maxItems: 4,
                             maxResults: 10,
                             multiple: true,
-                            source: function (term, render) {
-                                var isStartingCall = this === null;
-                                var arr = countryListAllIsoData.slice();
-                                for (var i = arr.length - 1; i > 0; i--) {
-                                    var j = Math.floor(Math.random() * (i + 1));
-                                    var temp = arr[i];
-                                    arr[i] = arr[j];
-                                    arr[j] = temp;
-                                }
-                                render(arr);
+                            source: function (query, render) {
+                                var result = [];
+                                var isStartingCall = this === window;
+                                var value = query.toLowerCase().trim();
+                                var arrToCheck = isStartingCall ? value.split(',') : [value];
+                                countryListAllIsoData.forEach(function (entry) {
+                                    var code3 = entry['code3'].toLowerCase();
+                                    var addIt = false;
+                                    arrToCheck.forEach(function (val) {
+                                        if (code3.search(val) !== -1) {
+                                            addIt = true;
+                                        }
+                                    });
+                                    if (addIt) {
+                                        result.push(entry);
+                                    }
+                                });
+                                render(result);
                             },
                             sourceMapping: { 'value': 'code3', 'label': 'name' }
                         });
@@ -236,20 +255,29 @@ new AriaAutocomplete(element, {
     maxItems: 4,
     maxResults: 10,
     multiple: true,
-    source: (term, render) => {
-        let isStartingCall = this === null;
-        let arr = countryListAllIsoData.slice();
-        for (let i = arr.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            let temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
-        }
-        render(arr);
+    source: (query, render) => {
+        let result = [];
+        let isStartingCall = this === window;
+        let value = query.toLowerCase().trim();
+        let arrToCheck = isStartingCall ? value.split(',') : [value];
+        countryListAllIsoData.forEach(entry => {
+            let code3 = entry['code3'].toLowerCase();
+            let addIt = false;
+            arrToCheck.forEach(val => {
+                if (code3.search(val) !== -1) {
+                    addIt = true;
+                }
+            });
+            if (addIt) {
+                result.push(entry);
+            }
+        });
+        render(result);
     },
     sourceMapping: { 'value': 'code3', 'label': 'name' }
 });
 </pre>
+                    <p>Despite the custom <code>source</code> Function, this example still needs a <code>sourceMapping</code> option, because the <code>label</code> is used when rendering the list, and the <code>value</code> is used when filling the original <code>&lt;input /&gt;</code></p>
                 </section>
                 <div class="tile">
                     <h3>String (endpoint) as Source</h3>
@@ -267,7 +295,7 @@ new AriaAutocomplete(element, {
                             sourceMapping: { 'value': 'code3', 'label': 'name' },
                             onAsyncSuccess: function (query, xhr) {
                                 var result = [];
-                                var isStartingCall = this === null;
+                                var isStartingCall = this === window;
                                 var value = query.toLowerCase().trim();
                                 var response = JSON.parse(xhr.responseText);
                                 var propToCheck = isStartingCall ? 'value' : 'name';
@@ -287,7 +315,7 @@ new AriaAutocomplete(element, {
     onAsyncPrep: url => url,
     onAsyncSuccess: (query, xhr) => {
         let result = [];
-        let isStartingCall = this === null;
+        let isStartingCall = this === window;
         let value = query.toLowerCase().trim();
         let response = JSON.parse(xhr.responseText);
         let propToCheck = isStartingCall ? 'value' : 'name';
@@ -304,7 +332,7 @@ new AriaAutocomplete(element, {
 });
 </pre>
                 </div>
-                <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API. The only exception to this is the Function and Endpoint starting cases mentioned above, where the context will be <code>null</code>. I have included an unnecessary <code>isStartingCall</code> variable in the above examples to illustrate this.</p>
+                <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API. The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. The <code>isStartingCall</code> variable in the above examples is used to illustrate this.</p>
             
                 <section id="options">
                     <h2>Options</h2>
@@ -314,9 +342,11 @@ new AriaAutocomplete(element, {
                             <dt>name: <code>String</code></dt>
                             <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
                             <dt>source: <code>String[] | Object[] | String | Function</code></dt>
-                            <dd>string for async endpoint, array of strings, array of objects with value and label, or function</code></dd>
+                            <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
                             <dt>sourceMapping: <code>Object</code></dt>
-                            <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</code></dd>
+                            <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
+                            <dt>alsoSearchIn: <code>String[]</code></dt>
+                            <dd>Additional properties to use when searching for a match</dd>
                         </div>
                         <div>
                             <dt>delay: <code>Number</code></dt>
