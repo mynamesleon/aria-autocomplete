@@ -1,4 +1,4 @@
-import { isPrintableKey, setCss, transferStyles } from './helpers';
+import { isPrintableKey, setCss, transferStyles } from './autocomplete-helpers';
 
 /**
  * @description storage for element used to detect value width

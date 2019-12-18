@@ -194,7 +194,7 @@ export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
         }
         // whether to set a cleaned label for static source filtering (in filter method)
         if (setCleanedLabel !== false) {
-            result.cleanedLabel = cleanString(result.label);
+            result.ariaAutocompleteCleanedLabel = cleanString(result.label);
         }
         toReturn.push(result);
     }
@@ -249,4 +249,89 @@ export function transferStyles(from, to, properties) {
     }
 
     setCss(to, styles);
+}
+
+/**
+ * @description search String or Array for another string - partial match
+ * @param {String|Array} prop
+ * @param {String} regexSafeQuery
+ * @param {String=} name
+ */
+const searchPropFor = (prop, regexSafeQuery, name) => {
+    if (typeof prop === 'string') {
+        if (name !== 'ariaAutocompleteCleanedLabel') {
+            prop = cleanString(prop, false);
+        }
+        return prop.search(regexSafeQuery) !== -1;
+    } else if (Array.isArray(prop)) {
+        for (let i = 0, l = prop.length; i < l; i += 1) {
+            if (searchPropFor(prop[i], regexSafeQuery)) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+/**
+ * @description check through object's String or String[] properties for query match
+ * @param {Object} obj
+ * @param {String[]} props
+ * @param {String} query
+ * @returns {Boolean}
+ */
+export function searchVarPropsFor(obj, props, query, makeSafe = false) {
+    if (makeSafe) {
+        query = cleanString(query, true);
+    }
+
+    for (let i in obj) {
+        if (obj.hasOwnProperty(i)) {
+            let proceed = false;
+            // check if obj property is a string, and if property name is in props Array
+            if (typeof obj[i] === 'string') {
+                // use while loop instead of indexOf for performance in older browsers
+                let l = props.length;
+                while (l--) {
+                    if (props[l] === i) {
+                        proceed = true;
+                        break;
+                    }
+                }
+            } else {
+                // if not a string, only allow Arrays otherwise
+                proceed = Array.isArray(obj[i]);
+            }
+            if (proceed && searchPropFor(obj[i], query, i)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * @description remove duplicate array entries, and `label`
+ * @param {Array} arr
+ * @returns {String[]}
+ */
+export function removeDuplicatesAndLabel(arr) {
+    // remove `label` (we will be using `ariaAutocompleteCleanedLabel`) and duplicates from props array
+    let result = [];
+    for (let i = 0, l = arr.length; i < l; i += 1) {
+        if (typeof arr[i] !== 'string') {
+            continue;
+        }
+        let str = trimString(arr[i]);
+        let proceed = str !== 'label';
+        let j = result.length;
+        while (proceed && j--) {
+            if (result[j] === str) {
+                proceed = false;
+            }
+        }
+        if (proceed) {
+            result.push(str);
+        }
+    }
+    return result;
 }

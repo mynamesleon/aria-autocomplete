@@ -137,7 +137,7 @@ if (!Element.prototype.closest) {
     return null;
   };
 }
-},{}],"lTk1":[function(require,module,exports) {
+},{}],"MBeS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -156,6 +156,8 @@ exports.processSourceArray = processSourceArray;
 exports.htmlToElement = htmlToElement;
 exports.setCss = setCss;
 exports.transferStyles = transferStyles;
+exports.searchVarPropsFor = searchVarPropsFor;
+exports.removeDuplicatesAndLabel = removeDuplicatesAndLabel;
 
 /**
  * @description trim string helper
@@ -369,7 +371,7 @@ function processSourceArray(sourceArray) {
 
 
     if (setCleanedLabel !== false) {
-      result.cleanedLabel = cleanString(result.label);
+      result.ariaAutocompleteCleanedLabel = cleanString(result.label);
     }
 
     toReturn.push(result);
@@ -432,6 +434,107 @@ function transferStyles(from, to, properties) {
 
   setCss(to, styles);
 }
+/**
+ * @description search String or Array for another string - partial match
+ * @param {String|Array} prop
+ * @param {String} regexSafeQuery
+ * @param {String=} name
+ */
+
+
+var searchPropFor = function searchPropFor(prop, regexSafeQuery, name) {
+  if (typeof prop === 'string') {
+    if (name !== 'ariaAutocompleteCleanedLabel') {
+      prop = cleanString(prop, false);
+    }
+
+    return prop.search(regexSafeQuery) !== -1;
+  } else if (Array.isArray(prop)) {
+    for (var i = 0, l = prop.length; i < l; i += 1) {
+      if (searchPropFor(prop[i], regexSafeQuery)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+/**
+ * @description check through object's String or String[] properties for query match
+ * @param {Object} obj
+ * @param {String[]} props
+ * @param {String} query
+ * @returns {Boolean}
+ */
+
+
+function searchVarPropsFor(obj, props, query) {
+  var makeSafe = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+  if (makeSafe) {
+    query = cleanString(query, true);
+  }
+
+  for (var i in obj) {
+    if (obj.hasOwnProperty(i)) {
+      var proceed = false; // check if obj property is a string, and if property name is in props Array
+
+      if (typeof obj[i] === 'string') {
+        // use while loop instead of indexOf for performance in older browsers
+        var l = props.length;
+
+        while (l--) {
+          if (props[l] === i) {
+            proceed = true;
+            break;
+          }
+        }
+      } else {
+        // if not a string, only allow Arrays otherwise
+        proceed = Array.isArray(obj[i]);
+      }
+
+      if (proceed && searchPropFor(obj[i], query, i)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+/**
+ * @description remove duplicate array entries, and `label`
+ * @param {Array} arr
+ * @returns {String[]}
+ */
+
+
+function removeDuplicatesAndLabel(arr) {
+  // remove `label` (we will be using `ariaAutocompleteCleanedLabel`) and duplicates from props array
+  var result = [];
+
+  for (var i = 0, l = arr.length; i < l; i += 1) {
+    if (typeof arr[i] !== 'string') {
+      continue;
+    }
+
+    var str = trimString(arr[i]);
+    var proceed = str !== 'label';
+    var j = result.length;
+
+    while (proceed && j--) {
+      if (result[j] === str) {
+        proceed = false;
+      }
+    }
+
+    if (proceed) {
+      result.push(str);
+    }
+  }
+
+  return result;
+}
 },{}],"KnPF":[function(require,module,exports) {
 "use strict";
 
@@ -440,7 +543,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _helpers = require("./helpers");
+var _autocompleteHelpers = require("./autocomplete-helpers");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -524,7 +627,7 @@ function () {
 
       if (!testSpan) {
         testSpan = document.createElement('span');
-        (0, _helpers.setCss)(testSpan, {
+        (0, _autocompleteHelpers.setCss)(testSpan, {
           position: 'absolute',
           top: -99999,
           left: -99999,
@@ -537,7 +640,7 @@ function () {
 
       testSpan.textContent = str;
       this.currentString = str;
-      (0, _helpers.transferStyles)(this.input, testSpan, ['letterSpacing', 'fontSize', 'fontFamily', 'fontWeight', 'textTransform']);
+      (0, _autocompleteHelpers.transferStyles)(this.input, testSpan, ['letterSpacing', 'fontSize', 'fontFamily', 'fontWeight', 'textTransform']);
       return testSpan.offsetWidth || testSpan.clientWidth;
     }
     /**
@@ -572,7 +675,7 @@ function () {
             value = value.substring(0, selection.start) + value.substring(selection.start + 1);
           }
         } // any other width affecting character
-        else if ((0, _helpers.isPrintableKey)(keyCode)) {
+        else if ((0, _autocompleteHelpers.isPrintableKey)(keyCode)) {
             var shift = event.shiftKey;
             var character = String.fromCharCode(keyCode);
 
@@ -632,7 +735,7 @@ function () {
 }();
 
 exports.default = AutoGrow;
-},{"./helpers":"lTk1"}],"c8cM":[function(require,module,exports) {
+},{"./autocomplete-helpers":"MBeS"}],"c8cM":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -644,7 +747,7 @@ require("./closest-polyfill");
 
 var _autogrow = _interopRequireDefault(require("./autogrow"));
 
-var _helpers = require("./helpers");
+var _autocompleteHelpers = require("./autocomplete-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -658,9 +761,9 @@ var appIndex = 0;
 var DEFAULT_OPTIONS = {
   /**
    * @description Give the autocomplete a name to be included in form submissions
-   * (Instead of using this option, I would advise initialising the autocomplete
-   * on an existing input that will be submitted; this approach is compatible
-   * with the control in multiple mode)
+   * (Instead of using this option, I would advise initialising the autocomplete on
+   * an existing input that will be submitted, to also use any existing validation;
+   * this approach is also compatible with the control in multiple mode)
    */
   name: '',
 
@@ -677,6 +780,13 @@ var DEFAULT_OPTIONS = {
    * when source is an Array of Objects
    */
   sourceMapping: {},
+
+  /**
+   * @type {String[]}
+   * @description Additional properties to use when searching for a match.
+   * `label` will always be used
+   */
+  alsoSearchIn: [],
 
   /**
    * @description Input delay after typing before running a search
@@ -888,8 +998,10 @@ function () {
     } // if instance already exists on the list element, do not re-initialise
 
 
-    if (element.ariaAutocomplete) {
-      return element.ariaAutocomplete;
+    if (element.ariaAutocomplete && element.ariaAutocomplete.open) {
+      return {
+        api: element.ariaAutocomplete
+      };
     } // vars defined later - related explicitly to core initialising params
 
 
@@ -964,7 +1076,7 @@ function () {
     value: function show(element) {
       if (typeof element !== 'undefined') {
         var toRemove = "".concat(this.cssNameSpace, "--hide hide hidden");
-        (0, _helpers.removeClass)(element, toRemove);
+        (0, _autocompleteHelpers.removeClass)(element, toRemove);
         return element.removeAttribute('hidden');
       }
 
@@ -995,7 +1107,7 @@ function () {
     key: "hide",
     value: function hide(element) {
       if (typeof element !== 'undefined') {
-        (0, _helpers.addClass)(element, "".concat(this.cssNameSpace, "--hide hide hidden"));
+        (0, _autocompleteHelpers.addClass)(element, "".concat(this.cssNameSpace, "--hide hide hidden"));
         return element.setAttribute('hidden', 'hidden');
       }
 
@@ -1023,12 +1135,12 @@ function () {
         this.disabled = false;
         this.input.disabled = false;
         var n = this.cssNameSpace;
-        (0, _helpers.removeClass)(this.input, "".concat(n, "__input--disabled disabled"));
-        (0, _helpers.removeClass)(this.wrapper, "".concat(n, "__wrapper--disabled disabled"));
+        (0, _autocompleteHelpers.removeClass)(this.input, "".concat(n, "__input--disabled disabled"));
+        (0, _autocompleteHelpers.removeClass)(this.wrapper, "".concat(n, "__wrapper--disabled disabled"));
 
         if (this.showAll) {
           this.showAll.setAttribute('tabindex', '0');
-          (0, _helpers.removeClass)(this.showAll, "".concat(n, "__show-all--disabled disabled"));
+          (0, _autocompleteHelpers.removeClass)(this.showAll, "".concat(n, "__show-all--disabled disabled"));
         }
       }
     }
@@ -1043,12 +1155,12 @@ function () {
         this.disabled = true;
         this.input.disabled = true;
         var n = this.cssNameSpace;
-        (0, _helpers.addClass)(this.input, "".concat(n, "__input--disabled disabled"));
-        (0, _helpers.addClass)(this.wrapper, "".concat(n, "__wrapper--disabled disabled"));
+        (0, _autocompleteHelpers.addClass)(this.input, "".concat(n, "__input--disabled disabled"));
+        (0, _autocompleteHelpers.addClass)(this.wrapper, "".concat(n, "__wrapper--disabled disabled"));
 
         if (this.showAll) {
           this.showAll.setAttribute('tabindex', '-1');
-          (0, _helpers.addClass)(this.showAll, "".concat(n, "__show-all--disabled disabled"));
+          (0, _autocompleteHelpers.addClass)(this.showAll, "".concat(n, "__show-all--disabled disabled"));
         }
       }
     }
@@ -1081,22 +1193,24 @@ function () {
     }
     /**
      * @description check if current input value is contained in a selection of options
-     * @param {String} query - string to use - checks input value otherwise
      * @param {Array} options - array of objects with value and label properties
+     * @param {String=} query - string to use - checks input value otherwise
      * @param {String=} prop - prop to check against in options array - defaults to 'label'
      * @returns {Number} index of array entry that matches, or -1 if none found
      */
 
   }, {
-    key: "isQueryContainedIn",
-    value: function isQueryContainedIn(query, options, prop) {
-      query = (0, _helpers.trimString)(query || this.input.value).toLowerCase();
+    key: "indexOfQueryIn",
+    value: function indexOfQueryIn(options) {
+      var query = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.input.value;
+      var prop = arguments.length > 2 ? arguments[2] : undefined;
+      query = (0, _autocompleteHelpers.trimString)(query).toLowerCase();
 
       if (query) {
         prop = prop || 'label';
 
         for (var i = 0, l = options.length; i < l; i += 1) {
-          if ((0, _helpers.trimString)(options[i][prop]).toLowerCase() === query) {
+          if ((0, _autocompleteHelpers.trimString)(options[i][prop]).toLowerCase() === query) {
             return i;
           }
         }
@@ -1143,7 +1257,7 @@ function () {
   }, {
     key: "isSelectedElem",
     value: function isSelectedElem(element) {
-      return this.multiple && element.ariaAutocompleteSelectedOption && (0, _helpers.hasClass)(element, "".concat(this.cssNameSpace, "__selected"));
+      return this.multiple && element.ariaAutocompleteSelectedOption && (0, _autocompleteHelpers.hasClass)(element, "".concat(this.cssNameSpace, "__selected"));
     }
     /**
      * @description get DOM elements for selected items
@@ -1187,9 +1301,9 @@ function () {
 
 
       if (index > -1 && this.selected[index]) {
-        var option = (0, _helpers.mergeObjects)(this.selected[index]);
+        var option = (0, _autocompleteHelpers.mergeObjects)(this.selected[index]);
         var label = option.label;
-        (0, _helpers.setElementState)(option.element, false, this);
+        (0, _autocompleteHelpers.setElementState)(option.element, false, this);
         this.selected.splice(index, 1);
         this.triggerOptionCallback('onDelete', [option]);
         this.buildMultiSelected();
@@ -1269,7 +1383,7 @@ function () {
 
         if (!isInDom) {
           var label = _selected.label;
-          var span = (0, _helpers.htmlToElement)("<span role=\"button\" class=\"".concat(selectedClass, "\" ") + "tabindex=\"0\" aria-label=\"".concat(deleteText, " ").concat(label, "\">") + "".concat(label, "</span>"));
+          var span = (0, _autocompleteHelpers.htmlToElement)("<span role=\"button\" class=\"".concat(selectedClass, "\" ") + "tabindex=\"0\" aria-label=\"".concat(deleteText, " ").concat(label, "\">") + "".concat(label, "</span>"));
           span.ariaAutocompleteSelectedOption = _selected;
           fragment.appendChild(span);
         }
@@ -1309,7 +1423,7 @@ function () {
     key: "setInputDescription",
     value: function setInputDescription() {
       var exists = this.input.getAttribute('aria-describedby');
-      var current = (0, _helpers.trimString)(exists || '');
+      var current = (0, _autocompleteHelpers.trimString)(exists || '');
       var describedBy = current.replace(this.ids.SR_ASSISTANCE, '');
 
       if (this.input.value.length === 0) {
@@ -1317,7 +1431,7 @@ function () {
       } // set or remove attribute, but only if necessary
 
 
-      if (describedBy = (0, _helpers.trimString)(describedBy)) {
+      if (describedBy = (0, _autocompleteHelpers.trimString)(describedBy)) {
         if (describedBy !== current) {
           this.input.setAttribute('aria-describedby', describedBy);
         }
@@ -1337,7 +1451,7 @@ function () {
       var l = nodes.length;
 
       while (l--) {
-        (0, _helpers.removeClass)(nodes[l], "".concat(cssName, "__option--focused focused focus"));
+        (0, _autocompleteHelpers.removeClass)(nodes[l], "".concat(cssName, "__option--focused focused focus"));
         nodes[l].setAttribute('aria-selected', 'false');
       }
     }
@@ -1378,7 +1492,7 @@ function () {
       if (toFocus && typeof toFocus.getAttribute('tabindex') === 'string') {
         this.currentSelectedIndex = index;
         var toAdd = "".concat(this.cssNameSpace, "__option--focused focused focus");
-        (0, _helpers.addClass)(toFocus, toAdd);
+        (0, _autocompleteHelpers.addClass)(toFocus, toAdd);
         toFocus.setAttribute('aria-selected', 'true');
         toFocus.focus();
         return;
@@ -1399,7 +1513,7 @@ function () {
       for (var i = 0, l = this.selected.length; i < l; i += 1) {
         var entry = this.selected[i];
         valToSet.push(entry.value);
-        (0, _helpers.setElementState)(entry.element, true, this); // element processing
+        (0, _autocompleteHelpers.setElementState)(entry.element, true, this); // element processing
       } // set original input value
 
 
@@ -1408,7 +1522,7 @@ function () {
 
         if (valToSetString !== this.element.value) {
           this.element.value = valToSetString;
-          (0, _helpers.dispatchEvent)(this.element, 'change');
+          (0, _autocompleteHelpers.dispatchEvent)(this.element, 'change');
         }
       } // included in case of multi-select mode used with a <select> element as the source
 
@@ -1435,7 +1549,7 @@ function () {
       } // generate new object from the selected item in case the original source gets altered
 
 
-      var option = (0, _helpers.mergeObjects)(this.filteredSource[index]); // detect if selected option is already in selected array
+      var option = (0, _autocompleteHelpers.mergeObjects)(this.filteredSource[index]); // detect if selected option is already in selected array
 
       var l = this.selected.length;
       var alreadySelected = false;
@@ -1520,7 +1634,7 @@ function () {
 
       var callback = this.triggerOptionCallback('onResponse', updated); // now commit to setting the filtered source
 
-      this.filteredSource = callback ? (0, _helpers.processSourceArray)(callback, mapping) : updated;
+      this.filteredSource = callback ? (0, _autocompleteHelpers.processSourceArray)(callback, mapping) : updated;
       var length = this.filteredSource.length; // build up the list html
 
       var maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
@@ -1531,11 +1645,11 @@ function () {
 
 
       if (toShow.length) {
-        (0, _helpers.addClass)(this.list, "".concat(cssName, "__list--has-results"));
-        (0, _helpers.removeClass)(this.list, "".concat(cssName, "__list--no-results"));
+        (0, _autocompleteHelpers.addClass)(this.list, "".concat(cssName, "__list--has-results"));
+        (0, _autocompleteHelpers.removeClass)(this.list, "".concat(cssName, "__list--no-results"));
       } else {
-        (0, _helpers.removeClass)(this.list, "".concat(cssName, "__list--has-results"));
-        (0, _helpers.addClass)(this.list, "".concat(cssName, "__list--no-results"));
+        (0, _autocompleteHelpers.removeClass)(this.list, "".concat(cssName, "__list--has-results"));
+        (0, _autocompleteHelpers.addClass)(this.list, "".concat(cssName, "__list--no-results"));
       } // no results text handling
 
 
@@ -1612,15 +1726,14 @@ function () {
       xhr.onload = function () {
         if (xhr.readyState === xhr.DONE) {
           if (xhr.status === 200) {
-            _this2.forceShowAll = isShowAll; // return forceShowAll to previous state before the options render
+            // return forceShowAll to previous state before the options render
+            _this2.forceShowAll = isShowAll;
 
-            var _context = isFirstCall ? null : _this2.api;
-
-            var callbackResponse = _this2.triggerOptionCallback('onAsyncSuccess', [value, xhr], _context);
+            var callbackResponse = _this2.triggerOptionCallback('onAsyncSuccess', [value, xhr], context);
 
             var mapping = _this2.options.sourceMapping;
             var source = callbackResponse || xhr.responseText;
-            var items = (0, _helpers.processSourceArray)(source, mapping, false);
+            var items = (0, _autocompleteHelpers.processSourceArray)(source, mapping, false);
 
             if (isFirstCall) {
               _this2.prepSelectedFromArray(items);
@@ -1679,7 +1792,7 @@ function () {
       if (typeof this.source === 'function') {
         this.source.call(this.api, this.term, function (response) {
           var mapping = _this3.options.sourceMapping;
-          var result = (0, _helpers.processSourceArray)(response, mapping);
+          var result = (0, _autocompleteHelpers.processSourceArray)(response, mapping);
 
           _this3.setListOptions(result);
         });
@@ -1693,14 +1806,21 @@ function () {
 
 
       if (this.source && this.source.length) {
+        var check = ['ariaAutocompleteCleanedLabel'];
+
         if (!forceShowAll) {
-          value = (0, _helpers.cleanString)(value, true);
+          value = (0, _autocompleteHelpers.cleanString)(value, true);
+          var searchIn = this.options.alsoSearchIn;
+
+          if (Array.isArray(searchIn) && searchIn.length) {
+            check = (0, _autocompleteHelpers.removeDuplicatesAndLabel)(check.concat(searchIn));
+          }
         }
 
         for (var i = 0, l = this.source.length; i < l; i += 1) {
           var entry = this.source[i];
 
-          if (forceShowAll || entry.cleanedLabel.search(value) !== -1) {
+          if (forceShowAll || (0, _autocompleteHelpers.searchVarPropsFor)(entry, check, value)) {
             toReturn.push({
               element: entry.element,
               staticSourceIndex: i,
@@ -1725,8 +1845,8 @@ function () {
       }
 
       var nameSpace = this.cssNameSpace;
-      (0, _helpers.removeClass)(this.wrapper, "".concat(nameSpace, "__wrapper--loading loading"));
-      (0, _helpers.removeClass)(this.input, "".concat(nameSpace, "__input--loading loading"));
+      (0, _autocompleteHelpers.removeClass)(this.wrapper, "".concat(nameSpace, "__wrapper--loading loading"));
+      (0, _autocompleteHelpers.removeClass)(this.input, "".concat(nameSpace, "__input--loading loading"));
       this.filtering = false;
     }
     /**
@@ -1752,7 +1872,7 @@ function () {
         var value = _this4.input.value; // treat as empty search if...
         // forceShowAll, or in single mode and selected item label matches current value
 
-        if (forceShowAll || value === '' || doValueOverrideCheck && !_this4.multiple && _this4.selected.length && (0, _helpers.trimString)(_this4.selected[0].label) === (0, _helpers.trimString)(value)) {
+        if (forceShowAll || value === '' || doValueOverrideCheck && !_this4.multiple && _this4.selected.length && (0, _autocompleteHelpers.trimString)(_this4.selected[0].label) === (0, _autocompleteHelpers.trimString)(value)) {
           value = '';
         } // handle aria-describedby
 
@@ -1780,8 +1900,8 @@ function () {
 
         if (!equalVals || equalVals && !_this4.menuOpen && !modifier) {
           var n = _this4.cssNameSpace;
-          (0, _helpers.addClass)(_this4.wrapper, "".concat(n, "__wrapper--loading loading"));
-          (0, _helpers.addClass)(_this4.input, "".concat(n, "__input--loading loading"));
+          (0, _autocompleteHelpers.addClass)(_this4.wrapper, "".concat(n, "__wrapper--loading loading"));
+          (0, _autocompleteHelpers.addClass)(_this4.input, "".concat(n, "__input--loading loading"));
           _this4.currentSelectedIndex = -1;
 
           _this4.filter(value);
@@ -1857,7 +1977,7 @@ function () {
         } // confirmOnBlur behaviour
 
 
-        var isQueryIn = _this6.isQueryContainedIn.bind(_this6);
+        var isQueryIn = _this6.indexOfQueryIn.bind(_this6);
 
         if (!force && _this6.options.confirmOnBlur && _this6.menuOpen) {
           // if blurring from an option (currentSelectedIndex > -1), select it
@@ -1865,7 +1985,7 @@ function () {
 
           if (typeof toUse !== 'number' || toUse === -1) {
             // otherwise check for exact match between current input value and available items
-            toUse = isQueryIn('', _this6.filteredSource);
+            toUse = isQueryIn(_this6.filteredSource);
           }
 
           _this6.handleOptionSelect({}, toUse, false);
@@ -1876,12 +1996,12 @@ function () {
         _this6.hide(); // in single select case, if current value and chosen value differ, clear selected and input value
 
 
-        if (!_this6.multiple && isQueryIn('', _this6.selected) === -1) {
+        if (!_this6.multiple && isQueryIn(_this6.selected) === -1) {
           var isInputOrDdl = _this6.elementIsInput || _this6.elementIsSelect;
 
           if (isInputOrDdl && _this6.element.value !== '') {
             _this6.element.value = '';
-            (0, _helpers.dispatchEvent)(_this6.element, 'change');
+            (0, _autocompleteHelpers.dispatchEvent)(_this6.element, 'change');
           }
 
           if (_this6.selected.length) {
@@ -2013,7 +2133,7 @@ function () {
       } // any printable character not on input, return focus to input
 
 
-      var printableKey = (0, _helpers.isPrintableKey)(event.keyCode);
+      var printableKey = (0, _autocompleteHelpers.isPrintableKey)(event.keyCode);
       var focusInput = !targetIsInput && printableKey;
 
       if (focusInput) {
@@ -2129,8 +2249,8 @@ function () {
       var inputFocusClasses = "".concat(this.cssNameSpace, "__input--focused focused focus"); // when blurring out of input, remove classes
 
       this.input.addEventListener('blur', function () {
-        (0, _helpers.removeClass)(_this8.wrapper, wrapperFocusClasses);
-        (0, _helpers.removeClass)(_this8.input, inputFocusClasses);
+        (0, _autocompleteHelpers.removeClass)(_this8.wrapper, wrapperFocusClasses);
+        (0, _autocompleteHelpers.removeClass)(_this8.input, inputFocusClasses);
 
         _this8.cancelPolling();
       }); // trigger filter on input event as well as keydown (covering bases)
@@ -2148,8 +2268,8 @@ function () {
       }); // when focusing on input, reset selected index and trigger search handling
 
       this.input.addEventListener('focusin', function () {
-        (0, _helpers.addClass)(_this8.wrapper, wrapperFocusClasses);
-        (0, _helpers.addClass)(_this8.input, inputFocusClasses);
+        (0, _autocompleteHelpers.addClass)(_this8.wrapper, wrapperFocusClasses);
+        (0, _autocompleteHelpers.addClass)(_this8.input, inputFocusClasses);
 
         _this8.startPolling();
 
@@ -2225,7 +2345,7 @@ function () {
           toPush.label = toPush.value;
         }
 
-        toPush.cleanedLabel = (0, _helpers.cleanString)(toPush.label);
+        toPush.ariaAutocompleteCleanedLabel = (0, _autocompleteHelpers.cleanString)(toPush.label);
         this.source.push(toPush); // add to selected if applicable
 
         if (checkbox.checked) {
@@ -2258,7 +2378,7 @@ function () {
           value: option.value,
           label: option.textContent
         };
-        toPush.cleanedLabel = (0, _helpers.cleanString)(toPush.label);
+        toPush.ariaAutocompleteCleanedLabel = (0, _autocompleteHelpers.cleanString)(toPush.label);
         this.source.push(toPush); // add to selected if applicable
 
         if (option.selected) {
@@ -2284,12 +2404,12 @@ function () {
 
         for (var i = 0, l = valueArr.length; i < l; i += 1) {
           var val = valueArr[i];
-          var isQueryIn = this.isQueryContainedIn; // make sure it is not already in the selected array
+          var isQueryIn = this.indexOfQueryIn; // make sure it is not already in the selected array
 
-          var isInSelected = isQueryIn(val, this.selected, 'value') > -1; // but is in the source array (check via 'value', not 'label')
+          var isInSelected = isQueryIn(this.selected, val, 'value') > -1; // but is in the source array (check via 'value', not 'label')
 
           if (!isInSelected) {
-            var indexInSource = isQueryIn(val, source, 'value');
+            var indexInSource = isQueryIn(source, val, 'value');
 
             if (indexInSource > -1) {
               this.selected.push(source[indexInSource]);
@@ -2306,7 +2426,7 @@ function () {
     key: "prepListSourceArray",
     value: function prepListSourceArray() {
       var mapping = this.options.sourceMapping;
-      this.source = (0, _helpers.processSourceArray)(this.source, mapping);
+      this.source = (0, _autocompleteHelpers.processSourceArray)(this.source, mapping);
       this.prepSelectedFromArray(this.source);
     }
     /**
@@ -2333,7 +2453,7 @@ function () {
 
       if (this.elementIsInput && this.element.value) {
         this.source.call(undefined, this.element.value, function (response) {
-          _this9.prepSelectedFromArray((0, _helpers.processSourceArray)(response, _this9.options.sourceMapping));
+          _this9.prepSelectedFromArray((0, _autocompleteHelpers.processSourceArray)(response, _this9.options.sourceMapping));
 
           _this9.setInputStartingStates(false);
         });
@@ -2478,7 +2598,7 @@ function () {
           return _this10.filter.call(val);
         }
       };
-      var a = ['options', 'refresh', 'destroy', 'enable', 'disable', 'input', 'wrapper', 'list', 'selected'];
+      var a = ['options', 'destroy', 'enable', 'disable', 'input', 'wrapper', 'list', 'selected'];
 
       var _loop = function _loop(i, l) {
         _this10.api[a[i]] = typeof _this10[a[i]] === 'function' ? function () {
@@ -2492,20 +2612,6 @@ function () {
 
 
       this.element.ariaAutocomplete = this.api;
-    }
-    /**
-     * @description refresh method for use after changing options, source, etc.
-     */
-
-  }, {
-    key: "refresh",
-    value: function refresh() {
-      // store element, as this is wiped in destroy method
-      var element = this.element;
-      var options = (0, _helpers.mergeObjects)(this.options); // do not do a hard destroy
-
-      this.destroy();
-      this.init(element, options);
     }
     /**
      * @description destroy component
@@ -2570,7 +2676,7 @@ function () {
       this.element = element;
       this.elementIsInput = element.nodeName === 'INPUT';
       this.elementIsSelect = element.nodeName === 'SELECT';
-      this.options = (0, _helpers.mergeObjects)(DEFAULT_OPTIONS, options); // set these internally so that the component has to be properly refreshed to change them
+      this.options = (0, _autocompleteHelpers.mergeObjects)(DEFAULT_OPTIONS, options); // set these internally so that the component has to be properly destroyed to change them
 
       this.source = this.options.source;
       this.multiple = this.options.multiple;
@@ -2594,7 +2700,7 @@ function () {
         wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--show-all");
       }
 
-      if (this.options.autoGrow) {
+      if (this.autoGrow) {
         wrapperClass += " ".concat(this.cssNameSpace, "__wrapper--autogrow");
       }
 
@@ -2603,7 +2709,7 @@ function () {
       }
 
       if (wrapperClass) {
-        (0, _helpers.addClass)(this.wrapper, wrapperClass);
+        (0, _autocompleteHelpers.addClass)(this.wrapper, wrapperClass);
       } // hide element and list manually
 
 
@@ -2640,5 +2746,5 @@ var _default = function _default(elem, options) {
 };
 
 exports.default = _default;
-},{"./closest-polyfill":"kTsq","./autogrow":"KnPF","./helpers":"lTk1"}]},{},["c8cM"], null)
+},{"./closest-polyfill":"kTsq","./autogrow":"KnPF","./autocomplete-helpers":"MBeS"}]},{},["c8cM"], null)
 //# sourceMappingURL=/aria-autocomplete.js.map

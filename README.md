@@ -1,10 +1,11 @@
 # Aria Autocomplete
 
+[![npm version](https://img.shields.io/npm/v/aria-autocomplete.svg)](http://npm.im/aria-autocomplete)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/aria-autocomplete/dist/aria-autocomplete.min.js?compression=gzip)](https://unpkg.com/aria-autocomplete/dist/aria-autocomplete.min.js)
 
 Accessible, extensible, dependency-free autocomplete with multi-select.
 
-I've used a lot of autocomplete plugins, but the combination of **accessibility**, **performance**, and **functionality** that I needed wasn't out there. So I've tried to build on the [brilliant accessibility of GOV.UK's accessible-autocomplete](https://accessibility.blog.gov.uk/2018/05/15/what-we-learned-from-getting-our-autocomplete-tested-for-accessibility/), but with more functionality, a smaller file size, and (in my testing) better performance.
+I've used a lot of autocomplete plugins, but the combination of **accessibility**, **performance**, and **functionality** that I needed wasn't out there. So I've written this from the ground up for that purpose, building on the [brilliant accessibility of GOV.UK's accessible-autocomplete](https://accessibility.blog.gov.uk/2018/05/15/what-we-learned-from-getting-our-autocomplete-tested-for-accessibility/) - with more functionality, a smaller file size, and (in my testing) better performance.
 
 [Try out the examples](https://mynamesleon.github.io/aria-autocomplete/examples/)
 
@@ -14,7 +15,7 @@ Key design goals and features are:
 -   **extensible source options**: Array of Strings, Array of Objects, a Function, or an endpoint String
 -   **progressive enhancement**: Automatic source building through specifying a `<select>` as the element, or an element with child checkboxes.
 -   **accessibility**: Use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
--   **compatibility**: Broad browser and device support (e.g. IE9+)
+-   **compatibility**: Broad browser and device support (IE9+)
 -   **starting values**: Automatic selection based on starting values, including for checkboxes, `select` options, and for async handling.
 
 ## Installation / usage
@@ -53,9 +54,15 @@ I would encourage you to style it yourself to match your own site or application
 <link rel="stylesheet" src="css/aria-autocomplete.css" />
 ```
 
+## Performance
+
+I wrote this from the ground up partly because I needed an autocomplete with better performance than others I'd tried. I've optimised the JavaScript where I can, but it's the actual list _rendering_ that's a hit to performance. In my testing, modern browsers can render huge lists (1000+ items) just fine (on my laptop, averaging 40ms in Chrome, and under 20ms in Firefox).
+
+As we all know however, Internet Explorer _sucks_. If you need to support IE11 (or earlier), I suggest either setting the `maxResults` option to 200 or less, or using a sensible combination for the `delay` and `minLength` options. Testing on my laptop, the list rendering in IE11 would take on average: 55ms for 250 items, 300ms for 650 items, and over 600ms for 1000 items.
+
 ## API Documentation
 
-At its core, the autocomplete requires only an element, and a source. When the element is an input, its value will be set using the user's selection(s). If a source isn't provided however, and the element is either a `<select>`, or is an element with child checkboxes, those will be used to build up the source.
+At its core, the autocomplete requires only an element, and a `source`. When the element is an input, its value will be set using the user's selection(s). If a `source` option isn't provided however (is falsy, or an empty Array), and the element is either a `<select>`, or has child checkboxes, those will be used to build up the `source`.
 
 ```javascript
 new AriaAutocomplete(document.getElementById('some-input'), {
@@ -77,9 +84,9 @@ The full list of options, and their defaults:
 {
     /**
      * @description Give the autocomplete a name to be included in form submissions
-     * (Instead of using this option, I would advise initialising the autocomplete
-     * on an existing input that will be submitted; this approach is compatible
-     * with the control in multiple mode)
+     * (Instead of using this option, I would advise initialising the autocomplete on
+     * an existing input that will be submitted, to also use any existing validation;
+     * this approach is also compatible with the control in multiple mode)
      */
     name: '',
 
@@ -96,6 +103,13 @@ The full list of options, and their defaults:
      * when source is an Array of Objects
      */
     sourceMapping: { value: 'value', label: 'label' },
+
+    /**
+     * @type {String[]}
+     * @description Additional properties to use when searching for a match.
+     * `label` will always be used
+     */
+    alsoSearchIn: [],
 
     /**
      * @description Input delay after typing before running a search
@@ -123,7 +137,6 @@ The full list of options, and their defaults:
      * If no active selection, will compare current input value against available labels
      */
     confirmOnBlur: true,
-
 
     /**
      * @description Allow multiple items to be selected
@@ -292,3 +305,5 @@ The full list of options, and their defaults:
     onOpen: listElement => {}
 }
 ```
+
+Calling `new AriaAutocomplete(element, options);` returns the API object, which can also be accessed on the element via `element.ariaAutocomplete`.
