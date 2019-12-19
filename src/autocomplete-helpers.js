@@ -1,3 +1,6 @@
+export const CLEANED_LABEL = '_ariaAutocompleteCleanedLabel';
+export const SELECTED_OPTION = '_ariaAutocompleteSelectedOption';
+
 /**
  * @description trim string helper
  * @param {string} theString
@@ -195,7 +198,7 @@ export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
         }
         // whether to set a cleaned label for static source filtering (in filter method)
         if (setCleanedLabel !== false) {
-            result.ariaAutocompleteCleanedLabel = cleanString(result.label);
+            result[CLEANED_LABEL] = cleanString(result.label);
         }
         toReturn.push(result);
     }
@@ -260,7 +263,7 @@ export function transferStyles(from, to, properties) {
  */
 const searchPropFor = (prop, regexSafeQuery, name) => {
     if (typeof prop === 'string') {
-        if (name !== 'ariaAutocompleteCleanedLabel') {
+        if (name !== CLEANED_LABEL) {
             prop = cleanString(prop, false);
         }
         return prop.search(regexSafeQuery) !== -1;
@@ -317,7 +320,7 @@ export function searchVarPropsFor(obj, props, query, makeQuerySafe = false) {
  * @returns {String[]}
  */
 export function removeDuplicatesAndLabel(arr) {
-    // remove `label` (we will be using `ariaAutocompleteCleanedLabel`) and duplicates from props array
+    // remove `label` (we will be using CLEANED_LABEL) and duplicates from props array
     const result = [];
     for (let i = 0, l = arr.length; i < l; i += 1) {
         if (typeof arr[i] !== 'string') {

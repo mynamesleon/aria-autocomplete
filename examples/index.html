@@ -219,7 +219,7 @@ new AriaAutocomplete(element, {
                     <h2>Function as Source, with Multi-select, but <i>without</i> autogrow</h2>
                     <p>If you want to use your own client-side filtering logic, you can also use a function as the <code>source</code> - it will be passed the search term, and a render function, which expects an Array to be passed to it (using either of the formats mentioned above).</p>
                     <p>If the autocomplete is initialised on an input, which has a starting value, the source function will also be called immediately with that value passed to it. In this case, the render function expects an Array of possible entries to check that starting value against, so that it can internally determine what the starting label (or multi-select elements) should be.</p>
-                    <p>This example <b>searches based on each country's 3 letter country code</b>, instead of its name, e.g. "DZA" for "Algeria", or "GBR" for the United Kingdom.</p>
+                    <p>This example <b>searches based on each country's 3 letter country code</b>, instead of its name, e.g. "DZA" for "Algeria", or "GBR" for the United Kingdom. The <code>onItemRender</code> callback is also being used to display the code next to the country name in the results.</p>
                     <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively - so this will also initialise with two values already selected.</p>
                     <label for="countrylist-function">Select up to 4 countries (search by country code)</label>
                     <input type="text" value="GLP,ZWE" id="countrylist-function" />
@@ -246,6 +246,9 @@ new AriaAutocomplete(element, {
                                     }
                                 });
                                 render(result);
+                            },
+                            onItemRender: function (itemData) {
+                                return itemData.label + ' (' + itemData.code3 + ')';
                             },
                             sourceMapping: { 'value': 'code3', 'label': 'name' }
                         });
@@ -274,6 +277,7 @@ new AriaAutocomplete(element, {
         });
         render(result);
     },
+    onItemRender: itemData => `${itemData.label} (${itemData.code3})`,
     sourceMapping: { 'value': 'code3', 'label': 'name' }
 });
 </pre>
@@ -421,14 +425,16 @@ new AriaAutocomplete(element, {
                     <div class="tile">
                         <h3>Callbacks</h3>
                         <dl>
+                            <dt>onSearch: <code>Function</code></dt>
+                            <dd>Before search is performed - can be used to affect search value by returning a new one<br>Default: <code>query => query</code></dd>
                             <dt>onAsyncPrep: <code>Function</code></dt>
                             <dd>Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String<br>Default: <code>url => url</code></dd>
                             <dt>onAsyncSuccess: <code>Function</code></dt>
                             <dd>After async call completes - is passed the value and the XHR Object. Can be used to format the results by returning an Array<br>Default: <code>(query, xhr) => xhr.responseText</code></dd>
+                            <dt>onItemRender: <code>Function</code></dt>
+                            <dd>Called for each item rendered in the list - Can be used to format the <code>&lt;li&gt;</code> content by returning a String<br>Default: <code>itemData => itemData.label</code></dd>
                             <dt>onResponse: <code>Function</code></dt>
                             <dd>Prior to rendering - can be used to format the results by returning an Array<br>Default: <code>optionsToRender => optionsToRender</code></dd>
-                            <dt>onSearch: <code>Function</code></dt>
-                            <dd>Before search is performed - can be used to affect search value by returning a new one<br>Default: <code>query => query</code></dd>
                             <dt>onConfirm: <code>Function</code></dt>
                             <dd>After an autocomplete selection is made<br>Default: <code>selection => {}</code></dd>
                             <dt>onDelete: <code>Function</code></dt>

@@ -253,6 +253,12 @@ The full list of options, and their defaults:
         `${length} ${length === 1 ? 'result' : 'results'} available.`,
 
     /**
+     * @description Callback before a search is performed - receives the input value.
+     * Can be used to alter the search value by returning a String
+     */
+    onSearch: query => query,
+
+    /**
      * @description Callback before async call is made - receives the URL.
      * Can be used to format the endpoint URL by returning a String
      */
@@ -271,10 +277,10 @@ The full list of options, and their defaults:
     onResponse: optionsToRender => optionsToRender,
 
     /**
-     * @description Callback before a search is performed - receives the input value.
-     * Can be used to alter the search value by returning a String
+     * @description Callback when rendering items in the list.
+     * Can be used to format the <li> content by returning a String
      */
-    onSearch: query => query,
+    onItemRender: itemData => itemData.label,
 
     /**
      * @description Callback after selection is made -

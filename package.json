@@ -1,6 +1,6 @@
 {
     "name": "aria-autocomplete",
-    "version": "1.0.0-beta.1",
+    "version": "1.0.0-beta.2",
     "description": "Accessible, extensible, dependency-free JavaScript autocomplete with multi-select",
     "main": "src/aria-autocomplete.js",
     "scripts": {
