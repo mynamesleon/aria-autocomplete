@@ -158,11 +158,17 @@ exports.setCss = setCss;
 exports.transferStyles = transferStyles;
 exports.searchVarPropsFor = searchVarPropsFor;
 exports.removeDuplicatesAndLabel = removeDuplicatesAndLabel;
-
+exports.SELECTED_OPTION = exports.CLEANED_LABEL = void 0;
+var CLEANED_LABEL = '_ariaAutocompleteCleanedLabel';
+exports.CLEANED_LABEL = CLEANED_LABEL;
+var SELECTED_OPTION = '_ariaAutocompleteSelectedOption';
 /**
  * @description trim string helper
  * @param {string} theString
  */
+
+exports.SELECTED_OPTION = SELECTED_OPTION;
+
 function trimString(theString) {
   return theString == null ? '' : (theString + '').trim();
 }
@@ -368,7 +374,7 @@ function processSourceArray(sourceArray) {
 
 
     if (setCleanedLabel !== false) {
-      result.ariaAutocompleteCleanedLabel = cleanString(result.label);
+      result[CLEANED_LABEL] = cleanString(result.label);
     }
 
     toReturn.push(result);
@@ -441,7 +447,7 @@ function transferStyles(from, to, properties) {
 
 var searchPropFor = function searchPropFor(prop, regexSafeQuery, name) {
   if (typeof prop === 'string') {
-    if (name !== 'ariaAutocompleteCleanedLabel') {
+    if (name !== CLEANED_LABEL) {
       prop = cleanString(prop, false);
     }
 
@@ -508,7 +514,7 @@ function searchVarPropsFor(obj, props, query) {
 
 
 function removeDuplicatesAndLabel(arr) {
-  // remove `label` (we will be using `ariaAutocompleteCleanedLabel`) and duplicates from props array
+  // remove `label` (we will be using CLEANED_LABEL) and duplicates from props array
   var result = [];
 
   for (var i = 0, l = arr.length; i < l; i += 1) {
@@ -927,6 +933,12 @@ var DEFAULT_OPTIONS = {
   },
 
   /**
+   * @description Callback before a search is performed - receives the input value.
+   * Can be used to alter the search value by returning a String
+   */
+  onSearch: undefined,
+
+  /**
    * @description Callback before async call is made - receives the URL.
    * Can be used to format the endpoint URL by returning a String
    */
@@ -945,10 +957,10 @@ var DEFAULT_OPTIONS = {
   onResponse: undefined,
 
   /**
-   * @description Callback before a search is performed - receives the input value.
-   * Can be used to alter the search value by returning a String
+   * @description Callback when rendering items in the list.
+   * Can be used to format the <li> content by returning a String
    */
-  onSearch: undefined,
+  onItemRender: undefined,
 
   /**
    * @description Callback after selection is made -
@@ -1050,7 +1062,7 @@ function () {
    * trigger callbacks included in component options
    * @param {String} name
    * @param {Array=} args
-   * @param {Any=} args
+   * @param {Any=} context
    */
 
 
@@ -1254,7 +1266,7 @@ function () {
   }, {
     key: "isSelectedElem",
     value: function isSelectedElem(element) {
-      return this.multiple && element.ariaAutocompleteSelectedOption && (0, _autocompleteHelpers.hasClass)(element, "".concat(this.cssNameSpace, "__selected"));
+      return this.multiple && element[_autocompleteHelpers.SELECTED_OPTION] && (0, _autocompleteHelpers.hasClass)(element, "".concat(this.cssNameSpace, "__selected"));
     }
     /**
      * @description get DOM elements for selected items
@@ -1339,7 +1351,7 @@ function () {
       var i = currentSelectedElems.length;
 
       while (i--) {
-        var option = currentSelectedElems[i].ariaAutocompleteSelectedOption;
+        var option = currentSelectedElems[i][_autocompleteHelpers.SELECTED_OPTION];
         var l = this.selected.length;
         var isInSelected = false;
 
@@ -1370,7 +1382,7 @@ function () {
         var isInDom = false;
 
         while (_l2--) {
-          var _option = current[_l2].ariaAutocompleteSelectedOption;
+          var _option = current[_l2][_autocompleteHelpers.SELECTED_OPTION];
 
           if (_option === _selected || _option.value === _selected.value) {
             isInDom = true;
@@ -1381,7 +1393,7 @@ function () {
         if (!isInDom) {
           var label = _selected.label;
           var span = (0, _autocompleteHelpers.htmlToElement)("<span role=\"button\" class=\"".concat(selectedClass, "\" ") + "tabindex=\"0\" aria-label=\"".concat(deleteText, " ").concat(label, "\">") + "".concat(label, "</span>"));
-          span.ariaAutocompleteSelectedOption = _selected;
+          span[_autocompleteHelpers.SELECTED_OPTION] = _selected;
           fragment.appendChild(span);
         }
       }
@@ -1634,10 +1646,14 @@ function () {
       var optionId = this.ids.OPTION;
       var cssName = this.cssNameSpace;
       var length = this.filteredSource.length;
+      var checkCallback = typeof this.options.onItemRender === 'function';
       var maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
 
       for (var i = 0; i < length && i < maxResults; i += 1) {
-        toShow.push("<li tabindex=\"-1\" aria-selected=\"false\" role=\"option\" class=\"".concat(cssName, "__option\" ") + "id=\"".concat(optionId, "--").concat(i, "\" aria-posinset=\"").concat(i + 1, "\" ") + "aria-setsize=\"".concat(length, "\">").concat(this.filteredSource[i].label, "</li>"));
+        var thisSource = this.filteredSource[i];
+        var callbackResponse = checkCallback && this.triggerOptionCallback('onItemRender', [thisSource]);
+        var itemContent = callbackResponse || thisSource.label;
+        toShow.push("<li tabindex=\"-1\" aria-selected=\"false\" role=\"option\" class=\"".concat(cssName, "__option\" ") + "id=\"".concat(optionId, "--").concat(i, "\" aria-posinset=\"").concat(i + 1, "\" ") + "aria-setsize=\"".concat(length, "\">").concat(itemContent, "</li>"));
       } // set has-results or no-results class on the list element
 
 
@@ -1806,7 +1822,7 @@ function () {
       var toReturn = [];
 
       if (this.source && this.source.length) {
-        var check = ['ariaAutocompleteCleanedLabel'];
+        var check = [_autocompleteHelpers.CLEANED_LABEL];
 
         if (!forceShowAll) {
           value = (0, _autocompleteHelpers.cleanString)(value, true);
@@ -1958,7 +1974,7 @@ function () {
         var activeElem = document.activeElement;
 
         if (!force && activeElem && !(_this6.showAll && _this6.showAll === activeElem) && // exception for show all button
-        !activeElem.ariaAutocompleteSelectedOption // exception for selected items
+        !activeElem[_autocompleteHelpers.SELECTED_OPTION] // exception for selected items
         ) {
             // must base this on the wrapper to allow scrolling the list in IE
             if (_this6.wrapper.contains(activeElem)) {
@@ -2030,7 +2046,7 @@ function () {
     value: function handleEnterKey(event) {
       // if in multiple mode, and event target was a selected item, remove it
       if (this.isSelectedElem(event.target)) {
-        var option = event.target.ariaAutocompleteSelectedOption;
+        var option = event.target[_autocompleteHelpers.SELECTED_OPTION];
         return this.removeEntryFromSelected(option);
       }
 
@@ -2235,7 +2251,7 @@ function () {
         }
 
         if (_this8.isSelectedElem(event.target)) {
-          var option = event.target.ariaAutocompleteSelectedOption;
+          var option = event.target[_autocompleteHelpers.SELECTED_OPTION];
 
           _this8.removeEntryFromSelected(option);
         }
@@ -2340,7 +2356,7 @@ function () {
           toPush.label = toPush.value;
         }
 
-        toPush.ariaAutocompleteCleanedLabel = (0, _autocompleteHelpers.cleanString)(toPush.label);
+        toPush[_autocompleteHelpers.CLEANED_LABEL] = (0, _autocompleteHelpers.cleanString)(toPush.label);
         this.source.push(toPush); // add to selected if applicable
 
         if (checkbox.checked) {
@@ -2373,7 +2389,7 @@ function () {
           value: option.value,
           label: option.textContent
         };
-        toPush.ariaAutocompleteCleanedLabel = (0, _autocompleteHelpers.cleanString)(toPush.label);
+        toPush[_autocompleteHelpers.CLEANED_LABEL] = (0, _autocompleteHelpers.cleanString)(toPush.label);
         this.source.push(toPush); // add to selected if applicable
 
         if (option.selected) {

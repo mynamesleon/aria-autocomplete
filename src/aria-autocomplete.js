@@ -1,6 +1,8 @@
 import './closest-polyfill';
 import AutoGrow from './autogrow';
 import {
+    CLEANED_LABEL,
+    SELECTED_OPTION,
     trimString,
     hasClass,
     addClass,
@@ -168,6 +170,11 @@ const DEFAULT_OPTIONS = {
         `${length} ${length === 1 ? 'result' : 'results'} available.`,
 
     /**
+     * @description Callback before a search is performed - receives the input value.
+     * Can be used to alter the search value by returning a String
+     */
+    onSearch: undefined,
+    /**
      * @description Callback before async call is made - receives the URL.
      * Can be used to format the endpoint URL by returning a String
      */
@@ -183,10 +190,10 @@ const DEFAULT_OPTIONS = {
      */
     onResponse: undefined,
     /**
-     * @description Callback before a search is performed - receives the input value.
-     * Can be used to alter the search value by returning a String
+     * @description Callback when rendering items in the list.
+     * Can be used to format the <li> content by returning a String
      */
-    onSearch: undefined,
+    onItemRender: undefined,
     /**
      * @description Callback after selection is made -
      * receives an object with the option details
@@ -282,7 +289,7 @@ class AriaAutocomplete {
      * trigger callbacks included in component options
      * @param {String} name
      * @param {Array=} args
-     * @param {Any=} args
+     * @param {Any=} context
      */
     triggerOptionCallback(name, args, context) {
         context = typeof context === 'undefined' ? this.api : context;
@@ -444,7 +451,7 @@ class AriaAutocomplete {
     isSelectedElem(element) {
         return (
             this.multiple &&
-            element.ariaAutocompleteSelectedOption &&
+            element[SELECTED_OPTION] &&
             hasClass(element, `${this.cssNameSpace}__selected`)
         );
     }
@@ -519,7 +526,7 @@ class AriaAutocomplete {
         const current = [];
         let i = currentSelectedElems.length;
         while (i--) {
-            let option = currentSelectedElems[i].ariaAutocompleteSelectedOption;
+            let option = currentSelectedElems[i][SELECTED_OPTION];
             let l = this.selected.length;
             let isInSelected = false;
             while (l--) {
@@ -545,7 +552,7 @@ class AriaAutocomplete {
             let l = current.length;
             let isInDom = false;
             while (l--) {
-                let option = current[l].ariaAutocompleteSelectedOption;
+                let option = current[l][SELECTED_OPTION];
                 if (option === selected || option.value === selected.value) {
                     isInDom = true;
                     break;
@@ -558,7 +565,7 @@ class AriaAutocomplete {
                         `tabindex="0" aria-label="${deleteText} ${label}">` +
                         `${label}</span>`
                 );
-                span.ariaAutocompleteSelectedOption = selected;
+                span[SELECTED_OPTION] = selected;
                 fragment.appendChild(span);
             }
         }
@@ -794,12 +801,18 @@ class AriaAutocomplete {
         const optionId = this.ids.OPTION;
         const cssName = this.cssNameSpace;
         const length = this.filteredSource.length;
+        const checkCallback = typeof this.options.onItemRender === 'function';
         const maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
         for (let i = 0; i < length && i < maxResults; i += 1) {
+            const thisSource = this.filteredSource[i];
+            const callbackResponse =
+                checkCallback &&
+                this.triggerOptionCallback('onItemRender', [thisSource]);
+            const itemContent = callbackResponse || thisSource.label;
             toShow.push(
                 `<li tabindex="-1" aria-selected="false" role="option" class="${cssName}__option" ` +
                     `id="${optionId}--${i}" aria-posinset="${i + 1}" ` +
-                    `aria-setsize="${length}">${this.filteredSource[i].label}</li>`
+                    `aria-setsize="${length}">${itemContent}</li>`
             );
         }
 
@@ -964,7 +977,7 @@ class AriaAutocomplete {
         // existing list handling
         const toReturn = [];
         if (this.source && this.source.length) {
-            let check = ['ariaAutocompleteCleanedLabel'];
+            let check = [CLEANED_LABEL];
             if (!forceShowAll) {
                 value = cleanString(value, true);
                 let searchIn = this.options.alsoSearchIn;
@@ -1093,7 +1106,7 @@ class AriaAutocomplete {
                 !force &&
                 activeElem &&
                 !(this.showAll && this.showAll === activeElem) && // exception for show all button
-                !activeElem.ariaAutocompleteSelectedOption // exception for selected items
+                !activeElem[SELECTED_OPTION] // exception for selected items
             ) {
                 // must base this on the wrapper to allow scrolling the list in IE
                 if (this.wrapper.contains(activeElem)) {
@@ -1156,7 +1169,7 @@ class AriaAutocomplete {
     handleEnterKey(event) {
         // if in multiple mode, and event target was a selected item, remove it
         if (this.isSelectedElem(event.target)) {
-            const option = event.target.ariaAutocompleteSelectedOption;
+            const option = event.target[SELECTED_OPTION];
             return this.removeEntryFromSelected(option);
         }
 
@@ -1334,7 +1347,7 @@ class AriaAutocomplete {
                 return;
             }
             if (this.isSelectedElem(event.target)) {
-                const option = event.target.ariaAutocompleteSelectedOption;
+                const option = event.target[SELECTED_OPTION];
                 this.removeEntryFromSelected(option);
             }
         });
@@ -1425,7 +1438,7 @@ class AriaAutocomplete {
             if (!toPush.label) {
                 toPush.label = toPush.value;
             }
-            toPush.ariaAutocompleteCleanedLabel = cleanString(toPush.label);
+            toPush[CLEANED_LABEL] = cleanString(toPush.label);
             this.source.push(toPush);
             // add to selected if applicable
             if (checkbox.checked) {
@@ -1453,7 +1466,7 @@ class AriaAutocomplete {
                 value: option.value,
                 label: option.textContent
             };
-            toPush.ariaAutocompleteCleanedLabel = cleanString(toPush.label);
+            toPush[CLEANED_LABEL] = cleanString(toPush.label);
             this.source.push(toPush);
             // add to selected if applicable
             if (option.selected) {
