@@ -167,7 +167,7 @@ function trimString(theString) {
   return theString == null ? '' : (theString + '').trim();
 }
 /**
- * @description check if element has class
+ * @description check if element has class - support pre `classList`
  * @param {Element} element - element to check class on
  * @param {String} className
  * @returns {Boolean}
@@ -180,7 +180,7 @@ function hasClass(element, className) {
   return " ".concat(cur, " ").indexOf(" ".concat(className, " ")) > -1;
 }
 /**
- * @description add class(es) to element
+ * @description add class(es) to element - support pre `classList`
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to add
  */
@@ -202,7 +202,7 @@ function addClass(element, classes) {
   }
 }
 /**
- * @description remove class(es) from element
+ * @description remove class(es) from element - support pre `classList`
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to remove
  */

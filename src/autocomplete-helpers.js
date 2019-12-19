@@ -7,27 +7,27 @@ export function trimString(theString) {
 }
 
 /**
- * @description check if element has class
+ * @description check if element has class - support pre `classList`
  * @param {Element} element - element to check class on
  * @param {String} className
  * @returns {Boolean}
  */
 export function hasClass(element, className) {
-    let e = element;
-    let cur = trimString(e.getAttribute && e.getAttribute('class'));
+    const e = element;
+    const cur = trimString(e.getAttribute && e.getAttribute('class'));
     return ` ${cur} `.indexOf(` ${className} `) > -1;
 }
 
 /**
- * @description add class(es) to element
+ * @description add class(es) to element - support pre `classList`
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to add
  */
 export function addClass(element, classes) {
-    let currentValue = trimString(
+    const currentValue = trimString(
         element.getAttribute && element.getAttribute('class')
     );
-    let current = ' ' + currentValue + ' ';
+    const current = ' ' + currentValue + ' ';
     let finalValue = '';
 
     for (let i = 0, cs = classes.split(' '), l = cs.length; i < l; i += 1) {
@@ -41,12 +41,12 @@ export function addClass(element, classes) {
 }
 
 /**
- * @description remove class(es) from element
+ * @description remove class(es) from element - support pre `classList`
  * @param {Element} element - element to add class(es) to
  * @param {String} classes - space delimitted class(es) to remove
  */
 export function removeClass(element, classes) {
-    let currentValue = trimString(
+    const currentValue = trimString(
         element.getAttribute && element.getAttribute('class')
     );
     let finalValue = ' ' + currentValue + ' ';
