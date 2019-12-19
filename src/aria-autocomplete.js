@@ -297,14 +297,14 @@ class AriaAutocomplete {
      */
     show(element) {
         if (typeof element !== 'undefined') {
-            let toRemove = `${this.cssNameSpace}--hide hide hidden`;
+            const toRemove = `${this.cssNameSpace}--hide hide hidden`;
             removeClass(element, toRemove);
             return element.removeAttribute('hidden');
         }
 
         this.input.setAttribute('aria-expanded', 'true');
         if (this.showAll) {
-            let expanded = (!!this.forceShowAll).toString();
+            const expanded = (!!this.forceShowAll).toString();
             this.showAll.setAttribute('aria-expanded', expanded);
         }
         if (!this.menuOpen) {
@@ -346,7 +346,7 @@ class AriaAutocomplete {
         if (this.disabled) {
             this.disabled = false;
             this.input.disabled = false;
-            let n = this.cssNameSpace;
+            const n = this.cssNameSpace;
             removeClass(this.input, `${n}__input--disabled disabled`);
             removeClass(this.wrapper, `${n}__wrapper--disabled disabled`);
             if (this.showAll) {
@@ -363,7 +363,7 @@ class AriaAutocomplete {
         if (!this.disabled) {
             this.disabled = true;
             this.input.disabled = true;
-            let n = this.cssNameSpace;
+            const n = this.cssNameSpace;
             addClass(this.input, `${n}__input--disabled disabled`);
             addClass(this.wrapper, `${n}__wrapper--disabled disabled`);
             if (this.showAll) {
@@ -454,8 +454,8 @@ class AriaAutocomplete {
      * @returns {Element[]}
      */
     getSelectedElems() {
-        let n = this.wrapper.childNodes;
-        let a = [];
+        const n = this.wrapper.childNodes;
+        const a = [];
         for (let i = 0, l = n.length; i < l; i += 1) {
             if (this.isSelectedElem(n[i])) {
                 a.push(n[i]);
@@ -482,8 +482,8 @@ class AriaAutocomplete {
         // set element state, dispatch change event, set selected array,
         // trigger callback, build selected, and do screen reader announcement
         if (index > -1 && this.selected[index]) {
-            let option = mergeObjects(this.selected[index]);
-            let label = option.label;
+            const option = mergeObjects(this.selected[index]);
+            const label = option.label;
             setElementState(option.element, false, this);
             this.selected.splice(index, 1);
             this.triggerOptionCallback('onDelete', [option]);
@@ -510,13 +510,13 @@ class AriaAutocomplete {
         }
 
         // no elements, and none selected, do nothing
-        let currentSelectedElems = this.getSelectedElems();
+        const currentSelectedElems = this.getSelectedElems();
         if (!this.selected.length && !currentSelectedElems.length) {
             return;
         }
 
         // cycle through existing elements, and remove any not in the selected array
-        let current = [];
+        const current = [];
         let i = currentSelectedElems.length;
         while (i--) {
             let option = currentSelectedElems[i].ariaAutocompleteSelectedOption;
@@ -537,11 +537,11 @@ class AriaAutocomplete {
         }
 
         // cycle through selected array, and add elements for any not represented by one
-        let deleteText = this.options.srDeleteText;
-        let fragment = document.createDocumentFragment();
-        let selectedClass = `${this.cssNameSpace}__selected`;
+        const deleteText = this.options.srDeleteText;
+        const fragment = document.createDocumentFragment();
+        const selectedClass = `${this.cssNameSpace}__selected`;
         for (let i = 0, l = this.selected.length; i < l; i += 1) {
-            let selected = this.selected[i];
+            const selected = this.selected[i];
             let l = current.length;
             let isInDom = false;
             while (l--) {
@@ -552,8 +552,8 @@ class AriaAutocomplete {
                 }
             }
             if (!isInDom) {
-                let label = selected.label;
-                let span = htmlToElement(
+                const label = selected.label;
+                const span = htmlToElement(
                     `<span role="button" class="${selectedClass}" ` +
                         `tabindex="0" aria-label="${deleteText} ${label}">` +
                         `${label}</span>`
@@ -567,12 +567,12 @@ class AriaAutocomplete {
         }
 
         // set ids on elements
-        let ids = [];
+        const ids = [];
         // get selected elements again, as some may have been added or removed
-        current = this.getSelectedElems();
-        for (let i = 0, l = current.length; i < l; i += 1) {
-            let id = `${this.ids.OPTION_SELECTED}-${i}`;
-            current[i].setAttribute('id', id);
+        const nowSelectedElems = this.getSelectedElems();
+        for (let i = 0, l = nowSelectedElems.length; i < l; i += 1) {
+            const id = `${this.ids.OPTION_SELECTED}-${i}`;
+            nowSelectedElems[i].setAttribute('id', id);
             ids.push(id);
         }
         ids.push(this.ids.LIST);
@@ -582,7 +582,7 @@ class AriaAutocomplete {
 
         // in autogrow mode, hide the placeholder if there are selected items
         if (this.autoGrow && this.options.placeholder) {
-            let toSet = this.selected.length ? '' : this.options.placeholder;
+            const toSet = this.selected.length ? '' : this.options.placeholder;
             this.input.setAttribute('placeholder', toSet);
         }
     }
@@ -591,8 +591,8 @@ class AriaAutocomplete {
      * @description set the aria-describedby attribute on the input
      */
     setInputDescription() {
-        let exists = this.input.getAttribute('aria-describedby');
-        let current = trimString(exists || '');
+        const exists = this.input.getAttribute('aria-describedby');
+        const current = trimString(exists || '');
         let describedBy = current.replace(this.ids.SR_ASSISTANCE, '');
 
         if (this.input.value.length === 0) {
@@ -613,10 +613,9 @@ class AriaAutocomplete {
      * @description reset classes and aria-selected attribute for all visible filtered options
      */
     resetOptionAttributes() {
-        let cssName = this.cssNameSpace;
-        let nodes = this.list.childNodes;
+        const cssName = this.cssNameSpace;
+        const nodes = this.list.childNodes;
         let l = nodes.length;
-
         while (l--) {
             removeClass(nodes[l], `${cssName}__option--focused focused focus`);
             nodes[l].setAttribute('aria-selected', 'false');
@@ -633,7 +632,7 @@ class AriaAutocomplete {
         this.resetOptionAttributes();
 
         // if negative index, or no options available, focus on input
-        let options = this.list.childNodes;
+        const options = this.list.childNodes;
         if (index < 0 || !options || !options.length) {
             this.currentSelectedIndex = -1;
             // focus on input, only if event was from another element
@@ -651,10 +650,10 @@ class AriaAutocomplete {
         }
 
         // if option found, focus...
-        let toFocus = options[index];
+        const toFocus = options[index];
         if (toFocus && typeof toFocus.getAttribute('tabindex') === 'string') {
             this.currentSelectedIndex = index;
-            let toAdd = `${this.cssNameSpace}__option--focused focused focus`;
+            const toAdd = `${this.cssNameSpace}__option--focused focused focus`;
             addClass(toFocus, toAdd);
             toFocus.setAttribute('aria-selected', 'true');
             toFocus.focus();
@@ -669,16 +668,18 @@ class AriaAutocomplete {
      * @description set values and dispatch events based on any DOM elements in the selected array
      */
     setSourceElementValues() {
-        let valToSet = [];
+        const valToSet = [];
         for (let i = 0, l = this.selected.length; i < l; i += 1) {
-            let entry = this.selected[i];
+            const entry = this.selected[i];
             valToSet.push(entry.value);
             setElementState(entry.element, true, this); // element processing
         }
 
         // set original input value
         if (this.elementIsInput) {
-            let valToSetString = valToSet.join(this.options.multipleSeparator);
+            const valToSetString = valToSet.join(
+                this.options.multipleSeparator
+            );
             if (valToSetString !== this.element.value) {
                 this.element.value = valToSetString;
                 dispatchEvent(this.element, 'change');
@@ -710,8 +711,7 @@ class AriaAutocomplete {
         }
 
         // generate new object from the selected item in case the original source gets altered
-        let option = mergeObjects(this.filteredSource[index]);
-
+        const option = mergeObjects(this.filteredSource[index]);
         // detect if selected option is already in selected array
         let l = this.selected.length;
         let alreadySelected = false;
@@ -758,10 +758,10 @@ class AriaAutocomplete {
         if (!this.multiple || !this.selected.length) {
             return results;
         }
-        let toReturn = [];
+        const toReturn = [];
         resultsLoop: for (let i = 0, l = results.length; i < l; i += 1) {
-            let selected = this.selected;
-            let result = results[i];
+            const selected = this.selected;
+            const result = results[i];
             for (let j = 0, k = selected.length; j < k; j += 1) {
                 let labelMatch = result.label === selected[j].label;
                 if (labelMatch && result.value === selected[j].value) {
@@ -778,23 +778,23 @@ class AriaAutocomplete {
      * @param {Array} results
      */
     setListOptions(results) {
-        let toShow = [];
-        let optionId = this.ids.OPTION;
-        let cssName = this.cssNameSpace;
-        let mapping = this.options.sourceMapping;
-        // if in multiple mode, exclude items already in the selected array
-        let updated = this.removeSelectedFromResults(results);
-        // allow callback to alter the response before rendering
-        let callback = this.triggerOptionCallback('onResponse', updated);
+        const toShow = [];
 
         // now commit to setting the filtered source
+        const mapping = this.options.sourceMapping;
+        // if in multiple mode, exclude items already in the selected array
+        const updated = this.removeSelectedFromResults(results);
+        // allow callback to alter the response before rendering
+        const callback = this.triggerOptionCallback('onResponse', updated);
         this.filteredSource = callback
             ? processSourceArray(callback, mapping)
             : updated;
-        let length = this.filteredSource.length;
 
         // build up the list html
-        let maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
+        const optionId = this.ids.OPTION;
+        const cssName = this.cssNameSpace;
+        const length = this.filteredSource.length;
+        const maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
         for (let i = 0; i < length && i < maxResults; i += 1) {
             toShow.push(
                 `<li tabindex="-1" aria-selected="false" role="option" class="${cssName}__option" ` +
@@ -814,7 +814,7 @@ class AriaAutocomplete {
 
         // no results text handling
         let announce;
-        let noText = this.options.noResultsText;
+        const noText = this.options.noResultsText;
         if (!toShow.length && typeof noText === 'string' && noText.length) {
             announce = noText;
             let optionClass = `${cssName}__option`;
@@ -834,7 +834,7 @@ class AriaAutocomplete {
 
         // render the list, only if we have to
         // time taken for string comparison is worth it to not have to re-parse and re-render the list
-        let newListHtml = toShow.join('');
+        const newListHtml = toShow.join('');
         if (this.currentListHtml !== newListHtml) {
             this.currentListHtml = newListHtml;
             // innerHTML vs insertAdjacentHtml performance in old IE ?
@@ -863,25 +863,24 @@ class AriaAutocomplete {
      * @param {Boolean=} isFirstCall
      */
     handleAsync(value, isFirstCall = false) {
-        let xhr = new XMLHttpRequest();
-        let encode = encodeURIComponent;
-        let isShowAll = this.forceShowAll;
-        let unlimited = isShowAll || isFirstCall;
-        let baseAmount = this.multiple ? this.selected.length : 0;
-        let ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
+        // abort any current call first
+        if (this.xhr) {
+            this.xhr.abort();
+        }
+
+        const xhr = new XMLHttpRequest();
+        const encode = encodeURIComponent;
+        const isShowAll = this.forceShowAll;
+        const unlimited = isShowAll || isFirstCall;
+        const context = isFirstCall ? null : this.api;
+        const baseAmount = this.multiple ? this.selected.length : 0;
+        const ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
         let url =
             this.source +
             ampersandOrQuestionMark +
             `${encode(this.options.asyncQueryParam)}=${encode(value)}&` +
             `${encode(this.options.asyncMaxResultsParam)}=` +
             `${unlimited ? 9999 : baseAmount + this.options.maxResults}`;
-
-        // abort any current call first
-        if (this.xhr) {
-            this.xhr.abort();
-        }
-
-        let context = isFirstCall ? null : this.api;
         url = this.triggerOptionCallback('onAsyncPrep', [url], context) || url;
 
         xhr.open('GET', url);
@@ -890,14 +889,14 @@ class AriaAutocomplete {
                 if (xhr.status === 200) {
                     // return forceShowAll to previous state before the options render
                     this.forceShowAll = isShowAll;
-                    let callbackResponse = this.triggerOptionCallback(
+                    const callbackResponse = this.triggerOptionCallback(
                         'onAsyncSuccess',
                         [value, xhr],
                         context
                     );
-                    let mapping = this.options.sourceMapping;
-                    let source = callbackResponse || xhr.responseText;
-                    let items = processSourceArray(source, mapping, false);
+                    const mapping = this.options.sourceMapping;
+                    const source = callbackResponse || xhr.responseText;
+                    const items = processSourceArray(source, mapping, false);
 
                     if (isFirstCall) {
                         this.prepSelectedFromArray(items);
@@ -928,12 +927,10 @@ class AriaAutocomplete {
             return;
         }
 
-        let forceShowAll = this.forceShowAll;
-        let callbackResponse = this.triggerOptionCallback('onSearch', [value]);
-        let toReturn = [];
-
         // allow onSearch callback to affect the searched value
         // only permitted when not a forceShowAll case
+        let forceShowAll = this.forceShowAll;
+        let callbackResponse = this.triggerOptionCallback('onSearch', [value]);
         if (!forceShowAll && typeof callbackResponse === 'string') {
             value = callbackResponse;
         }
@@ -965,6 +962,7 @@ class AriaAutocomplete {
         }
 
         // existing list handling
+        const toReturn = [];
         if (this.source && this.source.length) {
             let check = ['ariaAutocompleteCleanedLabel'];
             if (!forceShowAll) {
@@ -975,14 +973,9 @@ class AriaAutocomplete {
                 }
             }
             for (let i = 0, l = this.source.length; i < l; i += 1) {
-                let entry = this.source[i];
+                const entry = this.source[i];
                 if (forceShowAll || searchVarPropsFor(entry, check, value)) {
-                    toReturn.push({
-                        element: entry.element,
-                        staticSourceIndex: i,
-                        label: entry.label,
-                        value: entry.value
-                    });
+                    toReturn.push(entry);
                 }
             }
         }
@@ -997,7 +990,7 @@ class AriaAutocomplete {
         if (this.filterTimer) {
             clearTimeout(this.filterTimer);
         }
-        let nameSpace = this.cssNameSpace;
+        const nameSpace = this.cssNameSpace;
         removeClass(this.wrapper, `${nameSpace}__wrapper--loading loading`);
         removeClass(this.input, `${nameSpace}__input--loading loading`);
         this.filtering = false;
@@ -1010,8 +1003,8 @@ class AriaAutocomplete {
      * @param {Boolean=} runNow
      */
     filterPrep(e, doValueOverrideCheck = false, runNow = false) {
-        let forceShowAll = this.forceShowAll;
-        let delay = forceShowAll || runNow ? 0 : this.options.delay;
+        const forceShowAll = this.forceShowAll;
+        const delay = forceShowAll || runNow ? 0 : this.options.delay;
 
         // clear timers
         this.cancelFilterPrep();
@@ -1047,10 +1040,8 @@ class AriaAutocomplete {
                 modifier = keydown && (e.altKey || e.ctrlKey || e.metaKey); // allow shift key, just in case...
             } catch (e) {}
 
-            // if value to use matches last used search term, do nothing
-            let equalVals = value === '' ? false : value === this.term;
-
             // prevent search being run again with the same value
+            const equalVals = value === '' ? false : value === this.term;
             if (!equalVals || (equalVals && !this.menuOpen && !modifier)) {
                 let n = this.cssNameSpace;
                 addClass(this.wrapper, `${n}__wrapper--loading loading`);
@@ -1089,15 +1080,15 @@ class AriaAutocomplete {
      * @param {Boolean=} force - fire instantly and force blurring out of the component
      */
     handleComponentBlur(event, force = false) {
-        let delay = force ? 0 : 100;
         if (this.componentBlurTimer) {
             clearTimeout(this.componentBlurTimer);
         }
         // use a timeout to ensure this blur fires after other focus events
         // and in case the user focuses back in immediately
+        const delay = force ? 0 : 100;
         this.componentBlurTimer = setTimeout(() => {
             // do nothing if blurring to an element within the list
-            let activeElem = document.activeElement;
+            const activeElem = document.activeElement;
             if (
                 !force &&
                 activeElem &&
@@ -1116,7 +1107,7 @@ class AriaAutocomplete {
             }
 
             // confirmOnBlur behaviour
-            let isQueryIn = this.indexOfQueryIn.bind(this);
+            const isQueryIn = this.indexOfQueryIn.bind(this);
             if (!force && this.options.confirmOnBlur && this.menuOpen) {
                 // if blurring from an option (currentSelectedIndex > -1), select it
                 let toUse = this.currentSelectedIndex;
@@ -1132,8 +1123,8 @@ class AriaAutocomplete {
 
             // in single select case, if current value and chosen value differ, clear selected and input value
             if (!this.multiple && isQueryIn(this.selected) === -1) {
-                let isInputOrDdl = this.elementIsInput || this.elementIsSelect;
-                if (isInputOrDdl && this.element.value !== '') {
+                const inputOrDdl = this.elementIsInput || this.elementIsSelect;
+                if (inputOrDdl && this.element.value !== '') {
                     this.element.value = '';
                     dispatchEvent(this.element, 'change');
                 }
@@ -1165,7 +1156,7 @@ class AriaAutocomplete {
     handleEnterKey(event) {
         // if in multiple mode, and event target was a selected item, remove it
         if (this.isSelectedElem(event.target)) {
-            let option = event.target.ariaAutocompleteSelectedOption;
+            const option = event.target.ariaAutocompleteSelectedOption;
             return this.removeEntryFromSelected(option);
         }
 
@@ -1208,7 +1199,7 @@ class AriaAutocomplete {
         }
         // move focus to downward option
         if (this.menuOpen && !this.filtering) {
-            let current = this.currentSelectedIndex;
+            const current = this.currentSelectedIndex;
             if (typeof current !== 'number' || current < 0) {
                 this.setOptionFocus(event, 0);
             } else {
@@ -1223,7 +1214,7 @@ class AriaAutocomplete {
      */
     handleUpArrowKey(event) {
         event.preventDefault();
-        let usable = !this.disabled && this.menuOpen;
+        const usable = !this.disabled && this.menuOpen;
         if (usable && typeof this.currentSelectedIndex === 'number') {
             this.setOptionFocus(event, this.currentSelectedIndex - 1);
         }
@@ -1246,7 +1237,7 @@ class AriaAutocomplete {
         }
 
         // on backspace, if using empty input in multiple mode, delete last selected entry
-        let selectedLength = this.selected && this.selected.length;
+        const selectedLength = this.selected && this.selected.length;
         if (
             this.options.deleteOnBackspace &&
             this.input.value === '' &&
@@ -1260,8 +1251,8 @@ class AriaAutocomplete {
         }
 
         // any printable character not on input, return focus to input
-        let printableKey = isPrintableKey(event.keyCode);
-        let focusInput = !targetIsInput && printableKey;
+        const printableKey = isPrintableKey(event.keyCode);
+        const focusInput = !targetIsInput && printableKey;
         if (focusInput) {
             this.input.focus();
         }
@@ -1343,13 +1334,13 @@ class AriaAutocomplete {
                 return;
             }
             if (this.isSelectedElem(event.target)) {
-                let option = event.target.ariaAutocompleteSelectedOption;
+                const option = event.target.ariaAutocompleteSelectedOption;
                 this.removeEntryFromSelected(option);
             }
         });
 
-        let wrapperFocusClasses = `${this.cssNameSpace}__wrapper--focused focused focus`;
-        let inputFocusClasses = `${this.cssNameSpace}__input--focused focused focus`;
+        const wrapperFocusClasses = `${this.cssNameSpace}__wrapper--focused focused focus`;
+        const inputFocusClasses = `${this.cssNameSpace}__input--focused focused focus`;
         // when blurring out of input, remove classes
         this.input.addEventListener('blur', () => {
             removeClass(this.wrapper, wrapperFocusClasses);
@@ -1362,7 +1353,7 @@ class AriaAutocomplete {
         });
         // when specifically clicking on input, if menu is closed, and value is long enough, search
         this.input.addEventListener('click', event => {
-            let open = this.menuOpen;
+            const open = this.menuOpen;
             if (!open && this.input.value.length >= this.options.minLength) {
                 this.filterPrep(event, true);
             }
@@ -1391,9 +1382,9 @@ class AriaAutocomplete {
         // trigger options selection
         this.list.addEventListener('click', event => {
             if (event.target !== this.list) {
-                let childNodes = this.list.childNodes;
+                const childNodes = this.list.childNodes;
                 if (childNodes.length) {
-                    let nodeIndex = [].indexOf.call(childNodes, event.target);
+                    const nodeIndex = [].indexOf.call(childNodes, event.target);
                     this.handleOptionSelect(event, nodeIndex);
                 }
             }
@@ -1412,14 +1403,16 @@ class AriaAutocomplete {
         this.multiple = true; // force multiple in this case
         // reset source and use checkboxes
         this.source = [];
-        let elements = this.element.querySelectorAll('input[type="checkbox"]');
+        const elements = this.element.querySelectorAll(
+            'input[type="checkbox"]'
+        );
         for (let i = 0, l = elements.length; i < l; i += 1) {
-            let checkbox = elements[i];
+            const checkbox = elements[i];
             // must have a value other than empty string
             if (!checkbox.value) {
                 continue;
             }
-            let toPush = { element: checkbox, value: checkbox.value };
+            const toPush = { element: checkbox, value: checkbox.value };
             // label searching
             let label = checkbox.closest('label');
             if (!label && checkbox.id) {
@@ -1448,14 +1441,14 @@ class AriaAutocomplete {
         this.multiple = this.element.multiple; // force multiple to match select
         // reset source and use options
         this.source = [];
-        let options = this.element.querySelectorAll('option');
+        const options = this.element.querySelectorAll('option');
         for (let i = 0, l = options.length; i < l; i += 1) {
-            let option = options[i];
+            const option = options[i];
             // must have a value other than empty string
             if (!option.value) {
                 continue;
             }
-            let toPush = {
+            const toPush = {
                 element: option,
                 value: option.value,
                 label: option.textContent
@@ -1474,22 +1467,22 @@ class AriaAutocomplete {
      * @param {Object[]} source
      */
     prepSelectedFromArray(source) {
-        let value = this.elementIsInput && this.element.value;
+        const value = this.elementIsInput && this.element.value;
         if (value && source && source.length) {
             // account for multiple mode
-            let multiple = this.options.multiple;
-            let separator = this.options.multipleSeparator;
-            let valueArr = multiple ? value.split(separator) : [value];
+            const multiple = this.options.multiple;
+            const separator = this.options.multipleSeparator;
+            const valueArr = multiple ? value.split(separator) : [value];
 
             for (let i = 0, l = valueArr.length; i < l; i += 1) {
-                let val = valueArr[i];
-                let isQueryIn = this.indexOfQueryIn;
+                const val = valueArr[i];
+                const isQueryIn = this.indexOfQueryIn;
                 // make sure it is not already in the selected array
-                let isInSelected = isQueryIn(this.selected, val, 'value') > -1;
+                const isSelected = isQueryIn(this.selected, val, 'value') > -1;
 
                 // but is in the source array (check via 'value', not 'label')
-                if (!isInSelected) {
-                    let indexInSource = isQueryIn(source, val, 'value');
+                if (!isSelected) {
+                    const indexInSource = isQueryIn(source, val, 'value');
                     if (indexInSource > -1) {
                         this.selected.push(source[indexInSource]);
                     }
@@ -1502,7 +1495,7 @@ class AriaAutocomplete {
      * @description adjust starting source array to format needed, and set selected
      */
     prepListSourceArray() {
-        let mapping = this.options.sourceMapping;
+        const mapping = this.options.sourceMapping;
         this.source = processSourceArray(this.source, mapping);
         this.prepSelectedFromArray(this.source);
     }
@@ -1569,7 +1562,7 @@ class AriaAutocomplete {
         if (setAriaAttrs) {
             // update corresponding label to now focus on the new input
             if (this.ids.ELEMENT) {
-                let label = document.querySelector(
+                const label = document.querySelector(
                     '[for="' + this.ids.ELEMENT + '"]'
                 );
                 if (label) {
@@ -1579,11 +1572,11 @@ class AriaAutocomplete {
             }
 
             // update aria-describedby and aria-labelledby attributes if present
-            let describedBy = this.element.getAttribute('aria-describedby');
+            const describedBy = this.element.getAttribute('aria-describedby');
             if (describedBy) {
                 this.input.setAttribute('aria-describedby', describedBy);
             }
-            let labelledBy = this.element.getAttribute('aria-labelledby');
+            const labelledBy = this.element.getAttribute('aria-labelledby');
             if (labelledBy) {
                 this.input.setAttribute('aria-labelledby', labelledBy);
             }
@@ -1615,20 +1608,16 @@ class AriaAutocomplete {
      * @description build and insert component html structure
      */
     setHtml() {
-        let o = this.options;
-        let cssName = this.cssNameSpace;
-        let explainerText = o.srListLabelText;
-        let name = o.name ? ` ${o.name}` : ``;
-        let listClass = o.listClassName ? ` ${o.listClassName}` : '';
-        let inputClass = o.inputClassName ? ` ${o.inputClassName}` : '';
-        let wrapperClass = o.wrapperClassName ? ` ${o.wrapperClassName}` : '';
-        let explainer = explainerText ? ` aria-label="${explainerText}"` : '';
-
-        let newHtml = [
+        const o = this.options;
+        const cssName = this.cssNameSpace;
+        const wrapperClass = o.wrapperClassName ? ` ${o.wrapperClassName}` : '';
+        const newHtml = [
             `<div id="${this.ids.WRAPPER}" class="${cssName}__wrapper${wrapperClass}">`
         ];
 
         // add input
+        const name = o.name ? ` ${o.name}` : ``;
+        const inputClass = o.inputClassName ? ` ${o.inputClassName}` : '';
         newHtml.push(
             `<input type="text" autocomplete="off" aria-expanded="false" aria-autocomplete="list" ` +
                 `role="combobox" id="${this.ids.INPUT}" placeholder="${o.placeholder}" ` +
@@ -1644,6 +1633,9 @@ class AriaAutocomplete {
             );
         }
         // add the list holder
+        const explainerText = o.srListLabelText;
+        const listClass = o.listClassName ? ` ${o.listClassName}` : '';
+        const explainer = explainerText ? ` aria-label="${explainerText}"` : '';
         newHtml.push(
             `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" role="listbox" ` +
                 `hidden="hidden"${explainer}></ul>`
@@ -1674,7 +1666,7 @@ class AriaAutocomplete {
             filter: val => this.filter.call(val)
         };
 
-        let a = [
+        const a = [
             'options',
             'destroy',
             'enable',
@@ -1701,7 +1693,7 @@ class AriaAutocomplete {
      */
     destroy() {
         // return original label 'for' attribute back to element id
-        let label = document.querySelector('[for="' + this.ids.INPUT + '"]');
+        const label = document.querySelector('[for="' + this.ids.INPUT + '"]');
         if (label && label.ariaAutocompleteOriginalFor) {
             label.setAttribute('for', label.ariaAutocompleteOriginalFor);
             delete label.ariaAutocompleteOriginalFor;

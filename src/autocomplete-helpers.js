@@ -71,10 +71,11 @@ const REGEX_MAKE_SAFE = /[\-\[\]{}()*+?.,\\\^$|#\s]/g;
  * @returns {String}
  */
 export function cleanString(theString, makeSafeForRegex = false) {
-    theString = trimString(theString).toLowerCase(); // case insensitive
-    theString = theString.replace(REGEX_TO_IGNORE, ''); // ignore quotes, commas, colons, and hyphens
-    theString = theString.replace(REGEX_AMPERSAND, 'and'); // treat & and 'and' as the same
-    theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
+    theString = trimString(theString)
+        .toLowerCase() // case insensitive
+        .replace(REGEX_TO_IGNORE, '') // ignore quotes, commas, colons, and hyphens
+        .replace(REGEX_AMPERSAND, 'and') // treat & and 'and' as the same
+        .replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
     // make safe for regex searching
     if (makeSafeForRegex) {
         theString = theString.replace(REGEX_MAKE_SAFE, '\\$&');
@@ -105,9 +106,9 @@ export function isPrintableKey(keyCode) {
  * @returns {Object}
  */
 export function mergeObjects(...args) {
-    let n = {};
+    const n = {};
     for (let i = 0, l = args.length; i < l; i += 1) {
-        let o = args[i];
+        const o = args[i];
         for (let p in o) {
             if (o.hasOwnProperty(p) && typeof o[p] !== 'undefined') {
                 n[p] = o[p];
@@ -124,9 +125,9 @@ export function mergeObjects(...args) {
  */
 export function dispatchEvent(element, event) {
     if ('createEvent' in document) {
-        let e = document.createEvent('HTMLEvents');
-        e.initEvent(event, true, true);
-        element.dispatchEvent(e);
+        const htmlEvents = document.createEvent('HTMLEvents');
+        htmlEvents.initEvent(event, true, true);
+        element.dispatchEvent(htmlEvents);
     } else {
         element.fireEvent('on' + event);
     }
@@ -173,9 +174,9 @@ export function setElementState(element, selected, instance) {
  * @returns {Array}
  */
 export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
-    let toReturn = [];
-    let mapValue = mapping['value'];
-    let mapLabel = mapping['label'];
+    const toReturn = [];
+    const mapValue = mapping['value'];
+    const mapLabel = mapping['label'];
     for (let i = 0, l = sourceArray.length; i < l; i += 1) {
         let result = {};
         let entry = sourceArray[i];
@@ -187,8 +188,8 @@ export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
         else {
             // generate new object to not modify original
             result = mergeObjects(entry);
-            let value = result[mapValue] || result.value || result.label;
-            let label = result[mapLabel] || result.label || result.value;
+            const value = result[mapValue] || result.value || result.label;
+            const label = result[mapLabel] || result.label || result.value;
             result.value = (value || '').toString();
             result.label = (label || '').toString();
         }
@@ -222,7 +223,7 @@ export function setCss(element, s) {
         return;
     }
     for (let i in s) {
-        let style = typeof s[i] === 'number' ? s[i] + 'px' : s[i];
+        const style = typeof s[i] === 'number' ? s[i] + 'px' : s[i];
         element.style[i] = style + ''; // force to be a string
     }
 }
@@ -237,7 +238,7 @@ export function transferStyles(from, to, properties) {
     if (!from || !to) {
         return;
     }
-    let fromStyles = getComputedStyle(from);
+    const fromStyles = getComputedStyle(from);
     let styles = {};
 
     if (properties && properties.length) {
@@ -277,10 +278,11 @@ const searchPropFor = (prop, regexSafeQuery, name) => {
  * @param {Object} obj
  * @param {String[]} props
  * @param {String} query
+ * @param {Boolean=} makeQuerySafe
  * @returns {Boolean}
  */
-export function searchVarPropsFor(obj, props, query, makeSafe = false) {
-    if (makeSafe) {
+export function searchVarPropsFor(obj, props, query, makeQuerySafe = false) {
+    if (makeQuerySafe) {
         query = cleanString(query, true);
     }
 
@@ -316,12 +318,12 @@ export function searchVarPropsFor(obj, props, query, makeSafe = false) {
  */
 export function removeDuplicatesAndLabel(arr) {
     // remove `label` (we will be using `ariaAutocompleteCleanedLabel`) and duplicates from props array
-    let result = [];
+    const result = [];
     for (let i = 0, l = arr.length; i < l; i += 1) {
         if (typeof arr[i] !== 'string') {
             continue;
         }
-        let str = trimString(arr[i]);
+        const str = trimString(arr[i]);
         let proceed = str !== 'label';
         let j = result.length;
         while (proceed && j--) {

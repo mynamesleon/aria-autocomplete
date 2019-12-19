@@ -235,13 +235,10 @@ var REGEX_MAKE_SAFE = /[\-\[\]{}()*+?.,\\\^$|#\s]/g;
 
 function cleanString(theString) {
   var makeSafeForRegex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  theString = trimString(theString).toLowerCase(); // case insensitive
-
-  theString = theString.replace(REGEX_TO_IGNORE, ''); // ignore quotes, commas, colons, and hyphens
-
-  theString = theString.replace(REGEX_AMPERSAND, 'and'); // treat & and 'and' as the same
-
-  theString = theString.replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
+  theString = trimString(theString).toLowerCase() // case insensitive
+  .replace(REGEX_TO_IGNORE, '') // ignore quotes, commas, colons, and hyphens
+  .replace(REGEX_AMPERSAND, 'and') // treat & and 'and' as the same
+  .replace(REGEX_DUPE_WHITESPACE, ' '); // ignore duplicate whitespace
   // make safe for regex searching
 
   if (makeSafeForRegex) {
@@ -298,9 +295,9 @@ function mergeObjects() {
 
 function dispatchEvent(element, event) {
   if ('createEvent' in document) {
-    var e = document.createEvent('HTMLEvents');
-    e.initEvent(event, true, true);
-    element.dispatchEvent(e);
+    var htmlEvents = document.createEvent('HTMLEvents');
+    htmlEvents.initEvent(event, true, true);
+    element.dispatchEvent(htmlEvents);
   } else {
     element.fireEvent('on' + event);
   }
@@ -464,14 +461,15 @@ var searchPropFor = function searchPropFor(prop, regexSafeQuery, name) {
  * @param {Object} obj
  * @param {String[]} props
  * @param {String} query
+ * @param {Boolean=} makeQuerySafe
  * @returns {Boolean}
  */
 
 
 function searchVarPropsFor(obj, props, query) {
-  var makeSafe = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+  var makeQuerySafe = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
-  if (makeSafe) {
+  if (makeQuerySafe) {
     query = cleanString(query, true);
   }
 
@@ -676,10 +674,9 @@ function () {
           }
         } // any other width affecting character
         else if ((0, _autocompleteHelpers.isPrintableKey)(keyCode)) {
-            var shift = event.shiftKey;
             var character = String.fromCharCode(keyCode);
 
-            if (shift) {
+            if (event.shiftKey) {
               character = character.toUpperCase();
             } else {
               character = character.toLowerCase();
@@ -1396,12 +1393,12 @@ function () {
 
       var ids = []; // get selected elements again, as some may have been added or removed
 
-      current = this.getSelectedElems();
+      var nowSelectedElems = this.getSelectedElems();
 
-      for (var _i2 = 0, _l3 = current.length; _i2 < _l3; _i2 += 1) {
+      for (var _i2 = 0, _l3 = nowSelectedElems.length; _i2 < _l3; _i2 += 1) {
         var id = "".concat(this.ids.OPTION_SELECTED, "-").concat(_i2);
 
-        current[_i2].setAttribute('id', id);
+        nowSelectedElems[_i2].setAttribute('id', id);
 
         ids.push(id);
       }
@@ -1625,18 +1622,18 @@ function () {
   }, {
     key: "setListOptions",
     value: function setListOptions(results) {
-      var toShow = [];
-      var optionId = this.ids.OPTION;
-      var cssName = this.cssNameSpace;
+      var toShow = []; // now commit to setting the filtered source
+
       var mapping = this.options.sourceMapping; // if in multiple mode, exclude items already in the selected array
 
       var updated = this.removeSelectedFromResults(results); // allow callback to alter the response before rendering
 
-      var callback = this.triggerOptionCallback('onResponse', updated); // now commit to setting the filtered source
+      var callback = this.triggerOptionCallback('onResponse', updated);
+      this.filteredSource = callback ? (0, _autocompleteHelpers.processSourceArray)(callback, mapping) : updated; // build up the list html
 
-      this.filteredSource = callback ? (0, _autocompleteHelpers.processSourceArray)(callback, mapping) : updated;
-      var length = this.filteredSource.length; // build up the list html
-
+      var optionId = this.ids.OPTION;
+      var cssName = this.cssNameSpace;
+      var length = this.filteredSource.length;
       var maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
 
       for (var i = 0; i < length && i < maxResults; i += 1) {
@@ -1707,19 +1704,20 @@ function () {
       var _this2 = this;
 
       var isFirstCall = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      var xhr = new XMLHttpRequest();
-      var encode = encodeURIComponent;
-      var isShowAll = this.forceShowAll;
-      var unlimited = isShowAll || isFirstCall;
-      var baseAmount = this.multiple ? this.selected.length : 0;
-      var ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
-      var url = this.source + ampersandOrQuestionMark + "".concat(encode(this.options.asyncQueryParam), "=").concat(encode(value), "&") + "".concat(encode(this.options.asyncMaxResultsParam), "=") + "".concat(unlimited ? 9999 : baseAmount + this.options.maxResults); // abort any current call first
 
+      // abort any current call first
       if (this.xhr) {
         this.xhr.abort();
       }
 
+      var xhr = new XMLHttpRequest();
+      var encode = encodeURIComponent;
+      var isShowAll = this.forceShowAll;
+      var unlimited = isShowAll || isFirstCall;
       var context = isFirstCall ? null : this.api;
+      var baseAmount = this.multiple ? this.selected.length : 0;
+      var ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
+      var url = this.source + ampersandOrQuestionMark + "".concat(encode(this.options.asyncQueryParam), "=").concat(encode(value), "&") + "".concat(encode(this.options.asyncMaxResultsParam), "=") + "".concat(unlimited ? 9999 : baseAmount + this.options.maxResults);
       url = this.triggerOptionCallback('onAsyncPrep', [url], context) || url;
       xhr.open('GET', url);
 
@@ -1767,12 +1765,12 @@ function () {
       if (typeof value !== 'string') {
         this.cancelFilterPrep();
         return;
-      }
+      } // allow onSearch callback to affect the searched value
+      // only permitted when not a forceShowAll case
+
 
       var forceShowAll = this.forceShowAll;
       var callbackResponse = this.triggerOptionCallback('onSearch', [value]);
-      var toReturn = []; // allow onSearch callback to affect the searched value
-      // only permitted when not a forceShowAll case
 
       if (!forceShowAll && typeof callbackResponse === 'string') {
         value = callbackResponse;
@@ -1805,6 +1803,8 @@ function () {
       } // existing list handling
 
 
+      var toReturn = [];
+
       if (this.source && this.source.length) {
         var check = ['ariaAutocompleteCleanedLabel'];
 
@@ -1821,12 +1821,7 @@ function () {
           var entry = this.source[i];
 
           if (forceShowAll || (0, _autocompleteHelpers.searchVarPropsFor)(entry, check, value)) {
-            toReturn.push({
-              element: entry.element,
-              staticSourceIndex: i,
-              label: entry.label,
-              value: entry.value
-            });
+            toReturn.push(entry);
           }
         }
       }
@@ -1893,10 +1888,10 @@ function () {
         try {
           var keydown = e && e.type === 'keydown';
           modifier = keydown && (e.altKey || e.ctrlKey || e.metaKey); // allow shift key, just in case...
-        } catch (e) {} // if value to use matches last used search term, do nothing
+        } catch (e) {} // prevent search being run again with the same value
 
 
-        var equalVals = value === '' ? false : value === _this4.term; // prevent search being run again with the same value
+        var equalVals = value === '' ? false : value === _this4.term;
 
         if (!equalVals || equalVals && !_this4.menuOpen && !modifier) {
           var n = _this4.cssNameSpace;
@@ -1950,7 +1945,6 @@ function () {
       var _this6 = this;
 
       var force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      var delay = force ? 0 : 100;
 
       if (this.componentBlurTimer) {
         clearTimeout(this.componentBlurTimer);
@@ -1958,6 +1952,7 @@ function () {
       // and in case the user focuses back in immediately
 
 
+      var delay = force ? 0 : 100;
       this.componentBlurTimer = setTimeout(function () {
         // do nothing if blurring to an element within the list
         var activeElem = document.activeElement;
@@ -1997,9 +1992,9 @@ function () {
 
 
         if (!_this6.multiple && isQueryIn(_this6.selected) === -1) {
-          var isInputOrDdl = _this6.elementIsInput || _this6.elementIsSelect;
+          var inputOrDdl = _this6.elementIsInput || _this6.elementIsSelect;
 
-          if (isInputOrDdl && _this6.element.value !== '') {
+          if (inputOrDdl && _this6.element.value !== '') {
             _this6.element.value = '';
             (0, _autocompleteHelpers.dispatchEvent)(_this6.element, 'change');
           }
@@ -2406,9 +2401,9 @@ function () {
           var val = valueArr[i];
           var isQueryIn = this.indexOfQueryIn; // make sure it is not already in the selected array
 
-          var isInSelected = isQueryIn(this.selected, val, 'value') > -1; // but is in the source array (check via 'value', not 'label')
+          var isSelected = isQueryIn(this.selected, val, 'value') > -1; // but is in the source array (check via 'value', not 'label')
 
-          if (!isInSelected) {
+          if (!isSelected) {
             var indexInSource = isQueryIn(source, val, 'value');
 
             if (indexInSource > -1) {
@@ -2554,14 +2549,11 @@ function () {
     value: function setHtml() {
       var o = this.options;
       var cssName = this.cssNameSpace;
-      var explainerText = o.srListLabelText;
-      var name = o.name ? " ".concat(o.name) : "";
-      var listClass = o.listClassName ? " ".concat(o.listClassName) : '';
-      var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
       var wrapperClass = o.wrapperClassName ? " ".concat(o.wrapperClassName) : '';
-      var explainer = explainerText ? " aria-label=\"".concat(explainerText, "\"") : '';
       var newHtml = ["<div id=\"".concat(this.ids.WRAPPER, "\" class=\"").concat(cssName, "__wrapper").concat(wrapperClass, "\">")]; // add input
 
+      var name = o.name ? " ".concat(o.name) : "";
+      var inputClass = o.inputClassName ? " ".concat(o.inputClassName) : '';
       newHtml.push("<input type=\"text\" autocomplete=\"off\" aria-expanded=\"false\" aria-autocomplete=\"list\" " + "role=\"combobox\" id=\"".concat(this.ids.INPUT, "\" placeholder=\"").concat(o.placeholder, "\" ") + "aria-owns=\"".concat(this.ids.LIST, "\" aria-placeholder=\"").concat(o.placeholder, "\" ") + "class=\"".concat(cssName, "__input").concat(inputClass, "\"").concat(name, " />")); // button to show all available options
 
       if (o.showAllControl) {
@@ -2569,6 +2561,9 @@ function () {
       } // add the list holder
 
 
+      var explainerText = o.srListLabelText;
+      var listClass = o.listClassName ? " ".concat(o.listClassName) : '';
+      var explainer = explainerText ? " aria-label=\"".concat(explainerText, "\"") : '';
       newHtml.push("<ul id=\"".concat(this.ids.LIST, "\" class=\"").concat(cssName, "__list").concat(listClass, "\" role=\"listbox\" ") + "hidden=\"hidden\"".concat(explainer, "></ul>")); // add the screen reader assistance element
 
       newHtml.push("<span class=\"sr-only ".concat(cssName, "__sr-only ").concat(cssName, "__sr-assistance\" ") + "id=\"".concat(this.ids.SR_ASSISTANCE, "\">").concat(o.srAssistiveText, "</span>")); // add element for added screen reader announcements

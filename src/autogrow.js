@@ -29,14 +29,14 @@ export default class AutoGrow {
      * @description get current user selection from within the input
      */
     getInputSelection() {
-        let result = {};
+        const result = {};
         if ('selectionStart' in this.input) {
             result.start = this.input.selectionStart;
             result.length = this.input.selectionEnd - result.start;
         } else if (document.selection) {
             this.input.focus();
-            let selection = document.selection.createRange();
-            let selectionLength = selection.text.length;
+            const selection = document.selection.createRange();
+            const selectionLength = selection.text.length;
             selection.moveStart('character', -this.input.value.length);
             result.start = selection.text.length - selectionLength;
             result.length = selectionLength;
@@ -99,13 +99,13 @@ export default class AutoGrow {
 
         let value = this.input.value;
         if (event.type && event.type.toLowerCase() === 'keydown') {
-            let keyCode = event.keyCode;
-            let keyCodeIsDelete = keyCode === 46;
-            let keyCodeIsBackspace = keyCode === 8;
+            const keyCode = event.keyCode;
+            const keyCodeIsDelete = keyCode === 46;
+            const keyCodeIsBackspace = keyCode === 8;
 
             // delete or backspace
             if (keyCodeIsDelete || keyCodeIsBackspace) {
-                let selection = this.getInputSelection();
+                const selection = this.getInputSelection();
                 if (selection.length) {
                     value =
                         value.substring(0, selection.start) +
@@ -123,9 +123,8 @@ export default class AutoGrow {
 
             // any other width affecting character
             else if (isPrintableKey(keyCode)) {
-                let shift = event.shiftKey;
                 let character = String.fromCharCode(keyCode);
-                if (shift) {
+                if (event.shiftKey) {
                     character = character.toUpperCase();
                 } else {
                     character = character.toLowerCase();
@@ -139,7 +138,7 @@ export default class AutoGrow {
             value = placeholder;
         }
 
-        let width = this.measureString(value) + 4;
+        const width = this.measureString(value) + 4;
         if (width !== this.currentWidth) {
             this.currentWidth = width;
             this.input.style.width = `${width}px`;

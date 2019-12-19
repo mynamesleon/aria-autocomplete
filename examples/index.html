@@ -221,7 +221,7 @@ new AriaAutocomplete(element, {
                     <p>If the autocomplete is initialised on an input, which has a starting value, the source function will also be called immediately with that value passed to it. In this case, the render function expects an Array of possible entries to check that starting value against, so that it can internally determine what the starting label (or multi-select elements) should be.</p>
                     <p>This example <b>searches based on each country's 3 letter country code</b>, instead of its name, e.g. "DZA" for "Algeria", or "GBR" for the United Kingdom.</p>
                     <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively - so this will also initialise with two values already selected.</p>
-                    <label for="countrylist-function">Select up to 4 countries</label>
+                    <label for="countrylist-function">Select up to 4 countries (search by country code)</label>
                     <input type="text" value="GLP,ZWE" id="countrylist-function" />
                     <script>
                         new AriaAutocomplete(document.getElementById('countrylist-function'), {
