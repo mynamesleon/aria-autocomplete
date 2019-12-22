@@ -1,5 +1,5 @@
-export const CLEANED_LABEL = '_ariaAutocompleteCleanedLabel';
-export const SELECTED_OPTION = '_ariaAutocompleteSelectedOption';
+export const CLEANED_LABEL_PROP = '_ariaAutocompleteCleanedLabel';
+export const SELECTED_OPTION_PROP = '_ariaAutocompleteSelectedOption';
 
 /**
  * @description trim string helper
@@ -9,56 +9,52 @@ export function trimString(theString) {
     return theString == null ? '' : (theString + '').trim();
 }
 
+const getClass = elem =>
+    (elem.getAttribute && elem.getAttribute('class')) || '';
 /**
  * @description check if element has class - support pre `classList`
- * @param {Element} element - element to check class on
+ * @param {Element} elem
  * @param {String} className
  * @returns {Boolean}
  */
-export function hasClass(element, className) {
-    const e = element;
-    const cur = trimString(e.getAttribute && e.getAttribute('class'));
-    return ` ${cur} `.indexOf(` ${className} `) > -1;
+export function hasClass(elem, className) {
+    return ` ${getClass(elem)} `.indexOf(` ${className} `) > -1;
 }
 
 /**
  * @description add class(es) to element - support pre `classList`
- * @param {Element} element - element to add class(es) to
+ * @param {Element} elem
  * @param {String} classes - space delimitted class(es) to add
  */
-export function addClass(element, classes) {
-    const currentValue = trimString(
-        element.getAttribute && element.getAttribute('class')
-    );
-    const current = ' ' + currentValue + ' ';
+export function addClass(elem, classes) {
+    const curValue = getClass(elem);
+    const cur = ` ${curValue} `;
     let finalValue = '';
 
     for (let i = 0, cs = classes.split(' '), l = cs.length; i < l; i += 1) {
-        if (cs[i] !== '' && current.indexOf(' ' + cs[i] + ' ') === -1) {
+        if (cs[i] !== '' && cur.indexOf(` ${cs[i]} `) === -1) {
             finalValue += ' ' + cs[i];
         }
     }
-    if (currentValue !== (finalValue = trimString(currentValue + finalValue))) {
-        element.setAttribute('class', finalValue);
+    if (curValue !== (finalValue = (curValue + finalValue).trim())) {
+        elem.setAttribute('class', finalValue);
     }
 }
 
 /**
  * @description remove class(es) from element - support pre `classList`
- * @param {Element} element - element to add class(es) to
+ * @param {Element} elem
  * @param {String} classes - space delimitted class(es) to remove
  */
-export function removeClass(element, classes) {
-    const currentValue = trimString(
-        element.getAttribute && element.getAttribute('class')
-    );
-    let finalValue = ' ' + currentValue + ' ';
+export function removeClass(elem, classes) {
+    const curValue = getClass(elem);
+    let finalValue = ` ${curValue} `;
 
     for (let i = 0, cs = classes.split(' '), l = cs.length; i < l; i += 1) {
-        finalValue = finalValue.replace(' ' + cs[i] + ' ', ' ');
+        finalValue = finalValue.replace(` ${cs[i]} `, ' ');
     }
-    if (currentValue !== (finalValue = trimString(finalValue))) {
-        element.setAttribute('class', finalValue);
+    if (curValue !== (finalValue = finalValue.trim())) {
+        elem.setAttribute('class', finalValue);
     }
 }
 
@@ -84,23 +80,6 @@ export function cleanString(theString, makeSafeForRegex = false) {
         theString = theString.replace(REGEX_MAKE_SAFE, '\\$&');
     }
     return theString;
-}
-
-/**
- * @description check if keycode is for a printable/width-affecting character
- * @param {Number} keyCode
- * @returns {Boolean}
- */
-export function isPrintableKey(keyCode) {
-    return (
-        (keyCode >= 48 && keyCode <= 57) || // 0-9
-        (keyCode >= 65 && keyCode <= 90) || // a-z
-        (keyCode >= 96 && keyCode <= 111) || // numpad 0-9, numeric operators
-        (keyCode >= 186 && keyCode <= 222) || // semicolon, equal, comma, dash, etc.
-        keyCode === 32 || // space
-        keyCode === 8 || // backspace
-        keyCode === 46 // delete
-    );
 }
 
 /**
@@ -198,61 +177,11 @@ export function processSourceArray(sourceArray, mapping = {}, setCleanedLabel) {
         }
         // whether to set a cleaned label for static source filtering (in filter method)
         if (setCleanedLabel !== false) {
-            result[CLEANED_LABEL] = cleanString(result.label);
+            result[CLEANED_LABEL_PROP] = cleanString(result.label);
         }
         toReturn.push(result);
     }
     return toReturn;
-}
-
-const DIV = document.createElement('div');
-/**
- * @description convert HTML string into an element
- * @param {String} html
- * @returns {Element}
- */
-export function htmlToElement(html) {
-    DIV.innerHTML = trimString(html);
-    return DIV.firstChild;
-}
-
-/**
- * @description set styles on an element
- * @param {Element} element
- * @param {Object} s
- */
-export function setCss(element, s) {
-    if (!element) {
-        return;
-    }
-    for (let i in s) {
-        const style = typeof s[i] === 'number' ? s[i] + 'px' : s[i];
-        element.style[i] = style + ''; // force to be a string
-    }
-}
-
-/**
- * @description transfer styles from one Element to another
- * @param {Element} from
- * @param {Element} to
- * @param {Array=} properties
- */
-export function transferStyles(from, to, properties) {
-    if (!from || !to) {
-        return;
-    }
-    const fromStyles = getComputedStyle(from);
-    let styles = {};
-
-    if (properties && properties.length) {
-        for (let i = 0, l = properties.length; i < l; i += 1) {
-            styles[properties[i]] = fromStyles[properties[i]];
-        }
-    } else {
-        styles = fromStyles;
-    }
-
-    setCss(to, styles);
 }
 
 /**
@@ -263,7 +192,7 @@ export function transferStyles(from, to, properties) {
  */
 const searchPropFor = (prop, regexSafeQuery, name) => {
     if (typeof prop === 'string') {
-        if (name !== CLEANED_LABEL) {
+        if (name !== CLEANED_LABEL_PROP) {
             prop = cleanString(prop, false);
         }
         return prop.search(regexSafeQuery) !== -1;
@@ -320,7 +249,7 @@ export function searchVarPropsFor(obj, props, query, makeQuerySafe = false) {
  * @returns {String[]}
  */
 export function removeDuplicatesAndLabel(arr) {
-    // remove `label` (we will be using CLEANED_LABEL) and duplicates from props array
+    // remove `label` (we will be using CLEANED_LABEL_PROP) and duplicates from props array
     const result = [];
     for (let i = 0, l = arr.length; i < l; i += 1) {
         if (typeof arr[i] !== 'string') {

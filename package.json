@@ -1,12 +1,14 @@
 {
     "name": "aria-autocomplete",
-    "version": "1.0.0-beta.2",
-    "description": "Accessible, extensible, dependency-free JavaScript autocomplete with multi-select",
-    "main": "src/aria-autocomplete.js",
+    "version": "1.0.0",
+    "description": "Accessible, extensible, JavaScript autocomplete with multi-select",
+    "main": "dist/aria-autocomplete.min.js",
+    "style": "dist/aria-autocomplete.min.css",
+    "browser": "dist/aria-autocomplete.min.js",
     "scripts": {
+        "build": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.min.js --no-source-maps",
         "dev": "NODE_ENV=development parcel build src/aria-autocomplete.js --out-file aria-autocomplete.js --no-minify",
-        "build": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.min.js",
-        "css": "NODE_ENV=development parcel build src/aria-autocomplete.less --out-file aria-autocomplete.css --no-minify"
+        "css": "NODE_ENV=development parcel build src/aria-autocomplete.less --out-file aria-autocomplete.min.css --no-source-maps"
     },
     "repository": {
         "type": "git",
@@ -37,5 +39,10 @@
     "devDependencies": {
         "less": "^3.10.3",
         "parcel-bundler": "^1.12.4"
+    },
+    "dependencies": {
+        "element-closest": "^3.0.2",
+        "input-autowidth": "^1.0.2",
+        "is-printable-keycode": "^1.0.1"
     }
 }
