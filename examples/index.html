@@ -4,8 +4,15 @@
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Aria Autocomplete examples</title>
-        <meta name="description" content="Aria Autocomplete - accessible, extensible, plain JavaScript autocomplete with multi-select" />
+        <title>Aria Autocomplete</title>
+        <meta name="description" content="Accessible, extensible, plain JavaScript autocomplete with multi-select" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@leon_slater" />
+        <meta name="twitter:title" content="Aria-Autocomplete" />
+        <meta
+            name="twitter:description"
+            content="Accessible, extensible, plain JavaScript autocomplete with multi-select"
+        />
         <link rel="stylesheet" href="../dist/aria-autocomplete.min.css" />
         <style type="text/css">
             html {
@@ -21,25 +28,21 @@
             pre,
             code {
                 font-family: monospace;
-                font-size: 1.025em;
+                font-size: 1.025rem;
             }
             pre {
-                padding: 10px;
+                padding: 0.625rem;
                 color: #f3f3f3;
                 overflow-x: auto;
                 line-height: 1.4em;
                 background: #434143;
-                box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+                box-shadow: inset 0 0 0.625rem rgba(0, 0, 0, 0.5);
             }
             code {
                 background: #ebebeb;
-                border: 3px solid #ebebeb;
+                border: 0.1875rem solid #ebebeb;
                 font-weight: normal;
                 color: #000;
-            }
-            label {
-                display: inline-block;
-                margin-bottom: 5px;
             }
             h1,
             h2,
@@ -47,41 +50,66 @@
                 font-weight: normal;
             }
             h1 {
-                font-size: 36px;
+                font-size: 2.25rem;
                 line-height: 1;
+                display: flex;
+                flex-wrap: wrap;
+                width: 100%;
+                justify-content: space-between;
+                align-content: center;
             }
-            h2 {
-                font-size: 28px;
+            h1 span {
+                display: block;
             }
-            section {
-                margin-top: 24px;
-            }
-            section ~ section {
-                margin-top: 48px;
-                padding-top: 24px;
-                border-top: 2px solid #606060;
-            }
-            small {
+            h1 small {
+                width: 100%;
                 font-size: 50%;
-                margin-top: 5px;
+                margin-top: 0.9375rem;
                 display: block;
                 line-height: 1.3;
+                box-sizing: border-box;
+            }
+            h2 {
+                font-size: 1.75rem;
+            }
+            .button {
+                display: inline-block;
+                padding: 0.4375rem 1rem;
+                border: 0.125rem solid #434143;
+                background-color: transparent;
+                border-radius: 0.25rem;
+                text-decoration: none;
+                font-size: 1.125rem;
+                color: #434143;
+            }
+            .button:hover,
+            .button:focus {
+                background-color: #434143;
+                color: #fcfcfb;
+            }
+            section {
+                margin-top: 1.5rem;
+            }
+            section ~ section {
+                margin-top: 3rem;
+                padding-top: 1.5rem;
+                border-top: 0.125rem solid #606060;
             }
             dt,
             dd {
                 display: block;
-                padding: 0 0 0 12px;
-                border-left: 3px solid #606060;
+                padding: 0 0 0 0.75rem;
+                border-left: 0.1875rem solid #606060;
                 margin: 0;
             }
             dt {
                 font-weight: bold;
-                margin-top: 15px;
+                margin-top: 0.9375rem;
             }
             dl > div ~ div {
-                margin-top: 30px;
-                padding-top: 30px;
-                border-top: 1px solid #d8d8d8;
+                margin-top: 1.875rem;
+                padding-top: 1.875rem;
+                border-top: 0.0625rem solid #d8d8d8;
             }
             dl > div dt:first-child {
                 margin-top: 0;
@@ -92,28 +120,27 @@
             .aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--focused {
                 outline: none;
                 border-color: #5e9ed6;
-                box-shadow: 0 0 0 1px #5e9ed6, 0 0 8px rgba(94, 158, 214, 0.5);
+                box-shadow: 0 0 0 0.0625rem #5e9ed6, 0 0 0.5rem rgba(94, 158, 214, 0.5);
             }
-
             #wrapper {
-                max-width: 760px;
-                padding: 0 20px;
-                margin: 60px auto;
+                max-width: 47.5rem;
+                padding: 0 1.25rem;
+                margin: 3.75rem auto;
                 box-sizing: border-box;
             }
             .tile {
                 background: #fff;
-                margin: 0 auto 30px;
-                padding: 30px 25px;
-                border: 1px solid #ccc;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                margin: 0 auto 1.875rem;
+                padding: 1.875rem 1.5625rem;
+                border: 0.0625rem solid #ccc;
+                box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.1);
             }
             .tile > h2,
             .tile > h3 {
-                font-size: 22px;
+                font-size: 1.375rem;
                 font-weight: normal;
-                padding-bottom: 15px;
-                border-bottom: 1px solid #ccc;
+                padding-bottom: 0.9375rem;
+                border-bottom: 0.0625rem solid #ccc;
             }
             .tile > :first-child {
                 margin-top: 0;
@@ -121,12 +148,29 @@
             .tile > :last-child {
                 margin-bottom: 0;
             }
+
+            @media (max-width: 30rem) {
+                #wrapper {
+                    padding: 0 1.0625rem;
+                }
+                h1 span {
+                    width: 100%;
+                    margin-bottom: 0.9375rem;
+                }
+                .tile {
+                    padding: 1.375rem 1.0625rem;
+                }
+            }
         </style>
     </head>
     <body>
         <div id="wrapper">
             <header>
-                <h1>Aria Autocomplete examples<br><small> - Accessible, extensible, plain JavaScript autocomplete with multi-select</small></h1>
+                <h1>
+                    <span>Aria Autocomplete</span>
+                    <a class="button" href="https://www.github.com/mynamesleon/aria-autocomplete">On GitHub</a>
+                    <small>Accessible, extensible, plain JavaScript autocomplete with multi-select</small>
+                </h1>
             </header>
             <main>
                 <script>
@@ -134,8 +178,9 @@
                 </script>
                 <script src="../dist/aria-autocomplete.min.js" type="text/javascript"></script>
                 <section>
+                    <h2>Examples</h2>
                     <div class="tile">
-                        <h2>Array as Source, using default options</h2>
+                        <h3>Array as Source, using default options</h3>
                         <label for="countrylist-array">Select a country</label>
                         <input type="text" id="countrylist-array" />
                         <script>
@@ -185,221 +230,224 @@ new AriaAutocomplete(element, {
 });</pre>
                     </div>
                     <p>The autocomplete typically expects an Array source that it will transform for use internally. To be as extensible as possible however, Function, Endpoint, and Element sources are also supported:</p>
-                </section>
-                <section class="tile">
-                    <h2>Element(s) as Source, with Multi-select, autogrow, results limit, and show all control</h2>
-                    <p>If the <code>source</code> option is falsy, or is an empty Array, the autocomplete will check to see if the element used is a <code>&lt;select&gt;</code>, or if there are any checkboxes inside the element, and will build up a <code>source</code> Array from what's available.</p>
-                    <label for="constituencylist-select">Select up to 5 UK constituencies (650 items)</label>
-                    <select id="constituencylist-select" multiple="">
-                        <option value="">Please select</option><option value="Aberavon">Aberavon</option><option value="Aberconwy">Aberconwy</option><option value="Aberdeen North">Aberdeen North</option><option value="Aberdeen South">Aberdeen South</option><option value="Airdrie and Shotts" selected>Airdrie and Shotts</option><option value="Aldershot">Aldershot</option><option value="Aldridge-Brownhills">Aldridge-Brownhills</option><option value="Altrincham and Sale West">Altrincham and Sale West</option><option value="Alyn and Deeside">Alyn and Deeside</option><option value="Amber Valley">Amber Valley</option><option value="Angus">Angus</option><option value="Arfon">Arfon</option><option value="Argyll and Bute">Argyll and Bute</option><option value="Arundel and South Downs">Arundel and South Downs</option><option value="Ashfield">Ashfield</option><option value="Ashford">Ashford</option><option value="Ashton-under-Lyne">Ashton-under-Lyne</option><option value="Aylesbury">Aylesbury</option><option value="Ayr, Carrick and Cumnock">Ayr, Carrick and Cumnock</option><option value="Banbury">Banbury</option><option value="Banff and Buchan">Banff and Buchan</option><option value="Barking">Barking</option><option value="Barnsley Central">Barnsley Central</option><option value="Barnsley East">Barnsley East</option><option value="Barrow And Furness">Barrow And Furness</option><option value="Basildon and Billericay">Basildon and Billericay</option><option value="Basingstoke">Basingstoke</option><option value="Bassetlaw">Bassetlaw</option><option value="Bath">Bath</option><option value="Batley and Spen">Batley and Spen</option><option value="Battersea">Battersea</option><option value="Beaconsfield">Beaconsfield</option><option value="Beckenham">Beckenham</option><option value="Bedford">Bedford</option><option value="Belfast East">Belfast East</option><option value="Belfast North">Belfast North</option><option value="Belfast South">Belfast South</option><option value="Belfast West">Belfast West</option><option value="Bermondsey and Old Southwark">Bermondsey and Old Southwark</option><option value="Berwick-upon-Tweed">Berwick-upon-Tweed</option><option value="Berwickshire, Roxburgh and Selkirk">Berwickshire, Roxburgh and Selkirk</option><option value="Bethnal Green and Bow">Bethnal Green and Bow</option><option value="Beverley and Holderness">Beverley and Holderness</option><option value="Bexhill and Battle">Bexhill and Battle</option><option value="Bexleyheath and Crayford">Bexleyheath and Crayford</option><option value="Birkenhead">Birkenhead</option><option value="Birmingham, Edgbaston">Birmingham, Edgbaston</option><option value="Birmingham, Erdington">Birmingham, Erdington</option><option value="Birmingham, Hall Green">Birmingham, Hall Green</option><option value="Birmingham, Hodge Hill">Birmingham, Hodge Hill</option><option value="Birmingham, Ladywood">Birmingham, Ladywood</option><option value="Birmingham, Northfield">Birmingham, Northfield</option><option value="Birmingham, Perry Barr">Birmingham, Perry Barr</option><option value="Birmingham, Selly Oak">Birmingham, Selly Oak</option><option value="Birmingham, Yardley">Birmingham, Yardley</option><option value="Bishop Auckland">Bishop Auckland</option><option value="Blackburn">Blackburn</option><option value="Blackley and Broughton">Blackley and Broughton</option><option value="Blackpool North and Cleveleys">Blackpool North and Cleveleys</option><option value="Blackpool South">Blackpool South</option><option value="Blaenau Gwent">Blaenau Gwent</option><option value="Blaydon">Blaydon</option><option value="Blyth Valley">Blyth Valley</option><option value="Bognor Regis and Littlehampton">Bognor Regis and Littlehampton</option><option value="Bolsover">Bolsover</option><option value="Bolton North East">Bolton North East</option><option value="Bolton South East">Bolton South East</option><option value="Bolton West">Bolton West</option><option value="Bootle">Bootle</option><option value="Boston and Skegness">Boston and Skegness</option><option value="Bosworth">Bosworth</option><option value="Bournemouth East">Bournemouth East</option><option value="Bournemouth West">Bournemouth West</option><option value="Bracknell">Bracknell</option><option value="Bradford East">Bradford East</option><option value="Bradford South">Bradford South</option><option value="Bradford West">Bradford West</option><option value="Braintree">Braintree</option><option value="Brecon and Radnorshire">Brecon and Radnorshire</option><option value="Brent Central">Brent Central</option><option value="Brent North">Brent North</option><option value="Brentford and Isleworth">Brentford and Isleworth</option><option value="Brentwood and Ongar">Brentwood and Ongar</option><option value="Bridgend">Bridgend</option><option value="Bridgwater and West Somerset">Bridgwater and West Somerset</option><option value="Brigg and Goole">Brigg and Goole</option><option value="Brighton, Kemptown">Brighton, Kemptown</option><option value="Brighton, Pavilion">Brighton, Pavilion</option><option value="Bristol East">Bristol East</option><option value="Bristol North West">Bristol North West</option><option value="Bristol South">Bristol South</option><option value="Bristol West">Bristol West</option><option value="Broadland">Broadland</option><option value="Bromley and Chislehurst">Bromley and Chislehurst</option><option value="Bromsgrove">Bromsgrove</option><option value="Broxbourne">Broxbourne</option><option value="Broxtowe">Broxtowe</option><option value="Buckingham">Buckingham</option><option value="Burnley">Burnley</option><option value="Burton">Burton</option><option value="Bury North">Bury North</option><option value="Bury South">Bury South</option><option value="Bury St Edmunds">Bury St Edmunds</option><option value="Caerphilly">Caerphilly</option><option value="Caithness, Sutherland and Easter Ross">Caithness, Sutherland and Easter Ross</option><option value="Calder Valley">Calder Valley</option><option value="Camberwell and Peckham">Camberwell and Peckham</option><option value="Camborne and Redruth">Camborne and Redruth</option><option value="Cambridge">Cambridge</option><option value="Cannock Chase">Cannock Chase</option><option value="Canterbury">Canterbury</option><option value="Cardiff Central">Cardiff Central</option><option value="Cardiff North">Cardiff North</option><option value="Cardiff South and Penarth">Cardiff South and Penarth</option><option value="Cardiff West">Cardiff West</option><option value="Carlisle">Carlisle</option><option value="Carmarthen East and Dinefwr">Carmarthen East and Dinefwr</option><option value="Carmarthen West and South Pembrokeshire">Carmarthen West and South Pembrokeshire</option><option value="Carshalton and Wallington">Carshalton and Wallington</option><option value="Castle Point">Castle Point</option><option value="Central Ayrshire">Central Ayrshire</option><option value="Central Devon">Central Devon</option><option value="Central Suffolk and North Ipswich">Central Suffolk and North Ipswich</option><option value="Ceredigion">Ceredigion</option><option value="Charnwood">Charnwood</option><option value="Chatham and Aylesford">Chatham and Aylesford</option><option value="Cheadle">Cheadle</option><option value="Chelmsford">Chelmsford</option><option value="Chelsea and Fulham">Chelsea and Fulham</option><option value="Cheltenham">Cheltenham</option><option value="Chesham and Amersham">Chesham and Amersham</option><option value="Chesterfield">Chesterfield</option><option value="Chichester">Chichester</option><option value="Chingford and Woodford Green">Chingford and Woodford Green</option><option value="Chippenham">Chippenham</option><option value="Chipping Barnet">Chipping Barnet</option><option value="Chorley">Chorley</option><option value="Christchurch">Christchurch</option><option value="Cities of London and Westminster">Cities of London and Westminster</option><option value="City of Chester">City of Chester</option><option value="City of Durham">City of Durham</option><option value="Clacton">Clacton</option><option value="Cleethorpes">Cleethorpes</option><option value="Clwyd South">Clwyd South</option><option value="Clwyd West">Clwyd West</option><option value="Coatbridge, Chryston and Bellshill">Coatbridge, Chryston and Bellshill</option><option value="Colchester">Colchester</option><option value="Colne Valley">Colne Valley</option><option value="Congleton">Congleton</option><option value="Copeland">Copeland</option><option value="Corby">Corby</option><option value="Coventry North East">Coventry North East</option><option value="Coventry North West">Coventry North West</option><option value="Coventry South">Coventry South</option><option value="Crawley">Crawley</option><option value="Crewe and Nantwich">Crewe and Nantwich</option><option value="Croydon Central">Croydon Central</option><option value="Croydon North">Croydon North</option><option value="Croydon South">Croydon South</option><option value="Cumbernauld, Kilsyth and Kirkintilloch East">Cumbernauld, Kilsyth and Kirkintilloch East</option><option value="Cynon Valley">Cynon Valley</option><option value="Dagenham and Rainham">Dagenham and Rainham</option><option value="Darlington">Darlington</option><option value="Dartford">Dartford</option><option value="Daventry">Daventry</option><option value="Delyn">Delyn</option><option value="Denton and Reddish">Denton and Reddish</option><option value="Derby North">Derby North</option><option value="Derby South">Derby South</option><option value="Derbyshire Dales">Derbyshire Dales</option><option value="Devizes">Devizes</option><option value="Dewsbury">Dewsbury</option><option value="Don Valley">Don Valley</option><option value="Doncaster Central">Doncaster Central</option><option value="Doncaster North">Doncaster North</option><option value="Dover">Dover</option><option value="Dudley North">Dudley North</option><option value="Dudley South" selected>Dudley South</option><option value="Dulwich and West Norwood">Dulwich and West Norwood</option><option value="Dumfries and Galloway">Dumfries and Galloway</option><option value="Dumfriesshire, Clydesdale and Tweeddale">Dumfriesshire, Clydesdale and Tweeddale</option><option value="Dundee East">Dundee East</option><option value="Dundee West">Dundee West</option><option value="Dunfermline and West Fife">Dunfermline and West Fife</option><option value="Dwyfor Meirionnydd">Dwyfor Meirionnydd</option><option value="Ealing Central and Acton">Ealing Central and Acton</option><option value="Ealing North">Ealing North</option><option value="Ealing, Southall">Ealing, Southall</option><option value="Easington">Easington</option><option value="East Antrim">East Antrim</option><option value="East Devon">East Devon</option><option value="East Dunbartonshire">East Dunbartonshire</option><option value="East Ham">East Ham</option><option value="East Hampshire">East Hampshire</option><option value="East Kilbride, Strathaven and Lesmahagow">East Kilbride, Strathaven and Lesmahagow</option><option value="East Londonderry">East Londonderry</option><option value="East Lothian">East Lothian</option><option value="East Renfrewshire">East Renfrewshire</option><option value="East Surrey">East Surrey</option><option value="East Worthing and Shoreham">East Worthing and Shoreham</option><option value="East Yorkshire">East Yorkshire</option><option value="Eastbourne">Eastbourne</option><option value="Eastleigh">Eastleigh</option><option value="Eddisbury">Eddisbury</option><option value="Edinburgh East">Edinburgh East</option><option value="Edinburgh North and Leith">Edinburgh North and Leith</option><option value="Edinburgh South">Edinburgh South</option><option value="Edinburgh South West">Edinburgh South West</option><option value="Edinburgh West">Edinburgh West</option><option value="Edmonton">Edmonton</option><option value="Ellesmere Port and Neston">Ellesmere Port and Neston</option><option value="Elmet and Rothwell">Elmet and Rothwell</option><option value="Eltham">Eltham</option><option value="Enfield North">Enfield North</option><option value="Enfield, Southgate">Enfield, Southgate</option><option value="Epping Forest">Epping Forest</option><option value="Epsom and Ewell">Epsom and Ewell</option><option value="Erewash">Erewash</option><option value="Erith and Thamesmead">Erith and Thamesmead</option><option value="Esher and Walton">Esher and Walton</option><option value="Exeter">Exeter</option><option value="Falkirk">Falkirk</option><option value="Fareham">Fareham</option><option value="Faversham and Mid Kent">Faversham and Mid Kent</option><option value="Feltham and Heston">Feltham and Heston</option><option value="Fermanagh and South Tyrone">Fermanagh and South Tyrone</option><option value="Filton and Bradley Stoke">Filton and Bradley Stoke</option><option value="Finchley and Golders Green">Finchley and Golders Green</option><option value="Folkestone and Hythe">Folkestone and Hythe</option><option value="Forest of Dean">Forest of Dean</option><option value="Foyle">Foyle</option><option value="Fylde">Fylde</option><option value="Gainsborough">Gainsborough</option><option value="Garston and Halewood">Garston and Halewood</option><option value="Gateshead">Gateshead</option><option value="Gedling">Gedling</option><option value="Gillingham and Rainham">Gillingham and Rainham</option><option value="Glasgow Central">Glasgow Central</option><option value="Glasgow East">Glasgow East</option><option value="Glasgow North">Glasgow North</option><option value="Glasgow North East">Glasgow North East</option><option value="Glasgow North West">Glasgow North West</option><option value="Glasgow South">Glasgow South</option><option value="Glasgow South West">Glasgow South West</option><option value="Glenrothes">Glenrothes</option><option value="Gloucester">Gloucester</option><option value="Gordon">Gordon</option><option value="Gosport">Gosport</option><option value="Gower">Gower</option><option value="Grantham and Stamford">Grantham and Stamford</option><option value="Gravesham">Gravesham</option><option value="Great Grimsby">Great Grimsby</option><option value="Great Yarmouth">Great Yarmouth</option><option value="Greenwich and Woolwich">Greenwich and Woolwich</option><option value="Guildford">Guildford</option><option value="Hackney North and Stoke Newington">Hackney North and Stoke Newington</option><option value="Hackney South and Shoreditch">Hackney South and Shoreditch</option><option value="Halesowen and Rowley Regis">Halesowen and Rowley Regis</option><option value="Halifax">Halifax</option><option value="Haltemprice and Howden">Haltemprice and Howden</option><option value="Halton">Halton</option><option value="Hammersmith">Hammersmith</option><option value="Hampstead and Kilburn">Hampstead and Kilburn</option><option value="Harborough">Harborough</option><option value="Harlow">Harlow</option><option value="Harrogate and Knaresborough">Harrogate and Knaresborough</option><option value="Harrow East">Harrow East</option><option value="Harrow West">Harrow West</option><option value="Hartlepool">Hartlepool</option><option value="Harwich and North Essex">Harwich and North Essex</option><option value="Hastings and Rye">Hastings and Rye</option><option value="Havant">Havant</option><option value="Hayes and Harlington">Hayes and Harlington</option><option value="Hazel Grove">Hazel Grove</option><option value="Hemel Hempstead">Hemel Hempstead</option><option value="Hemsworth">Hemsworth</option><option value="Hendon">Hendon</option><option value="Henley">Henley</option><option value="Hereford and South Herefordshire">Hereford and South Herefordshire</option><option value="Hertford and Stortford">Hertford and Stortford</option><option value="Hertsmere">Hertsmere</option><option value="Hexham">Hexham</option><option value="Heywood and Middleton">Heywood and Middleton</option><option value="High Peak">High Peak</option><option value="Hitchin and Harpenden">Hitchin and Harpenden</option><option value="Holborn and St Pancras">Holborn and St Pancras</option><option value="Hornchurch and Upminster">Hornchurch and Upminster</option><option value="Hornsey and Wood Green">Hornsey and Wood Green</option><option value="Horsham">Horsham</option><option value="Houghton and Sunderland South">Houghton and Sunderland South</option><option value="Hove">Hove</option><option value="Huddersfield">Huddersfield</option><option value="Huntingdon">Huntingdon</option><option value="Hyndburn">Hyndburn</option><option value="Ilford North">Ilford North</option><option value="Ilford South">Ilford South</option><option value="Inverclyde">Inverclyde</option><option value="Inverness, Nairn, Badenoch and Strathspey">Inverness, Nairn, Badenoch and Strathspey</option><option value="Ipswich">Ipswich</option><option value="Isle of Wight">Isle of Wight</option><option value="Islington North">Islington North</option><option value="Islington South and Finsbury">Islington South and Finsbury</option><option value="Islwyn">Islwyn</option><option value="Jarrow">Jarrow</option><option value="Keighley">Keighley</option><option value="Kenilworth and Southam">Kenilworth and Southam</option><option value="Kensington">Kensington</option><option value="Kettering">Kettering</option><option value="Kilmarnock and Loudoun">Kilmarnock and Loudoun</option><option value="Kingston and Surbiton">Kingston and Surbiton</option><option value="Kingston upon Hull East">Kingston upon Hull East</option><option value="Kingston upon Hull North">Kingston upon Hull North</option><option value="Kingston upon Hull West and Hessle">Kingston upon Hull West and Hessle</option><option value="Kingswood">Kingswood</option><option value="Kirkcaldy and Cowdenbeath">Kirkcaldy and Cowdenbeath</option><option value="Knowsley">Knowsley</option><option value="Lagan Valley">Lagan Valley</option><option value="Lanark and Hamilton East">Lanark and Hamilton East</option><option value="Lancaster and Fleetwood">Lancaster and Fleetwood</option><option value="Leeds Central">Leeds Central</option><option value="Leeds East">Leeds East</option><option value="Leeds North East">Leeds North East</option><option value="Leeds North West">Leeds North West</option><option value="Leeds West">Leeds West</option><option value="Leicester East">Leicester East</option><option value="Leicester South">Leicester South</option><option value="Leicester West">Leicester West</option><option value="Leigh">Leigh</option><option value="Lewes">Lewes</option><option value="Lewisham East">Lewisham East</option><option value="Lewisham West and Penge">Lewisham West and Penge</option><option value="Lewisham, Deptford">Lewisham, Deptford</option><option value="Leyton and Wanstead">Leyton and Wanstead</option><option value="Lichfield">Lichfield</option><option value="Lincoln">Lincoln</option><option value="Linlithgow and East Falkirk">Linlithgow and East Falkirk</option><option value="Liverpool, Riverside">Liverpool, Riverside</option><option value="Liverpool, Walton">Liverpool, Walton</option><option value="Liverpool, Wavertree">Liverpool, Wavertree</option><option value="Liverpool, West Derby">Liverpool, West Derby</option><option value="Livingston">Livingston</option><option value="Llanelli">Llanelli</option><option value="Loughborough">Loughborough</option><option value="Louth and Horncastle">Louth and Horncastle</option><option value="Ludlow">Ludlow</option><option value="Luton North">Luton North</option><option value="Luton South">Luton South</option><option value="Macclesfield">Macclesfield</option><option value="Maidenhead">Maidenhead</option><option value="Maidstone and the Weald">Maidstone and the Weald</option><option value="Makerfield">Makerfield</option><option value="Maldon">Maldon</option><option value="Manchester Central">Manchester Central</option><option value="Manchester, Gorton">Manchester, Gorton</option><option value="Manchester, Withington">Manchester, Withington</option><option value="Mansfield">Mansfield</option><option value="Meon Valley">Meon Valley</option><option value="Meriden">Meriden</option><option value="Merthyr Tydfil and Rhymney">Merthyr Tydfil and Rhymney</option><option value="Mid Bedfordshire">Mid Bedfordshire</option><option value="Mid Derbyshire">Mid Derbyshire</option><option value="Mid Dorset and North Poole">Mid Dorset and North Poole</option><option value="Mid Norfolk">Mid Norfolk</option><option value="Mid Sussex">Mid Sussex</option><option value="Mid Ulster">Mid Ulster</option><option value="Mid Worcestershire">Mid Worcestershire</option><option value="Middlesbrough">Middlesbrough</option><option value="Middlesbrough South and East Cleveland">Middlesbrough South and East Cleveland</option><option value="Midlothian">Midlothian</option><option value="Milton Keynes North">Milton Keynes North</option><option value="Milton Keynes South">Milton Keynes South</option><option value="Mitcham and Morden">Mitcham and Morden</option><option value="Mole Valley">Mole Valley</option><option value="Monmouth">Monmouth</option><option value="Montgomeryshire">Montgomeryshire</option><option value="Moray">Moray</option><option value="Morecambe and Lunesdale">Morecambe and Lunesdale</option><option value="Morley and Outwood">Morley and Outwood</option><option value="Motherwell and Wishaw">Motherwell and Wishaw</option><option value="Na h-Eileanan an Iar">Na h-Eileanan an Iar</option><option value="Neath">Neath</option><option value="New Forest East">New Forest East</option><option value="New Forest West">New Forest West</option><option value="Newark">Newark</option><option value="Newbury">Newbury</option><option value="Newcastle upon Tyne Central">Newcastle upon Tyne Central</option><option value="Newcastle upon Tyne East">Newcastle upon Tyne East</option><option value="Newcastle upon Tyne North">Newcastle upon Tyne North</option><option value="Newcastle-under-Lyme">Newcastle-under-Lyme</option><option value="Newport East">Newport East</option><option value="Newport West">Newport West</option><option value="Newry and Armagh">Newry and Armagh</option><option value="Newton Abbot">Newton Abbot</option><option value="Normanton, Pontefract and Castleford">Normanton, Pontefract and Castleford</option><option value="North Antrim">North Antrim</option><option value="North Ayrshire and Arran">North Ayrshire and Arran</option><option value="North Cornwall">North Cornwall</option><option value="North Devon">North Devon</option><option value="North Dorset">North Dorset</option><option value="North Down">North Down</option><option value="North Durham">North Durham</option><option value="North East Bedfordshire">North East Bedfordshire</option><option value="North East Cambridgeshire">North East Cambridgeshire</option><option value="North East Derbyshire">North East Derbyshire</option><option value="North East Fife">North East Fife</option><option value="North East Hampshire">North East Hampshire</option><option value="North East Hertfordshire">North East Hertfordshire</option><option value="North East Somerset">North East Somerset</option><option value="North Herefordshire">North Herefordshire</option><option value="North Norfolk">North Norfolk</option><option value="North Shropshire">North Shropshire</option><option value="North Somerset">North Somerset</option><option value="North Swindon">North Swindon</option><option value="North Thanet">North Thanet</option><option value="North Tyneside">North Tyneside</option><option value="North Warwickshire">North Warwickshire</option><option value="North West Cambridgeshire">North West Cambridgeshire</option><option value="North West Durham">North West Durham</option><option value="North West Hampshire">North West Hampshire</option><option value="North West Leicestershire">North West Leicestershire</option><option value="North West Norfolk">North West Norfolk</option><option value="North Wiltshire">North Wiltshire</option><option value="Northampton North">Northampton North</option><option value="Northampton South">Northampton South</option><option value="Norwich North">Norwich North</option><option value="Norwich South">Norwich South</option><option value="Nottingham East">Nottingham East</option><option value="Nottingham North">Nottingham North</option><option value="Nottingham South">Nottingham South</option><option value="Nuneaton">Nuneaton</option><option value="Ochil and South Perthshire">Ochil and South Perthshire</option><option value="Ogmore">Ogmore</option><option value="Old Bexley and Sidcup">Old Bexley and Sidcup</option><option value="Oldham East and Saddleworth">Oldham East and Saddleworth</option><option value="Oldham West and Royton">Oldham West and Royton</option><option value="Orkney and Shetland">Orkney and Shetland</option><option value="Orpington">Orpington</option><option value="Oxford East">Oxford East</option><option value="Oxford West and Abingdon">Oxford West and Abingdon</option><option value="Paisley and Renfrewshire North">Paisley and Renfrewshire North</option><option value="Paisley and Renfrewshire South">Paisley and Renfrewshire South</option><option value="Pendle">Pendle</option><option value="Penistone and Stocksbridge">Penistone and Stocksbridge</option><option value="Penrith and The Border">Penrith and The Border</option><option value="Perth and North Perthshire">Perth and North Perthshire</option><option value="Peterborough">Peterborough</option><option value="Plymouth, Moor View">Plymouth, Moor View</option><option value="Plymouth, Sutton and Devonport">Plymouth, Sutton and Devonport</option><option value="Pontypridd">Pontypridd</option><option value="Poole">Poole</option><option value="Poplar and Limehouse">Poplar and Limehouse</option><option value="Portsmouth North">Portsmouth North</option><option value="Portsmouth South">Portsmouth South</option><option value="Preseli Pembrokeshire">Preseli Pembrokeshire</option><option value="Preston">Preston</option><option value="Pudsey">Pudsey</option><option value="Putney">Putney</option><option value="Rayleigh and Wickford">Rayleigh and Wickford</option><option value="Reading East">Reading East</option><option value="Reading West">Reading West</option><option value="Redcar">Redcar</option><option value="Redditch">Redditch</option><option value="Reigate">Reigate</option><option value="Rhondda">Rhondda</option><option value="Ribble Valley">Ribble Valley</option><option value="Richmond (Yorks)">Richmond (Yorks)</option><option value="Richmond Park">Richmond Park</option><option value="Rochdale">Rochdale</option><option value="Rochester and Strood">Rochester and Strood</option><option value="Rochford and Southend East">Rochford and Southend East</option><option value="Romford">Romford</option><option value="Romsey and Southampton North">Romsey and Southampton North</option><option value="Ross, Skye and Lochaber">Ross, Skye and Lochaber</option><option value="Rossendale and Darwen">Rossendale and Darwen</option><option value="Rother Valley">Rother Valley</option><option value="Rotherham">Rotherham</option><option value="Rugby">Rugby</option><option value="Ruislip, Northwood and Pinner">Ruislip, Northwood and Pinner</option><option value="Runnymede and Weybridge">Runnymede and Weybridge</option><option value="Rushcliffe">Rushcliffe</option><option value="Rutherglen and Hamilton West">Rutherglen and Hamilton West</option><option value="Rutland and Melton">Rutland and Melton</option><option value="Saffron Walden">Saffron Walden</option><option value="Salford and Eccles">Salford and Eccles</option><option value="Salisbury">Salisbury</option><option value="Scarborough and Whitby">Scarborough and Whitby</option><option value="Scunthorpe">Scunthorpe</option><option value="Sedgefield">Sedgefield</option><option value="Sefton Central">Sefton Central</option><option value="Selby and Ainsty">Selby and Ainsty</option><option value="Sevenoaks">Sevenoaks</option><option value="Sheffield Central">Sheffield Central</option><option value="Sheffield South East">Sheffield South East</option><option value="Sheffield, Brightside and Hillsborough">Sheffield, Brightside and Hillsborough</option><option value="Sheffield, Hallam">Sheffield, Hallam</option><option value="Sheffield, Heeley">Sheffield, Heeley</option><option value="Sherwood">Sherwood</option><option value="Shipley">Shipley</option><option value="Shrewsbury and Atcham">Shrewsbury and Atcham</option><option value="Sittingbourne and Sheppey">Sittingbourne and Sheppey</option><option value="Skipton and Ripon">Skipton and Ripon</option><option value="Sleaford and North Hykeham">Sleaford and North Hykeham</option><option value="Slough">Slough</option><option value="Solihull">Solihull</option><option value="Somerton and Frome">Somerton and Frome</option><option value="South Antrim">South Antrim</option><option value="South Basildon and East Thurrock">South Basildon and East Thurrock</option><option value="South Cambridgeshire">South Cambridgeshire</option><option value="South Derbyshire">South Derbyshire</option><option value="South Dorset">South Dorset</option><option value="South Down">South Down</option><option value="South East Cambridgeshire">South East Cambridgeshire</option><option value="South East Cornwall">South East Cornwall</option><option value="South Holland and The Deepings">South Holland and The Deepings</option><option value="South Leicestershire">South Leicestershire</option><option value="South Norfolk">South Norfolk</option><option value="South Northamptonshire">South Northamptonshire</option><option value="South Ribble">South Ribble</option><option value="South Shields">South Shields</option><option value="South Staffordshire">South Staffordshire</option><option value="South Suffolk">South Suffolk</option><option value="South Swindon">South Swindon</option><option value="South Thanet">South Thanet</option><option value="South West Bedfordshire">South West Bedfordshire</option><option value="South West Devon">South West Devon</option><option value="South West Hertfordshire">South West Hertfordshire</option><option value="South West Norfolk">South West Norfolk</option><option value="South West Surrey">South West Surrey</option><option value="South West Wiltshire">South West Wiltshire</option><option value="Southampton, Itchen">Southampton, Itchen</option><option value="Southampton, Test">Southampton, Test</option><option value="Southend West">Southend West</option><option value="Southport">Southport</option><option value="Spelthorne">Spelthorne</option><option value="St Albans">St Albans</option><option value="St Austell and Newquay">St Austell and Newquay</option><option value="St Helens North">St Helens North</option><option value="St Helens South and Whiston">St Helens South and Whiston</option><option value="St Ives">St Ives</option><option value="Stafford">Stafford</option><option value="Staffordshire Moorlands">Staffordshire Moorlands</option><option value="Stalybridge and Hyde">Stalybridge and Hyde</option><option value="Stevenage">Stevenage</option><option value="Stirling">Stirling</option><option value="Stockport">Stockport</option><option value="Stockton North">Stockton North</option><option value="Stockton South">Stockton South</option><option value="Stoke-on-Trent Central">Stoke-on-Trent Central</option><option value="Stoke-on-Trent North">Stoke-on-Trent North</option><option value="Stoke-on-Trent South">Stoke-on-Trent South</option><option value="Stone">Stone</option><option value="Stourbridge">Stourbridge</option><option value="Strangford">Strangford</option><option value="Stratford-on-Avon">Stratford-on-Avon</option><option value="Streatham">Streatham</option><option value="Stretford and Urmston">Stretford and Urmston</option><option value="Stroud">Stroud</option><option value="Suffolk Coastal">Suffolk Coastal</option><option value="Sunderland Central">Sunderland Central</option><option value="Surrey Heath">Surrey Heath</option><option value="Sutton and Cheam">Sutton and Cheam</option><option value="Sutton Coldfield">Sutton Coldfield</option><option value="Swansea East">Swansea East</option><option value="Swansea West">Swansea West</option><option value="Tamworth">Tamworth</option><option value="Tatton">Tatton</option><option value="Taunton Deane">Taunton Deane</option><option value="Telford">Telford</option><option value="Tewkesbury">Tewkesbury</option><option value="The Cotswolds">The Cotswolds</option><option value="The Wrekin">The Wrekin</option><option value="Thirsk and Malton">Thirsk and Malton</option><option value="Thornbury and Yate">Thornbury and Yate</option><option value="Thurrock">Thurrock</option><option value="Tiverton and Honiton">Tiverton and Honiton</option><option value="Tonbridge and Malling">Tonbridge and Malling</option><option value="Tooting">Tooting</option><option value="Torbay">Torbay</option><option value="Torfaen">Torfaen</option><option value="Torridge and West Devon">Torridge and West Devon</option><option value="Totnes">Totnes</option><option value="Tottenham">Tottenham</option><option value="Truro and Falmouth">Truro and Falmouth</option><option value="Tunbridge Wells">Tunbridge Wells</option><option value="Twickenham">Twickenham</option><option value="Tynemouth">Tynemouth</option><option value="Upper Bann">Upper Bann</option><option value="Uxbridge and South Ruislip">Uxbridge and South Ruislip</option><option value="Vale of Clwyd">Vale of Clwyd</option><option value="Vale of Glamorgan">Vale of Glamorgan</option><option value="Vauxhall">Vauxhall</option><option value="Wakefield">Wakefield</option><option value="Wallasey">Wallasey</option><option value="Walsall North">Walsall North</option><option value="Walsall South">Walsall South</option><option value="Walthamstow">Walthamstow</option><option value="Wansbeck">Wansbeck</option><option value="Wantage">Wantage</option><option value="Warley">Warley</option><option value="Warrington North">Warrington North</option><option value="Warrington South">Warrington South</option><option value="Warwick and Leamington">Warwick and Leamington</option><option value="Washington and Sunderland West">Washington and Sunderland West</option><option value="Watford">Watford</option><option value="Waveney">Waveney</option><option value="Wealden">Wealden</option><option value="Weaver Vale">Weaver Vale</option><option value="Wellingborough">Wellingborough</option><option value="Wells">Wells</option><option value="Welwyn Hatfield">Welwyn Hatfield</option><option value="Wentworth and Dearne">Wentworth and Dearne</option><option value="West Aberdeenshire and Kincardine">West Aberdeenshire and Kincardine</option><option value="West Bromwich East">West Bromwich East</option><option value="West Bromwich West">West Bromwich West</option><option value="West Dorset">West Dorset</option><option value="West Dunbartonshire">West Dunbartonshire</option><option value="West Ham">West Ham</option><option value="West Lancashire">West Lancashire</option><option value="West Suffolk">West Suffolk</option><option value="West Tyrone">West Tyrone</option><option value="West Worcestershire">West Worcestershire</option><option value="Westminster North">Westminster North</option><option value="Westmorland and Lonsdale">Westmorland and Lonsdale</option><option value="Weston-Super-Mare">Weston-Super-Mare</option><option value="Wigan">Wigan</option><option value="Wimbledon">Wimbledon</option><option value="Winchester">Winchester</option><option value="Windsor">Windsor</option><option value="Wirral South">Wirral South</option><option value="Wirral West">Wirral West</option><option value="Witham">Witham</option><option value="Witney">Witney</option><option value="Woking">Woking</option><option value="Wokingham">Wokingham</option><option value="Wolverhampton North East">Wolverhampton North East</option><option value="Wolverhampton South East">Wolverhampton South East</option><option value="Wolverhampton South West">Wolverhampton South West</option><option value="Worcester">Worcester</option><option value="Workington">Workington</option><option value="Worsley and Eccles South">Worsley and Eccles South</option><option value="Worthing West">Worthing West</option><option value="Wrexham">Wrexham</option><option value="Wycombe">Wycombe</option><option value="Wyre and Preston North">Wyre and Preston North</option><option value="Wyre Forest">Wyre Forest</option><option value="Wythenshawe and Sale East">Wythenshawe and Sale East</option><option value="Yeovil">Yeovil</option><option value="Ynys Môn">Ynys Môn</option><option value="York Central">York Central</option><option value="York Outer">York Outer</option>
-                    </select>
-                    <script>
-                        new AriaAutocomplete(document.getElementById('constituencylist-select'), {
-                            deleteOnBackspace: true,
-                            showAllControl: true,
-                            autoGrow: true,
-                            maxResults: 50,
-                            minLength: 0,
-                            maxItems: 5
-                        });
-                    </script>
-                    <p>This example uses a <code>&lt;select&gt;</code>, so the <code>multiple</code> option is automatically set to match its own state (true in this case). If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
-                    <p>When an option in the autocomplete is selected, the corresponding <code>&lt;option&gt;</code> or checkbox will be set to selected / checked as well.</p>
-                    <pre>
-new AriaAutocomplete(element, {
-    deleteOnBackspace: true,
-    showAllControl: true,
-    autoGrow: true,
-    maxResults: 50,
-    minLength: 0,
-    maxItems: 5
-});</pre>
-                </section>
-                <section class="tile">
-                    <h2>Function as Source, with Multi-select, but <i>without</i> autogrow</h2>
-                    <p>If you want to use your own client-side filtering logic, you can also use a function as the <code>source</code> - it will be passed the search term, and a render function, which expects an Array to be passed to it (using either of the formats mentioned above).</p>
-                    <p>If the autocomplete is initialised on an input, which has a starting value, the source function will also be called immediately with that value passed to it. In this case, the render function expects an Array of possible entries to check that starting value against, so that it can internally determine what the starting label (or multi-select elements) should be.</p>
-                    <p>This example <b>searches based on each country's 3 letter country code</b>, instead of its name, e.g. "DZA" for "Algeria", or "GBR" for the United Kingdom. The <code>onItemRender</code> callback is also being used to display the code next to the country name in the results.</p>
-                    <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively - so this will also initialise with two values already selected.</p>
-                    <label for="countrylist-function">Select up to 4 countries (search by country code)</label>
-                    <input type="text" value="GLP,ZWE" id="countrylist-function" />
-                    <script>
-                        new AriaAutocomplete(document.getElementById('countrylist-function'), {
-                            maxItems: 4,
-                            maxResults: 10,
-                            multiple: true,
-                            source: function (query, render) {
-                                var result = [];
-                                var isStartingCall = this === window;
-                                var value = query.toLowerCase().trim();
-                                var arrToCheck = isStartingCall ? value.split(',') : [value];
-                                countryListAllIsoData.forEach(function (entry) {
-                                    var code3 = entry['code3'].toLowerCase();
-                                    var addIt = false;
-                                    arrToCheck.forEach(function (val) {
-                                        if (code3.search(val) !== -1) {
-                                            addIt = true;
+                    <div class="tile">
+                        <h3>Element(s) as Source, with Multi-select, autogrow, results limit, and show all control</h3>
+                        <p>If the <code>source</code> option is falsy, or is an empty Array, the autocomplete will check to see if the element used is a <code>&lt;select&gt;</code>, or if there are any checkboxes inside the element, and will build up a <code>source</code> Array from what's available.</p>
+                        <label for="constituencylist-select">Select up to 5 UK constituencies (650 items)</label>
+                        <select id="constituencylist-select" multiple="">
+                            <option value="">Please select</option><option value="Aberavon">Aberavon</option><option value="Aberconwy">Aberconwy</option><option value="Aberdeen North">Aberdeen North</option><option value="Aberdeen South">Aberdeen South</option><option value="Airdrie and Shotts" selected>Airdrie and Shotts</option><option value="Aldershot">Aldershot</option><option value="Aldridge-Brownhills">Aldridge-Brownhills</option><option value="Altrincham and Sale West">Altrincham and Sale West</option><option value="Alyn and Deeside">Alyn and Deeside</option><option value="Amber Valley">Amber Valley</option><option value="Angus">Angus</option><option value="Arfon">Arfon</option><option value="Argyll and Bute">Argyll and Bute</option><option value="Arundel and South Downs">Arundel and South Downs</option><option value="Ashfield">Ashfield</option><option value="Ashford">Ashford</option><option value="Ashton-under-Lyne">Ashton-under-Lyne</option><option value="Aylesbury">Aylesbury</option><option value="Ayr, Carrick and Cumnock">Ayr, Carrick and Cumnock</option><option value="Banbury">Banbury</option><option value="Banff and Buchan">Banff and Buchan</option><option value="Barking">Barking</option><option value="Barnsley Central">Barnsley Central</option><option value="Barnsley East">Barnsley East</option><option value="Barrow And Furness">Barrow And Furness</option><option value="Basildon and Billericay">Basildon and Billericay</option><option value="Basingstoke">Basingstoke</option><option value="Bassetlaw">Bassetlaw</option><option value="Bath">Bath</option><option value="Batley and Spen">Batley and Spen</option><option value="Battersea">Battersea</option><option value="Beaconsfield">Beaconsfield</option><option value="Beckenham">Beckenham</option><option value="Bedford">Bedford</option><option value="Belfast East">Belfast East</option><option value="Belfast North">Belfast North</option><option value="Belfast South">Belfast South</option><option value="Belfast West">Belfast West</option><option value="Bermondsey and Old Southwark">Bermondsey and Old Southwark</option><option value="Berwick-upon-Tweed">Berwick-upon-Tweed</option><option value="Berwickshire, Roxburgh and Selkirk">Berwickshire, Roxburgh and Selkirk</option><option value="Bethnal Green and Bow">Bethnal Green and Bow</option><option value="Beverley and Holderness">Beverley and Holderness</option><option value="Bexhill and Battle">Bexhill and Battle</option><option value="Bexleyheath and Crayford">Bexleyheath and Crayford</option><option value="Birkenhead">Birkenhead</option><option value="Birmingham, Edgbaston">Birmingham, Edgbaston</option><option value="Birmingham, Erdington">Birmingham, Erdington</option><option value="Birmingham, Hall Green">Birmingham, Hall Green</option><option value="Birmingham, Hodge Hill">Birmingham, Hodge Hill</option><option value="Birmingham, Ladywood">Birmingham, Ladywood</option><option value="Birmingham, Northfield">Birmingham, Northfield</option><option value="Birmingham, Perry Barr">Birmingham, Perry Barr</option><option value="Birmingham, Selly Oak">Birmingham, Selly Oak</option><option value="Birmingham, Yardley">Birmingham, Yardley</option><option value="Bishop Auckland">Bishop Auckland</option><option value="Blackburn">Blackburn</option><option value="Blackley and Broughton">Blackley and Broughton</option><option value="Blackpool North and Cleveleys">Blackpool North and Cleveleys</option><option value="Blackpool South">Blackpool South</option><option value="Blaenau Gwent">Blaenau Gwent</option><option value="Blaydon">Blaydon</option><option value="Blyth Valley">Blyth Valley</option><option value="Bognor Regis and Littlehampton">Bognor Regis and Littlehampton</option><option value="Bolsover">Bolsover</option><option value="Bolton North East">Bolton North East</option><option value="Bolton South East">Bolton South East</option><option value="Bolton West">Bolton West</option><option value="Bootle">Bootle</option><option value="Boston and Skegness">Boston and Skegness</option><option value="Bosworth">Bosworth</option><option value="Bournemouth East">Bournemouth East</option><option value="Bournemouth West">Bournemouth West</option><option value="Bracknell">Bracknell</option><option value="Bradford East">Bradford East</option><option value="Bradford South">Bradford South</option><option value="Bradford West">Bradford West</option><option value="Braintree">Braintree</option><option value="Brecon and Radnorshire">Brecon and Radnorshire</option><option value="Brent Central">Brent Central</option><option value="Brent North">Brent North</option><option value="Brentford and Isleworth">Brentford and Isleworth</option><option value="Brentwood and Ongar">Brentwood and Ongar</option><option value="Bridgend">Bridgend</option><option value="Bridgwater and West Somerset">Bridgwater and West Somerset</option><option value="Brigg and Goole">Brigg and Goole</option><option value="Brighton, Kemptown">Brighton, Kemptown</option><option value="Brighton, Pavilion">Brighton, Pavilion</option><option value="Bristol East">Bristol East</option><option value="Bristol North West">Bristol North West</option><option value="Bristol South">Bristol South</option><option value="Bristol West">Bristol West</option><option value="Broadland">Broadland</option><option value="Bromley and Chislehurst">Bromley and Chislehurst</option><option value="Bromsgrove">Bromsgrove</option><option value="Broxbourne">Broxbourne</option><option value="Broxtowe">Broxtowe</option><option value="Buckingham">Buckingham</option><option value="Burnley">Burnley</option><option value="Burton">Burton</option><option value="Bury North">Bury North</option><option value="Bury South">Bury South</option><option value="Bury St Edmunds">Bury St Edmunds</option><option value="Caerphilly">Caerphilly</option><option value="Caithness, Sutherland and Easter Ross">Caithness, Sutherland and Easter Ross</option><option value="Calder Valley">Calder Valley</option><option value="Camberwell and Peckham">Camberwell and Peckham</option><option value="Camborne and Redruth">Camborne and Redruth</option><option value="Cambridge">Cambridge</option><option value="Cannock Chase">Cannock Chase</option><option value="Canterbury">Canterbury</option><option value="Cardiff Central">Cardiff Central</option><option value="Cardiff North">Cardiff North</option><option value="Cardiff South and Penarth">Cardiff South and Penarth</option><option value="Cardiff West">Cardiff West</option><option value="Carlisle">Carlisle</option><option value="Carmarthen East and Dinefwr">Carmarthen East and Dinefwr</option><option value="Carmarthen West and South Pembrokeshire">Carmarthen West and South Pembrokeshire</option><option value="Carshalton and Wallington">Carshalton and Wallington</option><option value="Castle Point">Castle Point</option><option value="Central Ayrshire">Central Ayrshire</option><option value="Central Devon">Central Devon</option><option value="Central Suffolk and North Ipswich">Central Suffolk and North Ipswich</option><option value="Ceredigion">Ceredigion</option><option value="Charnwood">Charnwood</option><option value="Chatham and Aylesford">Chatham and Aylesford</option><option value="Cheadle">Cheadle</option><option value="Chelmsford">Chelmsford</option><option value="Chelsea and Fulham">Chelsea and Fulham</option><option value="Cheltenham">Cheltenham</option><option value="Chesham and Amersham">Chesham and Amersham</option><option value="Chesterfield">Chesterfield</option><option value="Chichester">Chichester</option><option value="Chingford and Woodford Green">Chingford and Woodford Green</option><option value="Chippenham">Chippenham</option><option value="Chipping Barnet">Chipping Barnet</option><option value="Chorley">Chorley</option><option value="Christchurch">Christchurch</option><option value="Cities of London and Westminster">Cities of London and Westminster</option><option value="City of Chester">City of Chester</option><option value="City of Durham">City of Durham</option><option value="Clacton">Clacton</option><option value="Cleethorpes">Cleethorpes</option><option value="Clwyd South">Clwyd South</option><option value="Clwyd West">Clwyd West</option><option value="Coatbridge, Chryston and Bellshill">Coatbridge, Chryston and Bellshill</option><option value="Colchester">Colchester</option><option value="Colne Valley">Colne Valley</option><option value="Congleton">Congleton</option><option value="Copeland">Copeland</option><option value="Corby">Corby</option><option value="Coventry North East">Coventry North East</option><option value="Coventry North West">Coventry North West</option><option value="Coventry South">Coventry South</option><option value="Crawley">Crawley</option><option value="Crewe and Nantwich">Crewe and Nantwich</option><option value="Croydon Central">Croydon Central</option><option value="Croydon North">Croydon North</option><option value="Croydon South">Croydon South</option><option value="Cumbernauld, Kilsyth and Kirkintilloch East">Cumbernauld, Kilsyth and Kirkintilloch East</option><option value="Cynon Valley">Cynon Valley</option><option value="Dagenham and Rainham">Dagenham and Rainham</option><option value="Darlington">Darlington</option><option value="Dartford">Dartford</option><option value="Daventry">Daventry</option><option value="Delyn">Delyn</option><option value="Denton and Reddish">Denton and Reddish</option><option value="Derby North">Derby North</option><option value="Derby South">Derby South</option><option value="Derbyshire Dales">Derbyshire Dales</option><option value="Devizes">Devizes</option><option value="Dewsbury">Dewsbury</option><option value="Don Valley">Don Valley</option><option value="Doncaster Central">Doncaster Central</option><option value="Doncaster North">Doncaster North</option><option value="Dover">Dover</option><option value="Dudley North">Dudley North</option><option value="Dudley South" selected>Dudley South</option><option value="Dulwich and West Norwood">Dulwich and West Norwood</option><option value="Dumfries and Galloway">Dumfries and Galloway</option><option value="Dumfriesshire, Clydesdale and Tweeddale">Dumfriesshire, Clydesdale and Tweeddale</option><option value="Dundee East">Dundee East</option><option value="Dundee West">Dundee West</option><option value="Dunfermline and West Fife">Dunfermline and West Fife</option><option value="Dwyfor Meirionnydd">Dwyfor Meirionnydd</option><option value="Ealing Central and Acton">Ealing Central and Acton</option><option value="Ealing North">Ealing North</option><option value="Ealing, Southall">Ealing, Southall</option><option value="Easington">Easington</option><option value="East Antrim">East Antrim</option><option value="East Devon">East Devon</option><option value="East Dunbartonshire">East Dunbartonshire</option><option value="East Ham">East Ham</option><option value="East Hampshire">East Hampshire</option><option value="East Kilbride, Strathaven and Lesmahagow">East Kilbride, Strathaven and Lesmahagow</option><option value="East Londonderry">East Londonderry</option><option value="East Lothian">East Lothian</option><option value="East Renfrewshire">East Renfrewshire</option><option value="East Surrey">East Surrey</option><option value="East Worthing and Shoreham">East Worthing and Shoreham</option><option value="East Yorkshire">East Yorkshire</option><option value="Eastbourne">Eastbourne</option><option value="Eastleigh">Eastleigh</option><option value="Eddisbury">Eddisbury</option><option value="Edinburgh East">Edinburgh East</option><option value="Edinburgh North and Leith">Edinburgh North and Leith</option><option value="Edinburgh South">Edinburgh South</option><option value="Edinburgh South West">Edinburgh South West</option><option value="Edinburgh West">Edinburgh West</option><option value="Edmonton">Edmonton</option><option value="Ellesmere Port and Neston">Ellesmere Port and Neston</option><option value="Elmet and Rothwell">Elmet and Rothwell</option><option value="Eltham">Eltham</option><option value="Enfield North">Enfield North</option><option value="Enfield, Southgate">Enfield, Southgate</option><option value="Epping Forest">Epping Forest</option><option value="Epsom and Ewell">Epsom and Ewell</option><option value="Erewash">Erewash</option><option value="Erith and Thamesmead">Erith and Thamesmead</option><option value="Esher and Walton">Esher and Walton</option><option value="Exeter">Exeter</option><option value="Falkirk">Falkirk</option><option value="Fareham">Fareham</option><option value="Faversham and Mid Kent">Faversham and Mid Kent</option><option value="Feltham and Heston">Feltham and Heston</option><option value="Fermanagh and South Tyrone">Fermanagh and South Tyrone</option><option value="Filton and Bradley Stoke">Filton and Bradley Stoke</option><option value="Finchley and Golders Green">Finchley and Golders Green</option><option value="Folkestone and Hythe">Folkestone and Hythe</option><option value="Forest of Dean">Forest of Dean</option><option value="Foyle">Foyle</option><option value="Fylde">Fylde</option><option value="Gainsborough">Gainsborough</option><option value="Garston and Halewood">Garston and Halewood</option><option value="Gateshead">Gateshead</option><option value="Gedling">Gedling</option><option value="Gillingham and Rainham">Gillingham and Rainham</option><option value="Glasgow Central">Glasgow Central</option><option value="Glasgow East">Glasgow East</option><option value="Glasgow North">Glasgow North</option><option value="Glasgow North East">Glasgow North East</option><option value="Glasgow North West">Glasgow North West</option><option value="Glasgow South">Glasgow South</option><option value="Glasgow South West">Glasgow South West</option><option value="Glenrothes">Glenrothes</option><option value="Gloucester">Gloucester</option><option value="Gordon">Gordon</option><option value="Gosport">Gosport</option><option value="Gower">Gower</option><option value="Grantham and Stamford">Grantham and Stamford</option><option value="Gravesham">Gravesham</option><option value="Great Grimsby">Great Grimsby</option><option value="Great Yarmouth">Great Yarmouth</option><option value="Greenwich and Woolwich">Greenwich and Woolwich</option><option value="Guildford">Guildford</option><option value="Hackney North and Stoke Newington">Hackney North and Stoke Newington</option><option value="Hackney South and Shoreditch">Hackney South and Shoreditch</option><option value="Halesowen and Rowley Regis">Halesowen and Rowley Regis</option><option value="Halifax">Halifax</option><option value="Haltemprice and Howden">Haltemprice and Howden</option><option value="Halton">Halton</option><option value="Hammersmith">Hammersmith</option><option value="Hampstead and Kilburn">Hampstead and Kilburn</option><option value="Harborough">Harborough</option><option value="Harlow">Harlow</option><option value="Harrogate and Knaresborough">Harrogate and Knaresborough</option><option value="Harrow East">Harrow East</option><option value="Harrow West">Harrow West</option><option value="Hartlepool">Hartlepool</option><option value="Harwich and North Essex">Harwich and North Essex</option><option value="Hastings and Rye">Hastings and Rye</option><option value="Havant">Havant</option><option value="Hayes and Harlington">Hayes and Harlington</option><option value="Hazel Grove">Hazel Grove</option><option value="Hemel Hempstead">Hemel Hempstead</option><option value="Hemsworth">Hemsworth</option><option value="Hendon">Hendon</option><option value="Henley">Henley</option><option value="Hereford and South Herefordshire">Hereford and South Herefordshire</option><option value="Hertford and Stortford">Hertford and Stortford</option><option value="Hertsmere">Hertsmere</option><option value="Hexham">Hexham</option><option value="Heywood and Middleton">Heywood and Middleton</option><option value="High Peak">High Peak</option><option value="Hitchin and Harpenden">Hitchin and Harpenden</option><option value="Holborn and St Pancras">Holborn and St Pancras</option><option value="Hornchurch and Upminster">Hornchurch and Upminster</option><option value="Hornsey and Wood Green">Hornsey and Wood Green</option><option value="Horsham">Horsham</option><option value="Houghton and Sunderland South">Houghton and Sunderland South</option><option value="Hove">Hove</option><option value="Huddersfield">Huddersfield</option><option value="Huntingdon">Huntingdon</option><option value="Hyndburn">Hyndburn</option><option value="Ilford North">Ilford North</option><option value="Ilford South">Ilford South</option><option value="Inverclyde">Inverclyde</option><option value="Inverness, Nairn, Badenoch and Strathspey">Inverness, Nairn, Badenoch and Strathspey</option><option value="Ipswich">Ipswich</option><option value="Isle of Wight">Isle of Wight</option><option value="Islington North">Islington North</option><option value="Islington South and Finsbury">Islington South and Finsbury</option><option value="Islwyn">Islwyn</option><option value="Jarrow">Jarrow</option><option value="Keighley">Keighley</option><option value="Kenilworth and Southam">Kenilworth and Southam</option><option value="Kensington">Kensington</option><option value="Kettering">Kettering</option><option value="Kilmarnock and Loudoun">Kilmarnock and Loudoun</option><option value="Kingston and Surbiton">Kingston and Surbiton</option><option value="Kingston upon Hull East">Kingston upon Hull East</option><option value="Kingston upon Hull North">Kingston upon Hull North</option><option value="Kingston upon Hull West and Hessle">Kingston upon Hull West and Hessle</option><option value="Kingswood">Kingswood</option><option value="Kirkcaldy and Cowdenbeath">Kirkcaldy and Cowdenbeath</option><option value="Knowsley">Knowsley</option><option value="Lagan Valley">Lagan Valley</option><option value="Lanark and Hamilton East">Lanark and Hamilton East</option><option value="Lancaster and Fleetwood">Lancaster and Fleetwood</option><option value="Leeds Central">Leeds Central</option><option value="Leeds East">Leeds East</option><option value="Leeds North East">Leeds North East</option><option value="Leeds North West">Leeds North West</option><option value="Leeds West">Leeds West</option><option value="Leicester East">Leicester East</option><option value="Leicester South">Leicester South</option><option value="Leicester West">Leicester West</option><option value="Leigh">Leigh</option><option value="Lewes">Lewes</option><option value="Lewisham East">Lewisham East</option><option value="Lewisham West and Penge">Lewisham West and Penge</option><option value="Lewisham, Deptford">Lewisham, Deptford</option><option value="Leyton and Wanstead">Leyton and Wanstead</option><option value="Lichfield">Lichfield</option><option value="Lincoln">Lincoln</option><option value="Linlithgow and East Falkirk">Linlithgow and East Falkirk</option><option value="Liverpool, Riverside">Liverpool, Riverside</option><option value="Liverpool, Walton">Liverpool, Walton</option><option value="Liverpool, Wavertree">Liverpool, Wavertree</option><option value="Liverpool, West Derby">Liverpool, West Derby</option><option value="Livingston">Livingston</option><option value="Llanelli">Llanelli</option><option value="Loughborough">Loughborough</option><option value="Louth and Horncastle">Louth and Horncastle</option><option value="Ludlow">Ludlow</option><option value="Luton North">Luton North</option><option value="Luton South">Luton South</option><option value="Macclesfield">Macclesfield</option><option value="Maidenhead">Maidenhead</option><option value="Maidstone and the Weald">Maidstone and the Weald</option><option value="Makerfield">Makerfield</option><option value="Maldon">Maldon</option><option value="Manchester Central">Manchester Central</option><option value="Manchester, Gorton">Manchester, Gorton</option><option value="Manchester, Withington">Manchester, Withington</option><option value="Mansfield">Mansfield</option><option value="Meon Valley">Meon Valley</option><option value="Meriden">Meriden</option><option value="Merthyr Tydfil and Rhymney">Merthyr Tydfil and Rhymney</option><option value="Mid Bedfordshire">Mid Bedfordshire</option><option value="Mid Derbyshire">Mid Derbyshire</option><option value="Mid Dorset and North Poole">Mid Dorset and North Poole</option><option value="Mid Norfolk">Mid Norfolk</option><option value="Mid Sussex">Mid Sussex</option><option value="Mid Ulster">Mid Ulster</option><option value="Mid Worcestershire">Mid Worcestershire</option><option value="Middlesbrough">Middlesbrough</option><option value="Middlesbrough South and East Cleveland">Middlesbrough South and East Cleveland</option><option value="Midlothian">Midlothian</option><option value="Milton Keynes North">Milton Keynes North</option><option value="Milton Keynes South">Milton Keynes South</option><option value="Mitcham and Morden">Mitcham and Morden</option><option value="Mole Valley">Mole Valley</option><option value="Monmouth">Monmouth</option><option value="Montgomeryshire">Montgomeryshire</option><option value="Moray">Moray</option><option value="Morecambe and Lunesdale">Morecambe and Lunesdale</option><option value="Morley and Outwood">Morley and Outwood</option><option value="Motherwell and Wishaw">Motherwell and Wishaw</option><option value="Na h-Eileanan an Iar">Na h-Eileanan an Iar</option><option value="Neath">Neath</option><option value="New Forest East">New Forest East</option><option value="New Forest West">New Forest West</option><option value="Newark">Newark</option><option value="Newbury">Newbury</option><option value="Newcastle upon Tyne Central">Newcastle upon Tyne Central</option><option value="Newcastle upon Tyne East">Newcastle upon Tyne East</option><option value="Newcastle upon Tyne North">Newcastle upon Tyne North</option><option value="Newcastle-under-Lyme">Newcastle-under-Lyme</option><option value="Newport East">Newport East</option><option value="Newport West">Newport West</option><option value="Newry and Armagh">Newry and Armagh</option><option value="Newton Abbot">Newton Abbot</option><option value="Normanton, Pontefract and Castleford">Normanton, Pontefract and Castleford</option><option value="North Antrim">North Antrim</option><option value="North Ayrshire and Arran">North Ayrshire and Arran</option><option value="North Cornwall">North Cornwall</option><option value="North Devon">North Devon</option><option value="North Dorset">North Dorset</option><option value="North Down">North Down</option><option value="North Durham">North Durham</option><option value="North East Bedfordshire">North East Bedfordshire</option><option value="North East Cambridgeshire">North East Cambridgeshire</option><option value="North East Derbyshire">North East Derbyshire</option><option value="North East Fife">North East Fife</option><option value="North East Hampshire">North East Hampshire</option><option value="North East Hertfordshire">North East Hertfordshire</option><option value="North East Somerset">North East Somerset</option><option value="North Herefordshire">North Herefordshire</option><option value="North Norfolk">North Norfolk</option><option value="North Shropshire">North Shropshire</option><option value="North Somerset">North Somerset</option><option value="North Swindon">North Swindon</option><option value="North Thanet">North Thanet</option><option value="North Tyneside">North Tyneside</option><option value="North Warwickshire">North Warwickshire</option><option value="North West Cambridgeshire">North West Cambridgeshire</option><option value="North West Durham">North West Durham</option><option value="North West Hampshire">North West Hampshire</option><option value="North West Leicestershire">North West Leicestershire</option><option value="North West Norfolk">North West Norfolk</option><option value="North Wiltshire">North Wiltshire</option><option value="Northampton North">Northampton North</option><option value="Northampton South">Northampton South</option><option value="Norwich North">Norwich North</option><option value="Norwich South">Norwich South</option><option value="Nottingham East">Nottingham East</option><option value="Nottingham North">Nottingham North</option><option value="Nottingham South">Nottingham South</option><option value="Nuneaton">Nuneaton</option><option value="Ochil and South Perthshire">Ochil and South Perthshire</option><option value="Ogmore">Ogmore</option><option value="Old Bexley and Sidcup">Old Bexley and Sidcup</option><option value="Oldham East and Saddleworth">Oldham East and Saddleworth</option><option value="Oldham West and Royton">Oldham West and Royton</option><option value="Orkney and Shetland">Orkney and Shetland</option><option value="Orpington">Orpington</option><option value="Oxford East">Oxford East</option><option value="Oxford West and Abingdon">Oxford West and Abingdon</option><option value="Paisley and Renfrewshire North">Paisley and Renfrewshire North</option><option value="Paisley and Renfrewshire South">Paisley and Renfrewshire South</option><option value="Pendle">Pendle</option><option value="Penistone and Stocksbridge">Penistone and Stocksbridge</option><option value="Penrith and The Border">Penrith and The Border</option><option value="Perth and North Perthshire">Perth and North Perthshire</option><option value="Peterborough">Peterborough</option><option value="Plymouth, Moor View">Plymouth, Moor View</option><option value="Plymouth, Sutton and Devonport">Plymouth, Sutton and Devonport</option><option value="Pontypridd">Pontypridd</option><option value="Poole">Poole</option><option value="Poplar and Limehouse">Poplar and Limehouse</option><option value="Portsmouth North">Portsmouth North</option><option value="Portsmouth South">Portsmouth South</option><option value="Preseli Pembrokeshire">Preseli Pembrokeshire</option><option value="Preston">Preston</option><option value="Pudsey">Pudsey</option><option value="Putney">Putney</option><option value="Rayleigh and Wickford">Rayleigh and Wickford</option><option value="Reading East">Reading East</option><option value="Reading West">Reading West</option><option value="Redcar">Redcar</option><option value="Redditch">Redditch</option><option value="Reigate">Reigate</option><option value="Rhondda">Rhondda</option><option value="Ribble Valley">Ribble Valley</option><option value="Richmond (Yorks)">Richmond (Yorks)</option><option value="Richmond Park">Richmond Park</option><option value="Rochdale">Rochdale</option><option value="Rochester and Strood">Rochester and Strood</option><option value="Rochford and Southend East">Rochford and Southend East</option><option value="Romford">Romford</option><option value="Romsey and Southampton North">Romsey and Southampton North</option><option value="Ross, Skye and Lochaber">Ross, Skye and Lochaber</option><option value="Rossendale and Darwen">Rossendale and Darwen</option><option value="Rother Valley">Rother Valley</option><option value="Rotherham">Rotherham</option><option value="Rugby">Rugby</option><option value="Ruislip, Northwood and Pinner">Ruislip, Northwood and Pinner</option><option value="Runnymede and Weybridge">Runnymede and Weybridge</option><option value="Rushcliffe">Rushcliffe</option><option value="Rutherglen and Hamilton West">Rutherglen and Hamilton West</option><option value="Rutland and Melton">Rutland and Melton</option><option value="Saffron Walden">Saffron Walden</option><option value="Salford and Eccles">Salford and Eccles</option><option value="Salisbury">Salisbury</option><option value="Scarborough and Whitby">Scarborough and Whitby</option><option value="Scunthorpe">Scunthorpe</option><option value="Sedgefield">Sedgefield</option><option value="Sefton Central">Sefton Central</option><option value="Selby and Ainsty">Selby and Ainsty</option><option value="Sevenoaks">Sevenoaks</option><option value="Sheffield Central">Sheffield Central</option><option value="Sheffield South East">Sheffield South East</option><option value="Sheffield, Brightside and Hillsborough">Sheffield, Brightside and Hillsborough</option><option value="Sheffield, Hallam">Sheffield, Hallam</option><option value="Sheffield, Heeley">Sheffield, Heeley</option><option value="Sherwood">Sherwood</option><option value="Shipley">Shipley</option><option value="Shrewsbury and Atcham">Shrewsbury and Atcham</option><option value="Sittingbourne and Sheppey">Sittingbourne and Sheppey</option><option value="Skipton and Ripon">Skipton and Ripon</option><option value="Sleaford and North Hykeham">Sleaford and North Hykeham</option><option value="Slough">Slough</option><option value="Solihull">Solihull</option><option value="Somerton and Frome">Somerton and Frome</option><option value="South Antrim">South Antrim</option><option value="South Basildon and East Thurrock">South Basildon and East Thurrock</option><option value="South Cambridgeshire">South Cambridgeshire</option><option value="South Derbyshire">South Derbyshire</option><option value="South Dorset">South Dorset</option><option value="South Down">South Down</option><option value="South East Cambridgeshire">South East Cambridgeshire</option><option value="South East Cornwall">South East Cornwall</option><option value="South Holland and The Deepings">South Holland and The Deepings</option><option value="South Leicestershire">South Leicestershire</option><option value="South Norfolk">South Norfolk</option><option value="South Northamptonshire">South Northamptonshire</option><option value="South Ribble">South Ribble</option><option value="South Shields">South Shields</option><option value="South Staffordshire">South Staffordshire</option><option value="South Suffolk">South Suffolk</option><option value="South Swindon">South Swindon</option><option value="South Thanet">South Thanet</option><option value="South West Bedfordshire">South West Bedfordshire</option><option value="South West Devon">South West Devon</option><option value="South West Hertfordshire">South West Hertfordshire</option><option value="South West Norfolk">South West Norfolk</option><option value="South West Surrey">South West Surrey</option><option value="South West Wiltshire">South West Wiltshire</option><option value="Southampton, Itchen">Southampton, Itchen</option><option value="Southampton, Test">Southampton, Test</option><option value="Southend West">Southend West</option><option value="Southport">Southport</option><option value="Spelthorne">Spelthorne</option><option value="St Albans">St Albans</option><option value="St Austell and Newquay">St Austell and Newquay</option><option value="St Helens North">St Helens North</option><option value="St Helens South and Whiston">St Helens South and Whiston</option><option value="St Ives">St Ives</option><option value="Stafford">Stafford</option><option value="Staffordshire Moorlands">Staffordshire Moorlands</option><option value="Stalybridge and Hyde">Stalybridge and Hyde</option><option value="Stevenage">Stevenage</option><option value="Stirling">Stirling</option><option value="Stockport">Stockport</option><option value="Stockton North">Stockton North</option><option value="Stockton South">Stockton South</option><option value="Stoke-on-Trent Central">Stoke-on-Trent Central</option><option value="Stoke-on-Trent North">Stoke-on-Trent North</option><option value="Stoke-on-Trent South">Stoke-on-Trent South</option><option value="Stone">Stone</option><option value="Stourbridge">Stourbridge</option><option value="Strangford">Strangford</option><option value="Stratford-on-Avon">Stratford-on-Avon</option><option value="Streatham">Streatham</option><option value="Stretford and Urmston">Stretford and Urmston</option><option value="Stroud">Stroud</option><option value="Suffolk Coastal">Suffolk Coastal</option><option value="Sunderland Central">Sunderland Central</option><option value="Surrey Heath">Surrey Heath</option><option value="Sutton and Cheam">Sutton and Cheam</option><option value="Sutton Coldfield">Sutton Coldfield</option><option value="Swansea East">Swansea East</option><option value="Swansea West">Swansea West</option><option value="Tamworth">Tamworth</option><option value="Tatton">Tatton</option><option value="Taunton Deane">Taunton Deane</option><option value="Telford">Telford</option><option value="Tewkesbury">Tewkesbury</option><option value="The Cotswolds">The Cotswolds</option><option value="The Wrekin">The Wrekin</option><option value="Thirsk and Malton">Thirsk and Malton</option><option value="Thornbury and Yate">Thornbury and Yate</option><option value="Thurrock">Thurrock</option><option value="Tiverton and Honiton">Tiverton and Honiton</option><option value="Tonbridge and Malling">Tonbridge and Malling</option><option value="Tooting">Tooting</option><option value="Torbay">Torbay</option><option value="Torfaen">Torfaen</option><option value="Torridge and West Devon">Torridge and West Devon</option><option value="Totnes">Totnes</option><option value="Tottenham">Tottenham</option><option value="Truro and Falmouth">Truro and Falmouth</option><option value="Tunbridge Wells">Tunbridge Wells</option><option value="Twickenham">Twickenham</option><option value="Tynemouth">Tynemouth</option><option value="Upper Bann">Upper Bann</option><option value="Uxbridge and South Ruislip">Uxbridge and South Ruislip</option><option value="Vale of Clwyd">Vale of Clwyd</option><option value="Vale of Glamorgan">Vale of Glamorgan</option><option value="Vauxhall">Vauxhall</option><option value="Wakefield">Wakefield</option><option value="Wallasey">Wallasey</option><option value="Walsall North">Walsall North</option><option value="Walsall South">Walsall South</option><option value="Walthamstow">Walthamstow</option><option value="Wansbeck">Wansbeck</option><option value="Wantage">Wantage</option><option value="Warley">Warley</option><option value="Warrington North">Warrington North</option><option value="Warrington South">Warrington South</option><option value="Warwick and Leamington">Warwick and Leamington</option><option value="Washington and Sunderland West">Washington and Sunderland West</option><option value="Watford">Watford</option><option value="Waveney">Waveney</option><option value="Wealden">Wealden</option><option value="Weaver Vale">Weaver Vale</option><option value="Wellingborough">Wellingborough</option><option value="Wells">Wells</option><option value="Welwyn Hatfield">Welwyn Hatfield</option><option value="Wentworth and Dearne">Wentworth and Dearne</option><option value="West Aberdeenshire and Kincardine">West Aberdeenshire and Kincardine</option><option value="West Bromwich East">West Bromwich East</option><option value="West Bromwich West">West Bromwich West</option><option value="West Dorset">West Dorset</option><option value="West Dunbartonshire">West Dunbartonshire</option><option value="West Ham">West Ham</option><option value="West Lancashire">West Lancashire</option><option value="West Suffolk">West Suffolk</option><option value="West Tyrone">West Tyrone</option><option value="West Worcestershire">West Worcestershire</option><option value="Westminster North">Westminster North</option><option value="Westmorland and Lonsdale">Westmorland and Lonsdale</option><option value="Weston-Super-Mare">Weston-Super-Mare</option><option value="Wigan">Wigan</option><option value="Wimbledon">Wimbledon</option><option value="Winchester">Winchester</option><option value="Windsor">Windsor</option><option value="Wirral South">Wirral South</option><option value="Wirral West">Wirral West</option><option value="Witham">Witham</option><option value="Witney">Witney</option><option value="Woking">Woking</option><option value="Wokingham">Wokingham</option><option value="Wolverhampton North East">Wolverhampton North East</option><option value="Wolverhampton South East">Wolverhampton South East</option><option value="Wolverhampton South West">Wolverhampton South West</option><option value="Worcester">Worcester</option><option value="Workington">Workington</option><option value="Worsley and Eccles South">Worsley and Eccles South</option><option value="Worthing West">Worthing West</option><option value="Wrexham">Wrexham</option><option value="Wycombe">Wycombe</option><option value="Wyre and Preston North">Wyre and Preston North</option><option value="Wyre Forest">Wyre Forest</option><option value="Wythenshawe and Sale East">Wythenshawe and Sale East</option><option value="Yeovil">Yeovil</option><option value="Ynys Môn">Ynys Môn</option><option value="York Central">York Central</option><option value="York Outer">York Outer</option>
+                        </select>
+                        <script>
+                            new AriaAutocomplete(document.getElementById('constituencylist-select'), {
+                                deleteOnBackspace: true,
+                                showAllControl: true,
+                                autoGrow: true,
+                                maxResults: 50,
+                                minLength: 0,
+                                maxItems: 5
+                            });
+                        </script>
+                        <p>This example uses a <code>&lt;select&gt;</code>, so the <code>multiple</code> option is automatically set to match its own state (true in this case). If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
+                        <p>When an option in the autocomplete is selected, the corresponding <code>&lt;option&gt;</code> or checkbox will be set to selected / checked as well.</p>
+                        <pre>
+    new AriaAutocomplete(element, {
+        deleteOnBackspace: true,
+        showAllControl: true,
+        autoGrow: true,
+        maxResults: 50,
+        minLength: 0,
+        maxItems: 5
+    });</pre>
+                    </div>
+                    <div class="tile">
+                        <h3>Function as Source, with Multi-select, but <i>without</i> autogrow</h3>
+                        <p>If you want to use your own client-side filtering logic, you can also use a function as the <code>source</code> - it will be passed the search term, and a render function, which expects an Array to be passed to it (using either of the formats mentioned above).</p>
+                        <p>If the autocomplete is initialised on an input, which has a starting value, the source function will also be called immediately with that value passed to it. In this case, the render function expects an Array of possible entries to check that starting value against, so that it can internally determine what the starting label (or multi-select elements) should be.</p>
+                        <p>This example <b>searches based on each country's 3 letter country code</b>, instead of its name, e.g. "DZA" for "Algeria", or "GBR" for the United Kingdom. The <code>onItemRender</code> callback is also being used to display the code next to the country name in the results.</p>
+                        <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively - so this will also initialise with two values already selected.</p>
+                        <label for="countrylist-function">Select up to 4 countries (search by country code)</label>
+                        <input type="text" value="GLP,ZWE" id="countrylist-function" />
+                        <script>
+                            new AriaAutocomplete(document.getElementById('countrylist-function'), {
+                                maxItems: 4,
+                                maxResults: 10,
+                                multiple: true,
+                                source: function (query, render) {
+                                    var result = [];
+                                    var isStartingCall = this === window;
+                                    var value = query.toLowerCase().trim();
+                                    var arrToCheck = isStartingCall ? value.split(',') : [value];
+                                    countryListAllIsoData.forEach(function (entry) {
+                                        var code3 = entry['code3'].toLowerCase();
+                                        var addIt = false;
+                                        arrToCheck.forEach(function (val) {
+                                            if (code3.search(val) !== -1) {
+                                                addIt = true;
+                                            }
+                                        });
+                                        if (addIt) {
+                                            result.push(entry);
                                         }
                                     });
-                                    if (addIt) {
-                                        result.push(entry);
-                                    }
-                                });
-                                render(result);
-                            },
-                            onItemRender: function (itemData) {
-                                return itemData.label + ' (' + itemData.code3 + ')';
-                            },
-                            sourceMapping: { 'value': 'code3', 'label': 'name' }
-                        });
-                    </script>
-                    <pre>
-new AriaAutocomplete(element, {
-    maxItems: 4,
-    maxResults: 10,
-    multiple: true,
-    source: (query, render) => {
-        let result = [];
-        let isStartingCall = this === window;
-        let value = query.toLowerCase().trim();
-        let arrToCheck = isStartingCall ? value.split(',') : [value];
-        countryListAllIsoData.forEach(entry => {
-            let code3 = entry['code3'].toLowerCase();
-            let addIt = false;
-            arrToCheck.forEach(val => {
-                if (code3.search(val) !== -1) {
-                    addIt = true;
+                                    render(result);
+                                },
+                                onItemRender: function (itemData) {
+                                    return itemData.label + ' (' + itemData.code3 + ')';
+                                },
+                                sourceMapping: { 'value': 'code3', 'label': 'name' }
+                            });
+                        </script>
+                        <pre>
+    new AriaAutocomplete(element, {
+        maxItems: 4,
+        maxResults: 10,
+        multiple: true,
+        source: function (query, render) {
+            let result = [];
+            let isStartingCall = this === window;
+            let value = query.toLowerCase().trim();
+            let arrToCheck = isStartingCall ? value.split(',') : [value];
+            countryListAllIsoData.forEach(entry => {
+                let code3 = entry['code3'].toLowerCase();
+                let addIt = false;
+                arrToCheck.forEach(val => {
+                    if (code3.search(val) !== -1) {
+                        addIt = true;
+                    }
+                });
+                if (addIt) {
+                    result.push(entry);
                 }
             });
-            if (addIt) {
-                result.push(entry);
-            }
-        });
-        render(result);
-    },
-    onItemRender: itemData => `${itemData.label} (${itemData.code3})`,
-    sourceMapping: { 'value': 'code3', 'label': 'name' }
-});
-</pre>
-                    <p>Despite the custom <code>source</code> Function, this example still needs a <code>sourceMapping</code> option, because the <code>label</code> is used when rendering the list, and the <code>value</code> is used when filling the original <code>&lt;input /&gt;</code></p>
+            render(result);
+        },
+        onItemRender: itemData => `${itemData.label} (${itemData.code3})`,
+        sourceMapping: { 'value': 'code3', 'label': 'name' }
+    });
+    </pre>
+                        <p>Despite the custom <code>source</code> Function, this example still needs a <code>sourceMapping</code> option, because the <code>label</code> is used when rendering the list, and the <code>value</code> is used when filling the original <code>&lt;input /&gt;</code></p>
+                    </div>
+                    <div class="tile">
+                        <h3>String (endpoint) as Source</h3>
+                        <p>If you want to send the query to an endpoint / your server, you can do that too. The current query, and your chosen value for max results to render, will be added to the url using the <code>asyncQueryParam</code> and <code>asyncMaxResultsParam</code> respectively.<br>E.g. https://some-url-here/endpoint?q=norway&limit=20.<br>You can also use the <code>onAsyncPrep</code> callback to modify the URL.</p>
+                        <p>As with a Function as the <code>source</code>, if the autocomplete is initialised on an input with a starting value, the endpoint will be called immediately.</p>
+                        <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
+                        <label for="countrylist-endpoint">Select a country</label>
+                        <input type="text" value="CAN" id="countrylist-endpoint" />
+                        <script>
+                            new AriaAutocomplete(document.getElementById('countrylist-endpoint'), {
+                                source: 'countrylistallisodata.json',
+                                asyncMaxResultsParam: 'limit',
+                                asyncQueryParam: 'q',
+                                maxResults: 25,
+                                sourceMapping: { 'value': 'code3', 'label': 'name' },
+                                onAsyncSuccess: function (query, xhr) {
+                                    var result = [];
+                                    var isStartingCall = this === window;
+                                    var value = query.toLowerCase().trim();
+                                    var response = JSON.parse(xhr.responseText);
+                                    var propToCheck = isStartingCall ? 'value' : 'name';
+                                    response.forEach(function (entry) {
+                                        if (entry[propToCheck].toLowerCase().search(value) !== -1) {
+                                            result.push(entry);
+                                        }
+                                    });
+                                    return result;
+                                }
+                            });
+                        </script>
+                        <pre>
+    new AriaAutocomplete(element, {
+        source: 'countrylistallisodata.json',
+        sourceMapping: { 'value': 'code3', 'label': 'name' },
+        onAsyncPrep: url => url,
+        onAsyncSuccess: function (query, xhr) {
+            let result = [];
+            let isStartingCall = this === window;
+            let value = query.toLowerCase().trim();
+            let response = JSON.parse(xhr.responseText);
+            let propToCheck = isStartingCall ? 'value' : 'name';
+            response.forEach(entry => {
+                if (entry[propToCheck].toLowerCase().search(value) !== -1) {
+                    result.push(entry);
+                }
+            });
+            return result;
+        },
+        asyncMaxResultsParam: 'limit',
+        asyncQueryParam: 'q',
+        maxResults: 25
+    });
+    </pre>
+                    </div>
+                    <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API (assuming you use an ordinary function expression instead of arrow functions). The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. The <code>isStartingCall</code> variable in the above examples is used to illustrate this.</p>
                 </section>
-                <div class="tile">
-                    <h3>String (endpoint) as Source</h3>
-                    <p>If you want to send the query to an endpoint / your server, you can do that too. The current query, and your chosen value for max results to render, will be added to the url using the <code>asyncQueryParam</code> and <code>asyncMaxResultsParam</code> respectively.<br>E.g. https://some-url-here/endpoint?q=norway&limit=20.<br>You can also use the <code>onAsyncPrep</code> callback to modify the URL.</p>
-                    <p>As with a Function as the <code>source</code>, if the autocomplete is initialised on an input with a starting value, the endpoint will be called immediately.</p>
-                    <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
-                    <label for="countrylist-endpoint">Select a country</label>
-                    <input type="text" value="CAN" id="countrylist-endpoint" />
-                    <script>
-                        new AriaAutocomplete(document.getElementById('countrylist-endpoint'), {
-                            source: 'countrylistallisodata.json',
-                            asyncMaxResultsParam: 'limit',
-                            asyncQueryParam: 'q',
-                            maxResults: 25,
-                            sourceMapping: { 'value': 'code3', 'label': 'name' },
-                            onAsyncSuccess: function (query, xhr) {
-                                var result = [];
-                                var isStartingCall = this === window;
-                                var value = query.toLowerCase().trim();
-                                var response = JSON.parse(xhr.responseText);
-                                var propToCheck = isStartingCall ? 'value' : 'name';
-                                response.forEach(function (entry) {
-                                    if (entry[propToCheck].toLowerCase().search(value) !== -1) {
-                                        result.push(entry);
-                                    }
-                                });
-                                return result;
-                            }
-                        });
-                    </script>
-                    <pre>
-new AriaAutocomplete(element, {
-    source: 'countrylistallisodata.json',
-    sourceMapping: { 'value': 'code3', 'label': 'name' },
-    onAsyncPrep: url => url,
-    onAsyncSuccess: (query, xhr) => {
-        let result = [];
-        let isStartingCall = this === window;
-        let value = query.toLowerCase().trim();
-        let response = JSON.parse(xhr.responseText);
-        let propToCheck = isStartingCall ? 'value' : 'name';
-        response.forEach(entry => {
-            if (entry[propToCheck].toLowerCase().search(value) !== -1) {
-                result.push(entry);
-            }
-        });
-        return result;
-    },
-    asyncMaxResultsParam: 'limit',
-    asyncQueryParam: 'q',
-    maxResults: 25
-});
-</pre>
-                </div>
-                <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API. The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. The <code>isStartingCall</code> variable in the above examples is used to illustrate this.</p>
             
                 <section id="options">
                     <h2>Options</h2>
                     <p>The full list of available options is as follows:</p>
-                    <dl class="tile">
-                        <div>
-                            <dt>name: <code>String</code></dt>
-                            <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
-                            <dt>source: <code>String[] | Object[] | String | Function</code></dt>
-                            <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
-                            <dt>sourceMapping: <code>Object</code></dt>
-                            <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
-                            <dt>alsoSearchIn: <code>String[]</code></dt>
-                            <dd>Additional properties to use when searching for a match</dd>
-                        </div>
-                        <div>
-                            <dt>delay: <code>Number</code></dt>
-                            <dd>input delay before running a search<br>Default: <code>100</code></dd>
-                            <dt>minLength: <code>Number</code></dt>
-                            <dd>Minimum number of characters to run a search (includes spaces)<br>Default: <code>1</code></dd>
-                            <dt>maxResults: <code>Number</code></dt>
-                            <dd>Maximum number of results to render<br>Default: <code>9999</code></dd>
-                            <dt>showAllControl: <code>Boolean</code></dt>
-                            <dd>Render a button that triggers showing all options<br>Default: <code>false</code></dd>
-                            <dt>confirmOnBlur: <code>Boolean</code></dt>
-                            <dd>Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for an exact text match<br>Default: <code>true</code></dd>
-                        </div>
-                        <div>
-                            <dt>multiple: <code>Boolean</code></dt>
-                            <dd>Allow multiple items to be selected<br>Default: <code>false</code></dd>
-                            <dt>autoGrow: <code>Boolean</code></dt>
-                            <dd>Set input width to match its content<br>Default: <code>false</code></dd>
-                            <dt>maxItems: <code>Number</code></dt>
-                            <dd>Maximum number of items that can be selected in multiple mode<br>Default: <code>9999</code></dd>
-                            <dt>multipleSeparator: <code>String</code></dt>
-                            <dd>In multiple mode, if the original element was an input, the character that separates the values<br>Default: <code>`,`</code></dd>
-                            <dt>deleteOnBackspace: <code>Boolean</code></dt>
-                            <dd>If input is empty and in multiple mode, delete last selected item on backspace<br>Default: <code>false</code></dd>
-                        </div>
-                    </dl>
+                    <div class="tile">
+                        <h3>Core options</h3>
+                        <dl>
+                            <div>
+                                <dt>name: <code>string</code></dt>
+                                <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
+                                <dt>source: <code>string[] | Object[] | string | Function</code></dt>
+                                <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
+                                <dt>sourceMapping: <code>Object</code></dt>
+                                <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
+                                <dt>alsoSearchIn: <code>String[]</code></dt>
+                                <dd>Additional properties to use when searching for a match</dd>
+                            </div>
+                            <div>
+                                <dt>delay: <code>number</code></dt>
+                                <dd>input delay before running a search<br>Default: <code>100</code></dd>
+                                <dt>minLength: <code>number</code></dt>
+                                <dd>Minimum number of characters to run a search (includes spaces)<br>Default: <code>1</code></dd>
+                                <dt>maxResults: <code>number</code></dt>
+                                <dd>Maximum number of results to render<br>Default: <code>9999</code></dd>
+                                <dt>showAllControl: <code>Boolean</code></dt>
+                                <dd>Render a button that triggers showing all options<br>Default: <code>false</code></dd>
+                                <dt>confirmOnBlur: <code>Boolean</code></dt>
+                                <dd>Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for an exact text match<br>Default: <code>true</code></dd>
+                            </div>
+                            <div>
+                                <dt>multiple: <code>Boolean</code></dt>
+                                <dd>Allow multiple items to be selected<br>Default: <code>false</code></dd>
+                                <dt>autoGrow: <code>Boolean</code></dt>
+                                <dd>Set input width to match its content<br>Default: <code>false</code></dd>
+                                <dt>maxItems: <code>number</code></dt>
+                                <dd>Maximum number of items that can be selected in multiple mode<br>Default: <code>9999</code></dd>
+                                <dt>multipleSeparator: <code>string</code></dt>
+                                <dd>In multiple mode, if the original element was an input, the character that separates the values<br>Default: <code>`,`</code></dd>
+                                <dt>deleteOnBackspace: <code>Boolean</code></dt>
+                                <dd>If input is empty and in multiple mode, delete last selected item on backspace<br>Default: <code>false</code></dd>
+                            </div>
+                        </dl>
+                    </div>
                     <div class="tile">
                         <h3>Async mode options</h3>
                         <dl>
-                            <dt>asyncQueryParam: <code>String</code></dt>
+                            <dt>asyncQueryParam: <code>string</code></dt>
                             <dd>When source is a string, param to use when adding input value to it<br>Default: <code>`q`</code></dd>
-                            <dt>asyncMaxResultsParam: <code>String</code></dt>
+                            <dt>asyncMaxResultsParam: <code>string</code></dt>
                             <dd>When source is a string, param to use when adding maxResults option (+ current selected count in multiple mode) to it<br>Default: <code>`limit`</code></dd>
                         </dl>
                     </div>
                     <div class="tile">
                         <h3>Styling / rendering options</h3>
                         <dl>
-                            <dt>placeholder: <code>String</code></dt>
+                            <dt>placeholder: <code>string</code></dt>
                             <dd>Placeholder text to show in generated input<br>Default: <code>``</code></dd>
-                            <dt>noResultsText: <code>String</code></dt>
+                            <dt>noResultsText: <code>string</code></dt>
                             <dd>Text to show (and announce to screen readers) if no results are found. If this is an empty string, the list will close instead<br>Default: <code>`No results`</code></dd>
-                            <dt>cssNameSpace: <code>String</code></dt>
+                            <dt>cssNameSpace: <code>string</code></dt>
                             <dd>The string to prepend to all main classes for BEM naming e.g. `aria-autocomplete__input`<br>(Some other generic class-names are used alongside these as well, such as <code>`disabled`</code>, <code>`focused`</code>, <code>`hidden`</code>, etc.)<br>Default: <code>`aria-autocomplete`</code></dd>
-                            <dt>listClassName: <code>String</code></dt>
+                            <dt>listClassName: <code>string</code></dt>
                             <dd>Custom class name to add to the generated list element<br>Default: <code>``</code></dd>
-                            <dt>inputClassName: <code>String</code></dt>
+                            <dt>inputClassName: <code>string</code></dt>
                             <dd>Custom class name to add to the generated input element<br>Default: <code>``</code></dd>
-                            <dt>wrapperClassName: <code>String</code></dt>
+                            <dt>wrapperClassName: <code>string</code></dt>
                             <dd>Custom class name to add to the generated component wrapper<br>Default: <code>``</code></dd>
                         </dl>
                     </div>
@@ -407,15 +455,15 @@ new AriaAutocomplete(element, {
                         <h3>Screen reader enhancements</h3>
                         <dl>
                             <div>
-                                <dt>srDeleteText: <code>String</code></dt>
+                                <dt>srDeleteText: <code>string</code></dt>
                                 <dd>In multi mode, screen reader text used for element deletion - prepended to label<br>Default: <code>`delete`</code></dd>
-                                <dt>srDeletedText: <code>String</code></dt>
+                                <dt>srDeletedText: <code>string</code></dt>
                                 <dd>Screen reader text announced after deletion - appended to label<br>Default: <code>`deleted`</code></dd>
-                                <dt>srSelectedText: <code>String</code></dt>
+                                <dt>srSelectedText: <code>string</code></dt>
                                 <dd>Screen reader text announced after selection - appended to label<br>Default: <code>`selected`</code></dd>
-                                <dt>srListLabelText: <code>String</code></dt>
+                                <dt>srListLabelText: <code>string</code></dt>
                                 <dd>Screen reader explainer added to the list element via aria-label attribute<br>Default: <code>`Search suggestions`</code></dd>
-                                <dt>srAssistiveText: <code>String</code></dt>
+                                <dt>srAssistiveText: <code>string</code></dt>
                                 <dd>Screen reader description used for main input when empty<br>Default: <code>`When results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.`</code></dd>
                                 <dt>srResultsText: <code>Function</code></dt>
                                 <dd>Screen reader announcement after results are rendered<br>Default: <code>length => `${length} ${length === 1 ? 'result' : 'results'} available.`</code></dd>
@@ -449,7 +497,9 @@ new AriaAutocomplete(element, {
                     </div>
                 </section>
             </main>
-            <footer></footer>
+            <footer>
+                <a class="button" href="https://www.github.com/mynamesleon/aria-autocomplete">On GitHub</a>
+            </footer>
         </div>
     </body>
 </html>

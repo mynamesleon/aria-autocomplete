@@ -30,6 +30,9 @@
         "multiselect",
         "multiple selection"
     ],
+    "files": [
+        "dist"
+    ],
     "author": "Leon Slater (https://www.mynamesleon.com)",
     "license": "GPL-3.0-or-later",
     "bugs": {

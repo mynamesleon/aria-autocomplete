@@ -46,10 +46,10 @@ class AriaAutocomplete {
         }
 
         // vars defined later - related explicitly to core initialising params
-        // this.options;
-        // this.element;
-        // this.elementIsInput;
-        // this.elementIsSelect;
+        this.options;
+        this.element;
+        this.elementIsInput;
+        this.elementIsSelect;
 
         // vars defined later - elements
         this.list;

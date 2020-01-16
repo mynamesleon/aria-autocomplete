@@ -91,7 +91,7 @@ The full list of options, and their defaults:
     name: '',
 
     /**
-     * @type {String | String[] | Object[] | Function}
+     * @type {string | string[] | Object[] | Function}
      * @description Specify source. See examples file for more specific usage.
      * @example ['Afghanistan', 'Albania', 'Algeria', ...more]
      * @example (query: String, render: Function) => render([])
@@ -105,7 +105,7 @@ The full list of options, and their defaults:
     sourceMapping: { value: 'value', label: 'label' },
 
     /**
-     * @type {String[]}
+     * @type {string[]}
      * @description Additional properties to use when searching for a match.
      * `label` will always be used
      */
