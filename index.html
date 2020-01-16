@@ -250,14 +250,14 @@ new AriaAutocomplete(element, {
                         <p>This example uses a <code>&lt;select&gt;</code>, so the <code>multiple</code> option is automatically set to match its own state (true in this case). If checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
                         <p>When an option in the autocomplete is selected, the corresponding <code>&lt;option&gt;</code> or checkbox will be set to selected / checked as well.</p>
                         <pre>
-    new AriaAutocomplete(element, {
-        deleteOnBackspace: true,
-        showAllControl: true,
-        autoGrow: true,
-        maxResults: 50,
-        minLength: 0,
-        maxItems: 5
-    });</pre>
+new AriaAutocomplete(element, {
+    deleteOnBackspace: true,
+    showAllControl: true,
+    autoGrow: true,
+    maxResults: 50,
+    minLength: 0,
+    maxItems: 5
+});</pre>
                     </div>
                     <div class="tile">
                         <h3>Function as Source, with Multi-select, but <i>without</i> autogrow</h3>
@@ -298,33 +298,33 @@ new AriaAutocomplete(element, {
                             });
                         </script>
                         <pre>
-    new AriaAutocomplete(element, {
-        maxItems: 4,
-        maxResults: 10,
-        multiple: true,
-        source: function (query, render) {
-            let result = [];
-            let isStartingCall = this === window;
-            let value = query.toLowerCase().trim();
-            let arrToCheck = isStartingCall ? value.split(',') : [value];
-            countryListAllIsoData.forEach(entry => {
-                let code3 = entry['code3'].toLowerCase();
-                let addIt = false;
-                arrToCheck.forEach(val => {
-                    if (code3.search(val) !== -1) {
-                        addIt = true;
-                    }
-                });
-                if (addIt) {
-                    result.push(entry);
+new AriaAutocomplete(element, {
+    maxItems: 4,
+    maxResults: 10,
+    multiple: true,
+    source: function (query, render) {
+        let result = [];
+        let isStartingCall = this === window;
+        let value = query.toLowerCase().trim();
+        let arrToCheck = isStartingCall ? value.split(',') : [value];
+        countryListAllIsoData.forEach(entry => {
+            let code3 = entry['code3'].toLowerCase();
+            let addIt = false;
+            arrToCheck.forEach(val => {
+                if (code3.search(val) !== -1) {
+                    addIt = true;
                 }
             });
-            render(result);
-        },
-        onItemRender: itemData => `${itemData.label} (${itemData.code3})`,
-        sourceMapping: { 'value': 'code3', 'label': 'name' }
-    });
-    </pre>
+            if (addIt) {
+                result.push(entry);
+            }
+        });
+        render(result);
+    },
+    onItemRender: itemData => `${itemData.label} (${itemData.code3})`,
+    sourceMapping: { 'value': 'code3', 'label': 'name' }
+});
+</pre>
                         <p>Despite the custom <code>source</code> Function, this example still needs a <code>sourceMapping</code> option, because the <code>label</code> is used when rendering the list, and the <code>value</code> is used when filling the original <code>&lt;input /&gt;</code></p>
                     </div>
                     <div class="tile">
@@ -357,28 +357,28 @@ new AriaAutocomplete(element, {
                             });
                         </script>
                         <pre>
-    new AriaAutocomplete(element, {
-        source: 'countrylistallisodata.json',
-        sourceMapping: { 'value': 'code3', 'label': 'name' },
-        onAsyncPrep: url => url,
-        onAsyncSuccess: function (query, xhr) {
-            let result = [];
-            let isStartingCall = this === window;
-            let value = query.toLowerCase().trim();
-            let response = JSON.parse(xhr.responseText);
-            let propToCheck = isStartingCall ? 'value' : 'name';
-            response.forEach(entry => {
-                if (entry[propToCheck].toLowerCase().search(value) !== -1) {
-                    result.push(entry);
-                }
-            });
-            return result;
-        },
-        asyncMaxResultsParam: 'limit',
-        asyncQueryParam: 'q',
-        maxResults: 25
-    });
-    </pre>
+new AriaAutocomplete(element, {
+    source: 'countrylistallisodata.json',
+    sourceMapping: { 'value': 'code3', 'label': 'name' },
+    onAsyncPrep: url => url,
+    onAsyncSuccess: function (query, xhr) {
+        let result = [];
+        let isStartingCall = this === window;
+        let value = query.toLowerCase().trim();
+        let response = JSON.parse(xhr.responseText);
+        let propToCheck = isStartingCall ? 'value' : 'name';
+        response.forEach(entry => {
+            if (entry[propToCheck].toLowerCase().search(value) !== -1) {
+                result.push(entry);
+            }
+        });
+        return result;
+    },
+    asyncMaxResultsParam: 'limit',
+    asyncQueryParam: 'q',
+    maxResults: 25
+});
+</pre>
                     </div>
                     <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API (assuming you use an ordinary function expression instead of arrow functions). The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. The <code>isStartingCall</code> variable in the above examples is used to illustrate this.</p>
                 </section>
