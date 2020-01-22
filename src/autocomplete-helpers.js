@@ -9,55 +9,6 @@ export function trimString(theString) {
     return theString == null ? '' : (theString + '').trim();
 }
 
-const getClass = elem =>
-    (elem.getAttribute && elem.getAttribute('class')) || '';
-/**
- * @description check if element has class - support pre `classList`
- * @param {Element} elem
- * @param {String} className
- * @returns {Boolean}
- */
-export function hasClass(elem, className) {
-    return ` ${getClass(elem)} `.indexOf(` ${className} `) > -1;
-}
-
-/**
- * @description add class(es) to element - support pre `classList`
- * @param {Element} elem
- * @param {String} classes - space delimitted class(es) to add
- */
-export function addClass(elem, classes) {
-    const curValue = getClass(elem);
-    const cur = ` ${curValue} `;
-    let finalValue = '';
-
-    for (let i = 0, cs = classes.split(' '), l = cs.length; i < l; i += 1) {
-        if (cs[i] !== '' && cur.indexOf(` ${cs[i]} `) === -1) {
-            finalValue += ' ' + cs[i];
-        }
-    }
-    if (curValue !== (finalValue = (curValue + finalValue).trim())) {
-        elem.setAttribute('class', finalValue);
-    }
-}
-
-/**
- * @description remove class(es) from element - support pre `classList`
- * @param {Element} elem
- * @param {String} classes - space delimitted class(es) to remove
- */
-export function removeClass(elem, classes) {
-    const curValue = getClass(elem);
-    let finalValue = ` ${curValue} `;
-
-    for (let i = 0, cs = classes.split(' '), l = cs.length; i < l; i += 1) {
-        finalValue = finalValue.replace(` ${cs[i]} `, ' ');
-    }
-    if (curValue !== (finalValue = finalValue.trim())) {
-        elem.setAttribute('class', finalValue);
-    }
-}
-
 // regex constants used for string cleaning
 const REGEX_AMPERSAND = /&/g;
 const REGEX_DUPE_WHITESPACE = /\s\s+/g;

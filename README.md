@@ -38,31 +38,7 @@ new AriaAutocomplete(document.getElementById('some-element'), {
 });
 ```
 
-### Plain JavaScript module
-
-You can copy the [dist/aria-autocomplete.min.js](/mynamesleon/aria-autocomplete/blob/master/dist/aria-autocomplete.min.js) file into your project and import it into the browser:
-
-```html
-<script type="text/javascript" src="js/aria-autocomplete.min.js"></script>
-```
-
-### Styling Aria Autocomplete
-
-I would encourage you to style it yourself to match your own site or application's design. An example stylesheet is included in the repository however at [dist/aria-autocomplete.min.css](/mynamesleon/aria-autocomplete/blob/master/dist/aria-autocomplete.css) which you can copy into your project and import into the browser:
-
-```html
-<link rel="stylesheet" src="css/aria-autocomplete.css" />
-```
-
-## Performance
-
-I wrote this from the ground up largely because I needed an autocomplete with better performance than others I'd tried. I've optimised the JavaScript where I can, but in some browsers the list _rendering_ will still be a hit to performance. In my testing, modern browsers can render huge lists (1000+ items) just fine (on my laptop, averaging 40ms in Chrome, and under 20ms in Firefox).
-
-As we all know however, Internet Explorer _sucks_. If you need to support Internet Explorer, I suggest using a sensible combination for the `delay`, `maxResults`, and possibly `minLength` options, to prevent the browser from freezing as your users type, and to reduce the rendering impact. Testing on my laptop, the list rendering in IE11 would take on average: 55ms for 250 items, 300ms for 650 items, and over 600ms for 1000 items.
-
-## API Documentation
-
-At its core, the autocomplete requires only an element, and a `source`. When the element is an input, its value will be set using the user's selection(s). If a `source` option isn't provided however (is falsy, or an empty Array), and the element is either a `<select>`, or has child checkboxes, those will be used to build up the `source`.
+At its core, the autocomplete requires only an element and a `source`. When the element is an input, its value will be set using the user's selection(s). If a `source` option isn't provided (is falsy, or an empty Array), and the element is either a `<select>`, or has child checkboxes, those will be used to build up the `source`.
 
 ```javascript
 new AriaAutocomplete(document.getElementById('some-input'), {
@@ -76,7 +52,25 @@ const div = document.getElementById('some-div-with-child-checkboxes');
 new AriaAutocomplete(div);
 ```
 
-### Options
+### Plain JavaScript module
+
+You can grab the minified JS from the `dist` directory, or straight from unpkg:
+
+```html
+<script src="https://unpkg.com/aria-autocomplete" type="text/javascript"></script>
+```
+
+### Styling Aria Autocomplete
+
+**I would encourage you to style it yourself** to match your own site or application's design. An example stylesheet is included in the `dist` directory however which you can copy into your project and import into the browser.
+
+## Performance
+
+I wrote this from the ground up largely because I needed an autocomplete with better performance than others I'd tried. I've optimised the JavaScript where I can, but in some browsers the list _rendering_ will still be a hit to performance. In my testing, modern browsers can render huge lists (1000+ items) just fine (on my laptop, averaging 40ms in Chrome, and under 20ms in Firefox).
+
+As we all know however, Internet Explorer _sucks_. If you need to support Internet Explorer, I suggest using a sensible combination for the `delay`, `maxResults`, and possibly `minLength` options, to prevent the browser from freezing as your users type, and to reduce the rendering impact. Testing on my laptop, the list rendering in IE11 would take on average: 55ms for 250 items, 300ms for 650 items, and over 600ms for 1000 items.
+
+## Options
 
 The full list of options, and their defaults:
 

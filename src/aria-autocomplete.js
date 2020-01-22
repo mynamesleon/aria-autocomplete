@@ -1,13 +1,13 @@
 import isPrintableKey from 'is-printable-keycode';
 import InputAutoWidth from 'input-autowidth';
+import removeClass from 'element-removeclass';
+import addClass from 'element-addclass';
+import hasClass from 'element-hasclass';
 
 import {
     CLEANED_LABEL_PROP,
     SELECTED_OPTION_PROP,
     trimString,
-    hasClass,
-    addClass,
-    removeClass,
     cleanString,
     mergeObjects,
     dispatchEvent,
@@ -16,18 +16,9 @@ import {
     searchVarPropsFor,
     removeDuplicatesAndLabel
 } from './autocomplete-helpers';
+import AutocompleteIds from './autocomplete-ids';
 import DEFAULT_OPTIONS from './default-options';
-
-/**
- * @description polyfill element.closest for IE use
- */
-import elementClosest from 'element-closest';
-elementClosest(window);
-
-/**
- * @description incremental index used for element ID generation
- */
-let appIndex = 0;
+import './closest-polyfill';
 
 /**
  * @param {Element} element
@@ -490,9 +481,7 @@ class AriaAutocomplete {
 
         // set original input value
         if (this.elementIsInput) {
-            const valToSetString = valToSet.join(
-                this.options.multipleSeparator
-            );
+            const valToSetString = valToSet.join(this.options.multipleSeparator);
             if (valToSetString !== this.element.value) {
                 this.element.value = valToSetString;
                 dispatchEvent(this.element, 'change');
@@ -538,8 +527,9 @@ class AriaAutocomplete {
         this.setInputValue(this.multiple ? '' : option.label, true);
 
         // reset selected array in single select mode
+        // use splice so that selected Array in API is also correctly updated
         if (!alreadySelected && !this.multiple) {
-            this.selected = [];
+            this.selected.splice(0);
         }
 
         // (re)set values of any DOM elements based on selected array
@@ -598,9 +588,7 @@ class AriaAutocomplete {
         const updated = this.removeSelectedFromResults(results);
         // allow callback to alter the response before rendering
         const callback = this.triggerOptionCallback('onResponse', updated);
-        this.filteredSource = callback
-            ? processSourceArray(callback, mapping)
-            : updated;
+        this.filteredSource = callback ? processSourceArray(callback, mapping) : updated;
 
         // build up the list html
         const optionId = this.ids.OPTION;
@@ -608,16 +596,17 @@ class AriaAutocomplete {
         const length = this.filteredSource.length;
         const checkCallback = typeof this.options.onItemRender === 'function';
         const maxResults = this.forceShowAll ? 9999 : this.options.maxResults;
-        for (let i = 0; i < length && i < maxResults; i += 1) {
+        const lengthToUse = maxResults < length ? maxResults : length;
+
+        for (let i = 0; i < lengthToUse; i += 1) {
             const thisSource = this.filteredSource[i];
             const callbackResponse =
-                checkCallback &&
-                this.triggerOptionCallback('onItemRender', [thisSource]);
+                checkCallback && this.triggerOptionCallback('onItemRender', [thisSource]);
             const itemContent = callbackResponse || thisSource.label;
             toShow.push(
                 `<li tabindex="-1" aria-selected="false" role="option" class="${cssName}__option" ` +
                     `id="${optionId}--${i}" aria-posinset="${i + 1}" ` +
-                    `aria-setsize="${length}">${itemContent}</li>`
+                    `aria-setsize="${lengthToUse}">${itemContent}</li>`
             );
         }
 
@@ -636,9 +625,7 @@ class AriaAutocomplete {
         if (!toShow.length && typeof noText === 'string' && noText.length) {
             announce = noText;
             let optionClass = `${cssName}__option`;
-            toShow.push(
-                `<li class="${optionClass} ${optionClass}--no-results">${noText}</li>`
-            );
+            toShow.push(`<li class="${optionClass} ${optionClass}--no-results">${noText}</li>`);
         }
 
         // remove loading class(es) and reset variables
@@ -646,7 +633,7 @@ class AriaAutocomplete {
 
         // announce to screen reader
         if (!announce) {
-            announce = this.triggerOptionCallback('srResultsText', [length]);
+            announce = this.triggerOptionCallback('srResultsText', [lengthToUse]);
         }
         this.announce(announce);
 
@@ -689,10 +676,11 @@ class AriaAutocomplete {
         const xhr = new XMLHttpRequest();
         const encode = encodeURIComponent;
         const isShowAll = this.forceShowAll;
-        const unlimited = isShowAll || isFirstCall;
         const context = isFirstCall ? null : this.api;
         const baseAmount = this.multiple ? this.selected.length : 0;
         const ampersandOrQuestionMark = /\?/.test(this.source) ? '&' : '?';
+        const unlimited =
+            isShowAll || isFirstCall || this.options.maxResults === DEFAULT_OPTIONS.maxResults;
         let url =
             this.source +
             ampersandOrQuestionMark +
@@ -1005,10 +993,7 @@ class AriaAutocomplete {
         // if closed, and text is long enough, run search
         if (!this.menuOpen) {
             this.forceShowAll = this.options.minLength < 1;
-            if (
-                this.forceShowAll ||
-                this.input.value.length >= this.options.minLength
-            ) {
+            if (this.forceShowAll || this.input.value.length >= this.options.minLength) {
                 this.filterPrep(event);
             }
         }
@@ -1218,9 +1203,7 @@ class AriaAutocomplete {
         this.multiple = true; // force multiple in this case
         // reset source and use checkboxes
         this.source = [];
-        const elements = this.element.querySelectorAll(
-            'input[type="checkbox"]'
-        );
+        const elements = this.element.querySelectorAll('input[type="checkbox"]');
         for (let i = 0, l = elements.length; i < l; i += 1) {
             const checkbox = elements[i];
             // must have a value other than empty string
@@ -1330,9 +1313,7 @@ class AriaAutocomplete {
     prepListSourceFunction() {
         if (this.elementIsInput && this.element.value) {
             this.source.call(undefined, this.element.value, response => {
-                this.prepSelectedFromArray(
-                    processSourceArray(response, this.options.sourceMapping)
-                );
+                this.prepSelectedFromArray(processSourceArray(response, this.options.sourceMapping));
                 this.setInputStartingStates(false);
             });
         }
@@ -1376,9 +1357,7 @@ class AriaAutocomplete {
         if (setAriaAttrs) {
             // update corresponding label to now focus on the new input
             if (this.ids.ELEMENT) {
-                const label = document.querySelector(
-                    '[for="' + this.ids.ELEMENT + '"]'
-                );
+                const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
                 if (label) {
                     label.ariaAutocompleteOriginalFor = this.ids.ELEMENT;
                     label.setAttribute('for', this.ids.INPUT);
@@ -1424,9 +1403,7 @@ class AriaAutocomplete {
         const o = this.options;
         const cssName = this.cssNameSpace;
         const wrapperClass = o.wrapperClassName ? ` ${o.wrapperClassName}` : '';
-        const newHtml = [
-            `<div id="${this.ids.WRAPPER}" class="${cssName}__wrapper${wrapperClass}">`
-        ];
+        const newHtml = [`<div id="${this.ids.WRAPPER}" class="${cssName}__wrapper${wrapperClass}">`];
 
         // add input
         const name = o.name ? ` ${o.name}` : ``;
@@ -1478,25 +1455,13 @@ class AriaAutocomplete {
         this.api = {
             open: () => this.show.call(this),
             close: () => this.hide.call(this),
-            filter: val => this.filter.call(val)
+            filter: val => this.filter.call(this, val)
         };
 
-        const a = [
-            'options',
-            'destroy',
-            'enable',
-            'disable',
-            'input',
-            'wrapper',
-            'list',
-            'selected'
-        ];
+        const a = ['options', 'destroy', 'enable', 'disable', 'input', 'wrapper', 'list', 'selected'];
 
         for (let i = 0, l = a.length; i < l; i += 1) {
-            this.api[a[i]] =
-                typeof this[a[i]] === 'function'
-                    ? () => this[a[i]].call(this)
-                    : this[a[i]];
+            this.api[a[i]] = typeof this[a[i]] === 'function' ? () => this[a[i]].call(this) : this[a[i]];
         }
 
         // store api on original element
@@ -1540,22 +1505,9 @@ class AriaAutocomplete {
      * @param {Object=} options
      */
     init(element, options) {
-        // ids used for DOM queries and accessibility attributes e.g. aria-controls
-        appIndex += 1;
-        this.ids = {};
-        this.ids.ELEMENT = element.id;
-        this.ids.PREFIX = `${element.id || ''}aria-autocomplete-${appIndex}`;
-        this.ids.LIST = `${this.ids.PREFIX}-list`;
-        this.ids.INPUT = `${this.ids.PREFIX}-input`;
-        this.ids.BUTTON = `${this.ids.PREFIX}-button`;
-        this.ids.OPTION = `${this.ids.PREFIX}-option`;
-        this.ids.WRAPPER = `${this.ids.PREFIX}-wrapper`;
-        this.ids.OPTION_SELECTED = `${this.ids.OPTION}-selected`;
-        this.ids.SR_ASSISTANCE = `${this.ids.PREFIX}-sr-assistance`;
-        this.ids.SR_ANNOUNCEMENTS = `${this.ids.PREFIX}-sr-announcements`;
-
         this.selected = [];
         this.element = element;
+        this.ids = new AutocompleteIds(element.id);
         this.elementIsInput = element.nodeName === 'INPUT';
         this.elementIsSelect = element.nodeName === 'SELECT';
         this.options = mergeObjects(DEFAULT_OPTIONS, options);
@@ -1575,9 +1527,7 @@ class AriaAutocomplete {
         this.input = document.getElementById(this.ids.INPUT);
         this.wrapper = document.getElementById(this.ids.WRAPPER);
         this.showAll = document.getElementById(this.ids.BUTTON);
-        this.srAnnouncements = document.getElementById(
-            this.ids.SR_ANNOUNCEMENTS
-        );
+        this.srAnnouncements = document.getElementById(this.ids.SR_ANNOUNCEMENTS);
 
         // set internal source array, from static elements if necessary
         this.prepListSource();
