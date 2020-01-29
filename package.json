@@ -1,6 +1,6 @@
 {
     "name": "aria-autocomplete",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Accessible, extensible, JavaScript autocomplete with multi-select",
     "main": "dist/aria-autocomplete.min.js",
     "style": "dist/aria-autocomplete.css",
@@ -55,8 +55,8 @@
         "webpack-cli": "^3.3.10"
     },
     "dependencies": {
-        "element-addclass": "^1.0.1",
-        "element-removeclass": "^1.0.0",
+        "element-addclass": "^1.0.2",
+        "element-removeclass": "^1.0.1",
         "input-autowidth": "^1.0.3",
         "is-printable-keycode": "^1.0.3"
     }
