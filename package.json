@@ -1,14 +1,12 @@
 {
     "name": "aria-autocomplete",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Accessible, extensible, JavaScript autocomplete with multi-select",
     "main": "dist/aria-autocomplete.min.js",
-    "style": "dist/aria-autocomplete.min.css",
-    "browser": "dist/aria-autocomplete.min.js",
+    "style": "dist/aria-autocomplete.css",
     "scripts": {
-        "build": "parcel build src/aria-autocomplete.js --out-file aria-autocomplete.min.js --no-source-maps",
-        "dev": "NODE_ENV=development parcel build src/aria-autocomplete.js --out-file aria-autocomplete.js --no-minify",
-        "css": "parcel build src/aria-autocomplete.less --out-file aria-autocomplete.min.css --no-source-maps"
+        "build": "webpack",
+        "css": "lessc src/aria-autocomplete.less dist/aria-autocomplete.css"
     },
     "repository": {
         "type": "git",
@@ -30,6 +28,16 @@
         "multiselect",
         "multiple selection"
     ],
+    "browserslist": [
+        ">0.1%",
+        "last 5 Chrome versions",
+        "last 5 Firefox versions",
+        "last 5 Edge versions",
+        "last 5 Samsung versions",
+        "Safari >= 9",
+        "ie 9-11",
+        "iOS >= 9"
+    ],
     "files": [
         "dist"
     ],
@@ -41,13 +49,15 @@
     "homepage": "https://github.com/mynamesleon/aria-autocomplete#readme",
     "devDependencies": {
         "less": "^3.10.3",
-        "parcel-bundler": "^1.12.4"
+        "ts-loader": "^6.2.1",
+        "typescript": "^3.7.5",
+        "webpack": "^4.41.5",
+        "webpack-cli": "^3.3.10"
     },
     "dependencies": {
         "element-addclass": "^1.0.1",
-        "element-hasclass": "^1.0.0",
         "element-removeclass": "^1.0.0",
-        "input-autowidth": "^1.0.2",
-        "is-printable-keycode": "^1.0.1"
+        "input-autowidth": "^1.0.3",
+        "is-printable-keycode": "^1.0.3"
     }
 }

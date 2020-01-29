@@ -1,7 +1,18 @@
 // ids used for DOM queries and accessibility attributes e.g. aria-controls
 let index = 0;
 export default class {
-    constructor(id) {
+    ELEMENT: string;
+    PREFIX: string;
+    LIST: string;
+    INPUT: string;
+    BUTTON: string;
+    OPTION: string;
+    WRAPPER: string;
+    SR_ASSISTANCE: string;
+    OPTION_SELECTED: string;
+    SR_ANNOUNCEMENTS: string;
+
+    constructor(id: string) {
         index += 1;
         this.ELEMENT = id;
         this.PREFIX = `${id || ''}aria-autocomplete-${index}`;
