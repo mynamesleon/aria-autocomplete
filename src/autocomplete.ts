@@ -293,7 +293,7 @@ export default class Autocomplete {
     /**
      * create a DOM element for entry in selected array
      */
-    createSelectElemFrom(entry: any): HTMLSpanElement {
+    createSelectedElemFrom(entry: any): HTMLSpanElement {
         const label = entry.label;
         const span = document.createElement('span');
         span.setAttribute('aria-label', `${this.options.srDeleteText} ${label}`);
@@ -359,7 +359,7 @@ export default class Autocomplete {
                 }
             }
             // if there wasn't, add one
-            fragment.appendChild(this.createSelectElemFrom(selected));
+            fragment.appendChild(this.createSelectedElemFrom(selected));
         });
 
         // insert new elements
