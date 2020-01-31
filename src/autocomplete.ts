@@ -350,6 +350,8 @@ export default class Autocomplete {
         const fragment = document.createDocumentFragment();
         this.selected.forEach((selected: any) => {
             // check if there is an element in the DOM for it already
+            // note: assumes all entries have unique values, but could be an issue
+            // if source is driven by multiple different checkbox groups
             for (let i = 0, l = updatedSelectedDomElems.length; i < l; i += 1) {
                 const sourceEntry: any = updatedSelectedDomElems[i][SELECTED_OPTION_PROP];
                 if (sourceEntry === selected || sourceEntry.value === selected.value) {
