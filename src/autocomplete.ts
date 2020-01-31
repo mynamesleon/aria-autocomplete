@@ -180,6 +180,15 @@ export default class Autocomplete {
     }
 
     /**
+     * if in autoGrow mode, trigger an input size re-calc
+     */
+    triggerAutoGrow() {
+        if (this.autoGrow && this.inputAutoWidth && typeof this.inputAutoWidth.trigger === 'function') {
+            this.inputAutoWidth.trigger();
+        }
+    }
+
+    /**
      * set input value to specific string, and related component vars
      */
     setInputValue(value?: string, setPollingValue: boolean = false) {
@@ -187,10 +196,7 @@ export default class Autocomplete {
         if (setPollingValue) {
             this.inputPollingValue = value;
         }
-        // trigger autogrow
-        if (this.autoGrow && this.inputAutoWidth) {
-            this.inputAutoWidth.trigger();
-        }
+        this.triggerAutoGrow();
     }
 
     /**
@@ -277,6 +283,8 @@ export default class Autocomplete {
             this.setSourceElementValues();
             // re-build the selected items markup
             this.buildMultiSelected();
+            // update input size in autoGrow mode
+            this.triggerAutoGrow();
             // make sure to announce deletion to screen reader users
             this.announce(`${label} ${this.options.srDeletedText}`, 0);
         }
@@ -503,9 +511,6 @@ export default class Autocomplete {
             }
         }
 
-        // update the visible input - empty it if in multiple mode
-        this.setInputValue(this.multiple ? '' : option.label, true);
-
         // reset selected array in single select mode
         // use splice so that selected Array in API is also correctly updated
         if (!alreadySelected && !this.multiple) {
@@ -519,6 +524,11 @@ export default class Autocomplete {
             // rebuild multi-selected if needed
             this.buildMultiSelected();
         }
+
+        // update the visible input - empty it if in multiple mode
+        // do this after multiSelected elements are built,
+        // in case placeholder is affected in autoGrow mode
+        this.setInputValue(this.multiple ? '' : option.label, true);
 
         // trigger callback and announce selection to screen reader users
         this.triggerOptionCallback('onConfirm', [option]);
@@ -1380,6 +1390,7 @@ export default class Autocomplete {
             // for multi select variant, set selected items
             if (this.multiple) {
                 this.buildMultiSelected();
+                this.triggerAutoGrow();
             }
             // for single select variant, set value to match
             else {

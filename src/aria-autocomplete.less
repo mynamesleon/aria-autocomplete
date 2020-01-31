@@ -220,18 +220,18 @@
     }
 
     // special cases based on options...
-    &__wrapper--autogrow&__wrapper--multiple {
+    &__wrapper--autogrow {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         .input-style();
     }
 
-    &__wrapper--autogrow&__wrapper--multiple&__wrapper--disabled {
+    &__wrapper--autogrow&__wrapper--disabled {
         .disabled-style();
     }
 
-    &__wrapper--autogrow&__wrapper--multiple &__show-all {
+    &__wrapper--autogrow &__show-all {
         order: 3;
         height: 100%;
         border-top: none;
@@ -239,7 +239,7 @@
         border-bottom: none;
     }
 
-    &__wrapper--autogrow&__wrapper--multiple &__input {
+    &__wrapper--autogrow &__input {
         max-width: 100% !important;
         max-height: none !important;
         min-height: 0 !important;
@@ -257,7 +257,7 @@
         order: 2;
     }
 
-    &__wrapper--autogrow&__wrapper--multiple &__list {
+    &__wrapper--autogrow &__list {
         width: calc(100% + 2px);
         top: calc(100% + 4px);
         left: -1px;

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2020-01-31
+
+### Fixed
+
+-   Issue with autoGrow not triggering after deleting an item in multiple mode when the placeholder is re-added to the input
+
 ## [1.1.1] - 2020-01-29
 
 ### Fixed
@@ -26,4 +32,6 @@ All notable changes to this project will be documented in this file.
 -   Issue when clicking on a single-select autocomplete with minLength of 0 with a current selection, which was correctly searching with an empty string, but the polling method was then triggering a search with the value afterwards.
 -   Screen reader announcements for results ignoring the number of results rendered
 
+[1.1.2]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.0.0...v1.1.0

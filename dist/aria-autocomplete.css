@@ -184,7 +184,7 @@
   top: 50%;
   margin-top: -12px;
 }
-.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple {
+.aria-autocomplete__wrapper--autogrow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -195,18 +195,18 @@
   border-radius: 2px;
   box-sizing: border-box;
 }
-.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple.aria-autocomplete__wrapper--disabled {
+.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--disabled {
   background-color: #ebebeb;
   cursor: not-allowed;
 }
-.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple .aria-autocomplete__show-all {
+.aria-autocomplete__wrapper--autogrow .aria-autocomplete__show-all {
   order: 3;
   height: 100%;
   border-top: none;
   border-right: none;
   border-bottom: none;
 }
-.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple .aria-autocomplete__input {
+.aria-autocomplete__wrapper--autogrow .aria-autocomplete__input {
   max-width: 100% !important;
   max-height: none !important;
   min-height: 0 !important;
@@ -223,7 +223,7 @@
   width: 1px;
   order: 2;
 }
-.aria-autocomplete__wrapper--autogrow.aria-autocomplete__wrapper--multiple .aria-autocomplete__list {
+.aria-autocomplete__wrapper--autogrow .aria-autocomplete__list {
   width: calc(100% + 2px);
   top: calc(100% + 4px);
   left: -1px;
