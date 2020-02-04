@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2020-02-04
+
+### Fixed
+
+-   Issue where hitting the enter key after running a search with a value prevented the down arrow from moving focus to the first item in the results. Thanks to /u/holloway on reddit for discovering this.
+
 ## [1.1.2] - 2020-01-31
 
 ### Fixed

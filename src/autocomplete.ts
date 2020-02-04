@@ -799,7 +799,7 @@ export default class Autocomplete {
             // set polling value, even if search criteria are not met
             this.inputPollingValue = value;
 
-            // treat as empty search if...
+            // treat as empty search if:
             // forceShowAll, or in single mode and selected item label matches current value
             if (
                 forceShowAll ||
@@ -837,6 +837,11 @@ export default class Autocomplete {
                 addClass(this.input, `${this.cssNameSpace}__input--loading loading`);
                 this.currentSelectedIndex = -1;
                 this.filter(value);
+            } else {
+                // if search wasn't run, make sure to clear internal state,
+                // otherwise it will block the down key from moving to the options;
+                // thanks to /u/holloway on reddit for discovering this
+                this.cancelFilterPrep();
             }
         }, delay);
     }
