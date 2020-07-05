@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2020-07-05
+
+### Fixed
+
+-   TypeScript definitions not included in npm package
+
 ## [1.1.3] - 2020-02-04
 
 ### Fixed
