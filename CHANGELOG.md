@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2020-08-05
+
+### Added
+
+-   Added `onChange` callback option that fires when the selected item(s) changes, and provides all selections in an array as an argument.
+-   Added `onFocus` callback option that fires when the overall component gains focus, and receives the component wrapper as an argument.
+-   Added `onBlur` callback option that fires when the overall component loses focus, and receives the component wrapper as an argument.
+
+### Fixed
+
+-   The API being updated after the change event was fired on the original input element in certain cases.
+
 ## [1.1.4] - 2020-07-05
 
 ### Fixed

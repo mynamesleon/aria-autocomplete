@@ -34,7 +34,7 @@ Then import it, and call it on an element (ideally a text `<input />`, but not n
 import AriaAutocomplete from 'aria-autocomplete';
 
 AriaAutocomplete(document.getElementById('some-element'), {
-    source: ArrayOrStringOrFunction
+    source: ArrayOrStringOrFunction,
 });
 ```
 
@@ -42,7 +42,7 @@ At its core, the autocomplete requires only an element and a `source`. When the 
 
 ```javascript
 AriaAutocomplete(document.getElementById('some-input'), {
-    source: ['Afghanistan', 'Albania', 'Algeria', ...more]
+    source: ['Afghanistan', 'Albania', 'Algeria', ...more],
 });
 
 const select = document.getElementById('some-select');
@@ -283,6 +283,21 @@ The full list of options, and their defaults:
      * Fires in multi-select mode when selected is deleted by user action
      */
     onDelete: (deleted: any) => void;
+
+    /**
+     * Callback that fires when the selected item(s) changes
+     */
+    onChange: (selected: any[]) => void;
+
+    /**
+     * Callback when the overall component receives focus
+     */
+    onFocus: (wrapper: HTMLDivElement) => void;
+
+    /**
+     * Callback when the overall component loses focus
+     */
+    onBlur: (wrapper: HTMLDivElement) => void;
 
     /**
      * Callback when main script processing and initial rendering has finished

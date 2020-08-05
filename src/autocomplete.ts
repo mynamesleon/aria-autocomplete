@@ -14,7 +14,7 @@ import {
     API_STORAGE_PROP,
     CLEANED_LABEL_PROP,
     SELECTED_OPTION_PROP,
-    ORIGINALLY_LABEL_FOR_PROP
+    ORIGINALLY_LABEL_FOR_PROP,
 } from './autocomplete-constants';
 
 import {
@@ -26,7 +26,7 @@ import {
     setElementState,
     prepSearchInArray,
     processSourceArray,
-    searchSourceEntryFor
+    searchSourceEntryFor,
 } from './autocomplete-helpers';
 
 export default class Autocomplete {
@@ -53,6 +53,7 @@ export default class Autocomplete {
     multiple: boolean;
     disabled: boolean;
     autoGrow: boolean;
+    isFocused: boolean;
     selected: any[];
     filtering: boolean;
     cssNameSpace: string;
@@ -90,7 +91,7 @@ export default class Autocomplete {
     /**
      * trigger callback in component options
      */
-    triggerOptionCallback(name: string, args: any[], context: any = this.api) {
+    triggerOptionCallback(name: string, args: any[] = [], context: any = this.api) {
         if (typeof this.options[name] === 'function') {
             return this.options[name].apply(context, args);
         }
@@ -484,6 +485,8 @@ export default class Autocomplete {
         if (!this.selected.length && this.elementIsSelect) {
             (this.element as HTMLSelectElement).value = '';
         }
+
+        this.triggerOptionCallback('onChange', [this.selected]);
     }
 
     /**
@@ -736,7 +739,7 @@ export default class Autocomplete {
 
         // handle the source as a function
         if (typeof this.source === 'function') {
-            this.source.call(this.api, this.term, response => {
+            this.source.call(this.api, this.term, (response) => {
                 const result: any[] = processSourceArray(response, this.options.sourceMapping);
                 this.setListOptions(result);
             });
@@ -910,14 +913,14 @@ export default class Autocomplete {
 
             // in single select case, if current value and chosen value differ, clear selected and input value
             if (!this.multiple && this.indexOfValueIn.call(this, this.selected) === -1) {
+                if (this.selected.length) {
+                    this.removeEntryFromSelected(this.selected[0]);
+                }
                 const inputOrDdl: boolean = this.elementIsInput || this.elementIsSelect;
                 const originalElement = this.element as HTMLInputElement | HTMLSelectElement;
                 if (inputOrDdl && originalElement.value !== '') {
                     originalElement.value = '';
                     dispatchEvent(originalElement, 'change');
-                }
-                if (this.selected.length) {
-                    this.removeEntryFromSelected(this.selected[0]);
                 }
                 this.setInputValue('', true);
             }
@@ -932,6 +935,9 @@ export default class Autocomplete {
                 this.documentClickBound = false;
                 document.removeEventListener('click', this.documentClick);
             }
+
+            this.triggerOptionCallback('onBlur', [this.wrapper]);
+            this.isFocused = false;
         }, delay);
     }
 
@@ -1129,21 +1135,25 @@ export default class Autocomplete {
      */
     bindEvents() {
         // when focus is moved outside of the component, close everything
-        this.wrapper.addEventListener('focusout', event => {
+        this.wrapper.addEventListener('focusout', (event) => {
             this.handleComponentBlur(event, false);
         });
         // reset selected index
-        this.wrapper.addEventListener('focusin', event => {
+        this.wrapper.addEventListener('focusin', (event) => {
             if (!this.list.contains(event.target as Element)) {
                 this.currentSelectedIndex = -1;
             }
+            if (!this.isFocused) {
+                this.triggerOptionCallback('onFocus', [this.wrapper]);
+            }
+            this.isFocused = true;
         });
         // handle all keydown events inside the component
-        this.wrapper.addEventListener('keydown', event => {
+        this.wrapper.addEventListener('keydown', (event) => {
             this.prepKeyDown(event);
         });
         // if clicking directly on the wrapper, move focus to the input
-        this.wrapper.addEventListener('click', event => {
+        this.wrapper.addEventListener('click', (event) => {
             if (event.target === this.wrapper) {
                 this.input.focus();
                 return;
@@ -1162,11 +1172,11 @@ export default class Autocomplete {
             this.cancelPolling();
         });
         // trigger filter on input event as well as keydown (covering bases)
-        this.input.addEventListener('input', event => {
+        this.input.addEventListener('input', (event) => {
             this.filterPrep(event);
         });
         // when specifically clicking on input, if menu is closed, and value is long enough, search
-        this.input.addEventListener('click', event => {
+        this.input.addEventListener('click', (event) => {
             if (!this.menuOpen && this.input.value.length >= this.options.minLength) {
                 this.filterPrep(event, true);
             }
@@ -1183,17 +1193,17 @@ export default class Autocomplete {
 
         // show all button click
         if (this.showAll) {
-            this.showAll.addEventListener('click', event => {
+            this.showAll.addEventListener('click', (event) => {
                 this.filterPrepShowAll(event);
             });
         }
 
         // clear any current focus position when hovering into the list
-        this.list.addEventListener('mouseenter', event => {
+        this.list.addEventListener('mouseenter', (event) => {
             this.resetOptionAttributes();
         });
         // trigger options selection
-        this.list.addEventListener('click', event => {
+        this.list.addEventListener('click', (event) => {
             if (event.target !== this.list) {
                 const options = getChildrenOf(this.list);
                 if (options.length) {
@@ -1271,7 +1281,7 @@ export default class Autocomplete {
             const toPush: any = {
                 element: option,
                 value: option.value,
-                label: option.textContent
+                label: option.textContent,
             };
             toPush[CLEANED_LABEL_PROP] = cleanString(toPush.label);
             this.source.push(toPush);

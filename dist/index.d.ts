@@ -36,6 +36,9 @@ export interface IAriaAutocompleteOptions {
     onItemRender?(sourceEntry: any): string | void;
     onConfirm?(selected: any): void;
     onDelete?(deleted: any): void;
+    onChange?(selected: any[]): void;
+    onFocus?(wrapper: HTMLDivElement): void;
+    onBlur?(wrapper: HTMLDivElement): void;
     onReady?(wrapper: HTMLDivElement): void;
     onClose?(list: HTMLUListElement): void;
     onOpen?(list: HTMLUListElement): void;

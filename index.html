@@ -475,27 +475,75 @@
                         <h3>Callbacks</h3>
                         <dl>
                             <dt>onSearch: <code>Function</code></dt>
-                            <dd>Before search is performed - can be used to affect search value by returning a new one<br>Default: <code>query => query</code></dd>
+                            <dd>
+                                Before search is performed - can be used to affect search value by returning a new one<br>
+                                Default: <code>(query: string) => query</code>
+                            </dd>
                             <dt>onAsyncPrep: <code>Function</code></dt>
-                            <dd>Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String<br>Default: <code>url => url</code></dd>
+                            <dd>
+                                Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String<br>
+                                Default: <code>(url: string) => url</code>
+                            </dd>
                             <dt>onAsyncSuccess: <code>Function</code></dt>
-                            <dd>After async call completes - is passed the value and the XHR Object. Can be used to format the results by returning an Array<br>Default: <code>(query, xhr) => xhr.responseText</code></dd>
+                            <dd>
+                                After async call completes - is passed the value and the XHR Object. Can be used to format the results by returning an Array<br>
+                                Default: <code>(query: string, xhr: XMLHttpRequest) => xhr.responseText</code>
+                            </dd>
                             <dt>onAsyncError: <code>Function</code></dt>
-                            <dd>If async call fails - is passed the value and the XHR Object.<br>Default: <code>(query, xhr) => {}</code></dd>
+                            <dd>
+                                If async call fails - is passed the value and the XHR Object.
+                                <br>Default: <code>(query, xhr: XMLHttpRequest) => {}</code>
+                            </dd>
                             <dt>onItemRender: <code>Function</code></dt>
-                            <dd>Called for each item rendered in the list - Can be used to format the <code>&lt;li&gt;</code> content by returning a String<br>Default: <code>itemData => itemData.label</code></dd>
+                            <dd>
+                                Called for each item rendered in the list - Can be used to format the <code>&lt;li&gt;</code> content by returning a String<br>
+                                Default: <code>(itemData: any) => itemData.label</code>
+                            </dd>
                             <dt>onResponse: <code>Function</code></dt>
-                            <dd>Prior to rendering - can be used to format the results by returning an Array<br>Default: <code>optionsToRender => optionsToRender</code></dd>
+                            <dd>
+                                Prior to rendering - can be used to format the results by returning an Array<br>
+                                Default: <code>(optionsToRender: any[]) => optionsToRender</code>
+                            </dd>
                             <dt>onConfirm: <code>Function</code></dt>
-                            <dd>After an autocomplete selection is made<br>Default: <code>selection => {}</code></dd>
+                            <dd>
+                                After an autocomplete selection is made<br>
+                                Default: <code>(selection: any) => {}</code>
+                            </dd>
                             <dt>onDelete: <code>Function</code></dt>
-                            <dd>After an autocomplete selection is deleted (programmatically in single-select mode, or by user action in multi-select mode)<br>Default: <code>selection => {}</code></dd>
+                            <dd>
+                                After an autocomplete selection is deleted (programmatically in single-select mode, or by user action in multi-select mode)<br>
+                                Default: <code>(deletion: any) => {}</code>
+                            </dd>
+                            <dt>onChange: <code>Function</code></dt>
+                            <dd>
+                                When the selected item(s) changes<br>
+                                Default: <code>(selectedItems: any[]) => {}</code>
+                            </dd>
+                            <dt>onFocus: <code>Function</code></dt>
+                            <dd>
+                                When the overall component receives focus<br>
+                                Default: <code>(componentWrapper: HTMLDivElement) => {}</code>
+                            </dd>
+                            <dt>onBlur: <code>Function</code></dt>
+                            <dd>
+                                When the overall component loses focus<br>
+                                Default: <code>(componentWrapper: HTMLDivElement) => {}</code>
+                            </dd>
                             <dt>onReady: <code>Function</code></dt>
-                            <dd>When main script processing and initial rendering has finished<br>Default: <code>componentWrapper => {}</code></dd>
+                            <dd>
+                                When main script processing and initial rendering has finished<br>
+                                Default: <code>(componentWrapper: HTMLDivElement) => {}</code>
+                            </dd>
                             <dt>onClose: <code>Function</code></dt>
-                            <dd>When list area closes<br>Default: <code>listElement => {}</code></dd>
+                            <dd>
+                                When list area closes<br>
+                                Default: <code>(listElement: HTMLUListElement) => {}</code>
+                            </dd>
                             <dt>onOpen: <code>Function</code></dt>
-                            <dd>When list area opens<br>Default: <code>listElement => {}</code></dd>
+                            <dd>
+                                When list area opens<br>
+                                Default: <code>(listElement: HTMLUListElement) => {}</code>
+                            </dd>
                         </dl>
                     </div>
                 </section>
