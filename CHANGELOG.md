@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2020-08-05
+## [1.2.0] - 2020-08-07
 
 ### Added
 
@@ -12,7 +12,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
--   The API being updated after the change event was fired on the original input element in certain cases.
+-   The `name` option now works correctly.
+-   In certain cases, the change event fired on the original input before the API's `selected` array was updated.
 
 ## [1.1.4] - 2020-07-05
 

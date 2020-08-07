@@ -1425,7 +1425,7 @@ export default class Autocomplete {
     }
 
     /**
-     * @description build and insert component html structure
+     * build and insert component html structure
      */
     setHtml() {
         const o = this.options;
@@ -1434,7 +1434,7 @@ export default class Autocomplete {
         const newHtml = [`<div id="${this.ids.WRAPPER}" class="${cssName}__wrapper${wrapperClass}">`];
 
         // add input
-        const name = o.name ? ` ${o.name}` : ``;
+        const name = o.name ? ` name="${o.name}"` : ``;
         const inputClass = o.inputClassName ? ` ${o.inputClassName}` : '';
         const placeholder = o.placeholder
             ? ` placeholder="${o.placeholder}" aria-placeholder="${o.placeholder}"`
