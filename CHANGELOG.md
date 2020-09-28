@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 -   The `name` option now works correctly.
 -   In certain cases, the change event fired on the original input before the API's `selected` array was updated.
+-   Added a workaround for an IE11 bug where the options were shown on load if the `minLength` was set to 0 on a multi-select autocomplete with starting values. This was due to the input's placeholder being removed, which erroneously triggers the `input` event in IE11.
 
 ## [1.1.4] - 2020-07-05
 

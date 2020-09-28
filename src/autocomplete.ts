@@ -1223,7 +1223,9 @@ export default class Autocomplete {
         });
         // trigger filter on input event as well as keydown (covering bases)
         this.input.addEventListener('input', (event) => {
-            this.filterPrep(event);
+            if (document.activeElement === this.input) {
+                this.filterPrep(event);
+            }
         });
         // when specifically clicking on input, if menu is closed, and value is long enough, search
         this.input.addEventListener('click', (event) => {
@@ -1232,7 +1234,7 @@ export default class Autocomplete {
             }
         });
         // when focusing on input, reset selected index and trigger search handling
-        this.input.addEventListener('focusin', () => {
+        this.input.addEventListener('focusin', (event) => {
             addClass(this.wrapper, wrapperFocusClasses);
             addClass(this.input, inputFocusClasses);
             this.startPolling();
