@@ -1,6 +1,6 @@
 {
     "name": "aria-autocomplete",
-    "version": "1.2.0-beta.2",
+    "version": "1.2.0-beta.3",
     "description": "Accessible, extensible, JavaScript autocomplete with multi-select",
     "main": "dist/aria-autocomplete.min.js",
     "style": "dist/aria-autocomplete.css",
@@ -49,11 +49,11 @@
     },
     "homepage": "https://github.com/mynamesleon/aria-autocomplete#readme",
     "devDependencies": {
-        "less": "^3.10.3",
-        "ts-loader": "^6.2.1",
-        "typescript": "^3.7.5",
-        "webpack": "^4.41.5",
-        "webpack-cli": "^3.3.10"
+        "less": "^3.12.2",
+        "ts-loader": "^6.2.2",
+        "typescript": "^3.9.7",
+        "webpack": "^4.44.2",
+        "webpack-cli": "^3.3.12"
     },
     "dependencies": {
         "element-addclass": "^1.0.2",
