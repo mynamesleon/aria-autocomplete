@@ -255,6 +255,12 @@ The full list of options, and their defaults:
     onAsyncPrep: (url: string) => string | void;
 
     /**
+     * Callback before async call is sent - receives the XHR object.
+     * Can be used for final changes to the XHR object, such as adding auth headers
+     */
+    onAsyncBeforeSend: (xhr: XMLHttpRequest) => void;
+
+    /**
      * Callback after async call completes - receives the xhr object.
      * Can be used to format the results by returning an Array
      */

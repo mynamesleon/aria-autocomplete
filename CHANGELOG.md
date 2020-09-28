@@ -6,9 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
--   Added `onChange` callback option that fires when the selected item(s) changes, and provides all selections in an array as an argument.
--   Added `onFocus` callback option that fires when the overall component gains focus, and receives the component wrapper as an argument.
--   Added `onBlur` callback option that fires when the overall component loses focus, and receives the component wrapper as an argument.
+-   `onChange` callback option that fires when the selected item(s) changes, and provides all selections in an array as an argument.
+-   `onFocus` callback option that fires when the overall component gains focus, and receives the component wrapper as an argument.
+-   `onBlur` callback option that fires when the overall component loses focus, and receives the component wrapper as an argument.
+-   `id` option to set a specific ID on the generated input
+-   the function usage of the `source` option can now take a Promise which resolves with the items to render, instead of having to use the provided second argument callback
+-   `onAsyncBeforeSend` callback option, to allow adjustments to the xhr object before it is sent (e.g. adding auth headers)
 
 ### Fixed
 

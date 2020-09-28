@@ -173,7 +173,7 @@
                             <li><strong>Single and multiple selection support</strong></li>
                             <li><strong>Accessibility</strong>: Use of ARIA attributes, custom screen reader announcements, and tested with assistive technologies.</li>
                             <li><strong>Progressive enhancement</strong>: Automatic source building through specifying a &lt;select&gt; as the element, or an element with child checkboxes.</li>
-                            <li><strong>Extensible source options</strong>: Array of Strings or Objects, Function, or an endpoint.</li>
+                            <li><strong>Extensible source options</strong>: Array of Strings or Objects, Function (or Promise), or an endpoint.</li>
                             <li><strong>Compatibility</strong>: Broad browser and device support (IE9+).</li>
                             <li><strong>Starting values</strong>: Automatic selection based on starting values, including for checkboxes, select options, and for async handling.</li>
                             <li><strong>Small script size</strong>: less than 9 kB gzipped.</li>
@@ -333,6 +333,7 @@
     }
 });
 </code></pre>
+                        <p>The <code>source</code> function can also be a <code>Promise</code> which resolves with the items to render, instead of having to use the provided second argument callback.</p>
                         <p>If the autocomplete is initialised on an <code>&lt;input /&gt;</code> with a starting value, the <code>source</code> function will also be called immediately using that value. In this case, the render function expects an Array of <b>possible</b> entries to check that starting value against, to determine what the starting label (or multi-select elements) should be.</p>
                         <p>The <code>onItemRender</code> callback is also being used here to display the code next to the country name in the results.</p>
                         <p>The initialised input's starting value is "GLP,ZWE" - the country codes for Guadeloupe and Zimbabwe respectively.</p>
@@ -393,7 +394,7 @@
                             <div>
                                 <dt>name: <code>string</code></dt>
                                 <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
-                                <dt>source: <code>string[] | any[] | string | Function</code></dt>
+                                <dt>source: <code>string[] | any[] | string | Function | Promise</code></dt>
                                 <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
                                 <dt>sourceMapping: <code>Object</code></dt>
                                 <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
@@ -483,6 +484,11 @@
                             <dd>
                                 Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String<br>
                                 Default: <code>(url: string) => url</code>
+                            </dd>
+                            <dt>onAsyncBeforeSend: <code>Function</code></dt>
+                            <dd>
+                                Callback before async call is sent - receives the XHR object. Can be used for final changes to the XHR object, such as adding auth headers<br>
+                                Default: <code>(xhr: XMLHttpRequest) => {}</code>
                             </dd>
                             <dt>onAsyncSuccess: <code>Function</code></dt>
                             <dd>

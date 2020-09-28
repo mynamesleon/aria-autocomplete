@@ -1,4 +1,5 @@
 export interface IAriaAutocompleteOptions {
+    id?: string;
     name?: string;
     source?: string | string[] | any[] | Function;
     sourceMapping?: any;
@@ -30,6 +31,7 @@ export interface IAriaAutocompleteOptions {
     srResultsText?(length: number): string | void;
     onSearch?(value: string): string | void;
     onAsyncPrep?(url: string): string | void;
+    onAsyncBeforeSend?(xhr: XMLHttpRequest): void;
     onAsyncSuccess?(query: string, xhr: XMLHttpRequest): any[] | void;
     onAsyncError?(query: string, xhr: XMLHttpRequest): void;
     onResponse?(options: any[]): any[] | void;
@@ -53,7 +55,7 @@ export interface IAriaAutocompleteApi {
     open(): void;
     close(): void;
     enable(): void;
-    disable(): void;
+    disable(disableDeletions: boolean): void;
     filter(val: string): void;
     destroy(): void;
 }

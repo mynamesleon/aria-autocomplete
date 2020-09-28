@@ -61,6 +61,7 @@ export default class Autocomplete {
     filteredSource: Object[]; // filtered source items to render
     currentListHtml: string;
     inputPollingValue: string;
+    deletionsDisabled: boolean;
     currentSelectedIndex: number; // for storing index of currently focused option
 
     // document click
@@ -161,12 +162,13 @@ export default class Autocomplete {
                 removeClass(this.showAll, `${cssNameSpace}__show-all--disabled disabled`);
             }
         }
+        this.enableDeletions();
     }
 
     /**
      * disable autocomplete (e.g. when maxItems selected)
      */
-    disable() {
+    disable(disableDeletions: boolean = false) {
         if (!this.disabled) {
             this.disabled = true;
             this.input.disabled = true;
@@ -178,6 +180,39 @@ export default class Autocomplete {
                 addClass(this.showAll, `${cssNameSpace}__show-all--disabled disabled`);
             }
         }
+        if (disableDeletions) {
+            this.disableDeletions();
+        }
+    }
+
+    /**
+     * (re-)enable ability to delete multi-select items
+     */
+    enableDeletions() {
+        if (!this.deletionsDisabled) {
+            return;
+        }
+        this.deletionsDisabled = false;
+        removeClass(this.wrapper, `${this.cssNameSpace}__wrapper--deletions-disabled`);
+        this.getSelectedElems().forEach((element: HTMLElement) => {
+            removeClass(element, `${this.cssNameSpace}__selected--disabled`);
+            element.setAttribute('tabindex', '0');
+        });
+    }
+
+    /**
+     * disable ability to delete multi-select items
+     */
+    disableDeletions() {
+        if (this.deletionsDisabled) {
+            return;
+        }
+        this.deletionsDisabled = true;
+        addClass(this.wrapper, `${this.cssNameSpace}__wrapper--deletions-disabled`);
+        this.getSelectedElems().forEach((element: HTMLElement) => {
+            addClass(element, `${this.cssNameSpace}__selected--disabled`);
+            element.setAttribute('tabindex', '-1');
+        });
     }
 
     /**
@@ -260,6 +295,11 @@ export default class Autocomplete {
      * remove object from selected options array
      */
     removeEntryFromSelected(entry: any) {
+        // prevent removing if deletions are disabled
+        if (this.deletionsDisabled) {
+            return;
+        }
+
         // check for explicit match first
         let index: number = this.selected.indexOf(entry);
         // if object reference check did not work found, do a manual value check
@@ -703,6 +743,10 @@ export default class Autocomplete {
         if (!isFirstCall) {
             this.xhr = xhr;
         }
+
+        // before send option callback, to allow adjustments to the xhr object,
+        // e.g. adding auth headers
+        this.triggerOptionCallback('onAsyncBeforeSend', [xhr], context);
         xhr.send();
     }
 
@@ -739,10 +783,16 @@ export default class Autocomplete {
 
         // handle the source as a function
         if (typeof this.source === 'function') {
-            this.source.call(this.api, this.term, (response) => {
-                const result: any[] = processSourceArray(response, this.options.sourceMapping);
+            // provide a render function to use as a callback
+            const render: (toRender: any[]) => void = (toRender) => {
+                const result: any[] = processSourceArray(toRender, this.options.sourceMapping);
                 this.setListOptions(result);
-            });
+            };
+            // check for `then` function on the result to allow use of a promise
+            const result = this.source.call(this.api, this.term, render);
+            if (result && typeof result.then === 'function') {
+                result.then((toRender: any[]) => render(toRender));
+            }
             return;
         }
 
@@ -1339,11 +1389,19 @@ export default class Autocomplete {
      */
     prepListSourceFunction() {
         const originalElement: HTMLInputElement = this.element as HTMLInputElement;
-        if (this.elementIsInput && originalElement.value) {
-            (this.source as Function).call(undefined, originalElement.value, (response: any[]) => {
-                this.prepSelectedFromArray(processSourceArray(response, this.options.sourceMapping));
-                this.setInputStartingStates(false);
-            });
+        if (!this.elementIsInput || !originalElement.value) {
+            return;
+        }
+
+        const render: (response: any[]) => void = (response) => {
+            const processedSource = processSourceArray(response, this.options.sourceMapping);
+            this.prepSelectedFromArray(processedSource);
+            this.setInputStartingStates(false);
+        };
+        // check for `then` function on the result to allow use of a promise
+        const result = (this.source as Function).call(undefined, originalElement.value, render);
+        if (result && typeof result.then === 'function') {
+            result.then((response: any[]) => render(response));
         }
     }
 
@@ -1420,7 +1478,7 @@ export default class Autocomplete {
 
         // disable the control if the invoked element was disabled
         if (!!(this.element as HTMLInputElement | HTMLSelectElement).disabled) {
-            this.disable();
+            this.disable(true);
         }
     }
 
@@ -1458,7 +1516,7 @@ export default class Autocomplete {
         const explainer = explainerText ? ` aria-label="${explainerText}"` : '';
         newHtml.push(
             `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" role="listbox" ` +
-                `hidden="hidden"${explainer}></ul>`
+                `aria-hidden="true" hidden="hidden"${explainer}></ul>`
         );
         // add the screen reader assistance element
         newHtml.push(
@@ -1509,7 +1567,7 @@ export default class Autocomplete {
     init(element: HTMLElement, options?: IAriaAutocompleteOptions) {
         this.selected = [];
         this.element = element;
-        this.ids = new AutocompleteIds(element.id);
+        this.ids = new AutocompleteIds(element.id, options.id);
         this.elementIsInput = element.nodeName === 'INPUT';
         this.elementIsSelect = element.nodeName === 'SELECT';
         this.options = new AutocompleteOptions(options);
