@@ -1546,21 +1546,36 @@ export default class Autocomplete {
             label.setAttribute('for', label[ORIGINALLY_LABEL_FOR_PROP]);
             delete label[ORIGINALLY_LABEL_FOR_PROP];
         }
+
         // remove the document click if still bound
         if (this.documentClickBound) {
             document.removeEventListener('click', this.documentClick);
         }
+
         // destroy autogrow behaviour and events
         if (this.autoGrow && this.inputAutoWidth) {
             this.inputAutoWidth.destroy();
         }
+
         // remove the whole wrapper
         this.element.parentNode.removeChild(this.wrapper);
         delete this.element[API_STORAGE_PROP];
+
         // re-show original element
         this.show(this.element);
 
-        // todo: reset stored element vars
+        // clear timers
+        clearTimeout(this.filterTimer);
+        clearTimeout(this.pollingTimer);
+        clearTimeout(this.showAllPrepTimer);
+        clearTimeout(this.announcementTimer);
+        clearTimeout(this.componentBlurTimer);
+        clearTimeout(this.elementChangeEventTimer);
+
+        // clear stored element vars
+        ['element', 'list', 'input', 'wrapper', 'showAll', 'srAnnouncements'].forEach(
+            (entry: string) => (this[entry] = null)
+        );
     }
 
     /**

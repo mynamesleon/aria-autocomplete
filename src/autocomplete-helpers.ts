@@ -32,7 +32,7 @@ export function cleanString(theString: string, makeSafeForRegex: boolean = false
  */
 export function mergeObjects(...args: any[]): any {
     const result = {};
-    args.forEach(obj => {
+    args.forEach((obj) => {
         for (const prop in obj) {
             if (obj.hasOwnProperty(prop) && typeof obj[prop] !== 'undefined') {
                 result[prop] = obj[prop];
@@ -81,10 +81,8 @@ export function setElementState(element: HTMLInputElement | HTMLOptionElement, s
         if (element.nodeName === 'OPTION' && 'selected' in element && element.selected !== selected) {
             element.selected = selected;
             // ensure change event only fires once for dropdown
-            if (instance.elementChangeEventTimer) {
-                clearTimeout(instance.elementChangeEventTimer);
-            }
-            instance.elementChangeEventTimer = setTimeout(function() {
+            clearTimeout(instance.elementChangeEventTimer);
+            instance.elementChangeEventTimer = setTimeout(function () {
                 dispatchEvent(element.closest('select'), 'change');
             }, 1);
         }
