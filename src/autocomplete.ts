@@ -328,6 +328,8 @@ export default class Autocomplete {
             this.triggerAutoGrow();
             // make sure to announce deletion to screen reader users
             this.announce(`${label} ${this.options.srDeletedText}`, 0);
+            // return focus to input
+            this.input.focus();
         }
     }
 

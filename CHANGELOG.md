@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### Fixed
+
+-   Accessibility issue where focus was lost after deletion of a selected item.
+
 ## [1.2.0] - 2020-10-01
 
 ### Added
