@@ -1518,9 +1518,21 @@ export default class Autocomplete {
         const explainerText = o.srListLabelText;
         const listClass = o.listClassName ? ` ${o.listClassName}` : '';
         const explainer = explainerText ? ` aria-label="${explainerText}"` : '';
+        let labelId = '';
+        if (this.ids.ELEMENT) {
+            const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
+            labelId = label.getAttribute('id');
+
+            if (labelId === '') {
+                labelId = 'test';
+                label.setAttribute('id', labelId);
+            }
+
+        }
+        const describer = labelId ? ` aria-describedby="${labelId}"` : '';
         newHtml.push(
             `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" role="listbox" ` +
-                `aria-hidden="true" hidden="hidden"${explainer}></ul>`
+                `aria-hidden="true" hidden="hidden"${explainer} ${describer}></ul>`
         );
         // add the screen reader assistance element
         newHtml.push(

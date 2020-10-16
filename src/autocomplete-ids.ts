@@ -2,6 +2,7 @@
 let index = 0;
 export default class {
     ELEMENT: string;
+    LABEL: string;
     PREFIX: string;
     LIST: string;
     INPUT: string;
