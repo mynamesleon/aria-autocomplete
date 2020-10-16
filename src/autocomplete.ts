@@ -968,11 +968,21 @@ export default class Autocomplete {
                 }
                 const inputOrDdl: boolean = this.elementIsInput || this.elementIsSelect;
                 const originalElement = this.element as HTMLInputElement | HTMLSelectElement;
-                if (inputOrDdl && originalElement.value !== '') {
-                    originalElement.value = '';
-                    dispatchEvent(originalElement, 'change');
+
+                // Clear selected and input value ?
+                if(this.options.keepUserInput) {
+                    // set original input value
+                    if (this.elementIsInput && this.input.value !== '') {
+                        originalElement.value = this.input.value;
+                        dispatchEvent(this.element, 'change');
+                    }
+                } else {
+                    if (inputOrDdl && originalElement.value !== '') {
+                        originalElement.value = '';
+                        dispatchEvent(originalElement, 'change');
+                    }
+                    this.setInputValue('', true);
                 }
-                this.setInputValue('', true);
             }
 
             // always clear input value in multiple mode

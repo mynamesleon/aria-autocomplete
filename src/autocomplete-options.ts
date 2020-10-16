@@ -26,6 +26,11 @@ export default class AutocompleteOptions {
     delay: number = 100;
 
     /**
+     * Keep user input even if there are no results
+     */
+    keepUserInput: boolean = false;
+
+    /**
      * Minimum number of characters to run a search (includes spaces)
      */
     minLength: number = 1;
