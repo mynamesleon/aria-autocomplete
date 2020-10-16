@@ -7,7 +7,7 @@ export interface IAriaAutocompleteOptions {
     delay?: number;
     minLength?: number;
     maxResults?: number;
-    allowFreeInput?: boolean;
+    keepUserInput?: boolean;
     showAllControl?: boolean;
     confirmOnBlur?: boolean;
     multiple?: boolean;

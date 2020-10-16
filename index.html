@@ -193,6 +193,41 @@
                 <script src="dist/aria-autocomplete.min.js" type="text/javascript"></script>
                 <section id="examples">
                     <h2>Examples</h2>
+
+                    <div class="tile" id="example-pascal">
+                        <h3>0. Free input</h3>
+                        <label for="free-input">Select a country</label>
+                        <input type="text" id="free-input" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('free-input'), {
+                                source: countryListAllIsoData,
+                                keepUserInput: true,
+                                sourceMapping: { 'value': 'code3', 'label': 'name' }
+                            });
+                        </script>
+                        <pre><code class="lang-javascript">AriaAutocomplete(document.getElementById('free-input'), {
+    source: countryListAllIsoData,
+    keepUserInput: true,
+    sourceMapping: { 'value': 'code3', 'label': 'name' }
+});</code></pre>
+                        <label for="no-free-input">Select another country</label>
+                        <input type="text" id="no-free-input" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('no-free-input'), {
+                                source: countryListAllIsoData,
+                                keepUserInput: false,
+                                sourceMapping: { 'value': 'code3', 'label': 'name' }
+                            });
+                        </script>
+                        <pre><code class="lang-javascript">AriaAutocomplete(document.getElementById('free-input'), {
+    source: countryListAllIsoData,
+    keepUserInput: false,
+    sourceMapping: { 'value': 'code3', 'label': 'name' }
+});</code></pre>
+                    </div>
+
+
+
                     <div class="tile" id="example-1">
                         <h3>1. Array as Source, using default options</h3>
                         <label for="countrylist-array">Select a country</label>
