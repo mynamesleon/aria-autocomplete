@@ -1530,7 +1530,7 @@ export default class Autocomplete {
         );
         // add the screen reader assistance element
         newHtml.push(
-            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-assistance" ` +
+            `<p class="hide hidden ${cssName}--hide ${cssName}__sr-assistance" ` +
                 `id="${this.ids.SR_ASSISTANCE}">${o.srAssistiveText}</p>`
         );
         // add element for added screen reader announcements
