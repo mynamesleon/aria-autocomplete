@@ -19,6 +19,7 @@ export default class {
         const id = optionId || elementId || '';
         this.PREFIX = `${id}aria-autocomplete-${index}`;
 
+        this.LABEL = `${this.PREFIX}-label`;
         this.LIST = `${this.PREFIX}-list`;
         this.BUTTON = `${this.PREFIX}-button`;
         this.OPTION = `${this.PREFIX}-option`;

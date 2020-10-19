@@ -2,6 +2,7 @@ export const API_STORAGE_PROP: string = 'ariaAutocomplete';
 export const CLEANED_LABEL_PROP: string = '_ariaAutocompleteCleanedLabel';
 export const SELECTED_OPTION_PROP: string = '_ariaAutocompleteSelectedOption';
 export const ORIGINALLY_LABEL_FOR_PROP: string = '_ariaAutocompleteLabelOriginallyFor';
+export const ORIGINALLY_LABEL_ID_PROP: string = '_ariaAutocompleteLabelOriginallyId';
 
 export const KEYCODES = {
     BACKSPACE: 8,

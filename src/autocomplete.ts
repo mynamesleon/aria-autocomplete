@@ -15,6 +15,7 @@ import {
     CLEANED_LABEL_PROP,
     SELECTED_OPTION_PROP,
     ORIGINALLY_LABEL_FOR_PROP,
+    ORIGINALLY_LABEL_ID_PROP,
 } from './autocomplete-constants';
 
 import {
@@ -35,6 +36,7 @@ export default class Autocomplete {
     element: HTMLElement | HTMLInputElement | HTMLSelectElement;
     elementIsInput: boolean;
     elementIsSelect: boolean;
+    elementHasLabel: boolean;
 
     // elements
     list: HTMLUListElement;
@@ -1444,15 +1446,6 @@ export default class Autocomplete {
      */
     setInputStartingStates(setAriaAttrs: boolean = true) {
         if (setAriaAttrs) {
-            // update corresponding label to now focus on the new input
-            if (this.ids.ELEMENT) {
-                const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
-                if (label) {
-                    label[ORIGINALLY_LABEL_FOR_PROP] = this.ids.ELEMENT;
-                    label.setAttribute('for', this.ids.INPUT);
-                }
-            }
-
             // update aria-describedby and aria-labelledby attributes if present
             const describedBy = this.element.getAttribute('aria-describedby');
             if (describedBy) {
@@ -1507,6 +1500,18 @@ export default class Autocomplete {
                 `class="${cssName}__input${inputClass}"${name}${placeholder} />`
         );
 
+        // update corresponding label to now focus on the new input
+        if (this.ids.ELEMENT) {
+            const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
+            if (label) {
+                label[ORIGINALLY_LABEL_FOR_PROP] = this.ids.ELEMENT;
+                label[ORIGINALLY_LABEL_ID_PROP] = label.getAttribute('id');
+                label.setAttribute('for', this.ids.INPUT);
+                label.setAttribute('id', this.ids.LABEL);
+                this.elementHasLabel = true;
+            }
+        }
+
         // button to show all available options
         if (o.showAllControl) {
             newHtml.push(
@@ -1518,18 +1523,7 @@ export default class Autocomplete {
         const explainerText = o.srListLabelText;
         const listClass = o.listClassName ? ` ${o.listClassName}` : '';
         const explainer = explainerText ? ` aria-label="${explainerText}"` : '';
-        let labelId = '';
-        if (this.ids.ELEMENT) {
-            const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
-            labelId = label.getAttribute('id');
-
-            if (labelId === '') {
-                labelId = 'test';
-                label.setAttribute('id', labelId);
-            }
-
-        }
-        const describer = labelId ? ` aria-describedby="${labelId}"` : '';
+        const describer = this.elementHasLabel ? ` aria-describedby="${this.ids.LABEL}"` : '';
         newHtml.push(
             `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" role="listbox" ` +
                 `aria-hidden="true" hidden="hidden"${explainer} ${describer}></ul>`
@@ -1554,11 +1548,16 @@ export default class Autocomplete {
      * destroy component
      */
     destroy() {
-        // return original label 'for' attribute back to element id
+        // return original label 'for' attribute back to element id, 'id' attribute to label original id
         const label: HTMLLabelElement = document.querySelector('[for="' + this.ids.INPUT + '"]');
         if (label && label[ORIGINALLY_LABEL_FOR_PROP]) {
             label.setAttribute('for', label[ORIGINALLY_LABEL_FOR_PROP]);
             delete label[ORIGINALLY_LABEL_FOR_PROP];
+
+            if (label[ORIGINALLY_LABEL_ID_PROP]) {
+                label.setAttribute('id', label[ORIGINALLY_LABEL_ID_PROP]);
+                delete label[ORIGINALLY_LABEL_ID_PROP];
+            }
         }
 
         // remove the document click if still bound
