@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
--   Accessibility issue where focus was lost after deletion of a selected item.
+-   Accessibility issues :
+    -   focus was lost after deletion of a selected item : return on the input.
+    -   aria-describedby for the suggestions list.
+    -   screenreader texts as p instead of span.
+    -   `sr-assistance` hidden with display none.
 
 ## [1.2.0] - 2020-10-01
 
