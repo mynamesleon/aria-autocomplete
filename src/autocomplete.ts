@@ -75,6 +75,7 @@ export default class Autocomplete {
     pollingTimer: ReturnType<typeof setTimeout>;
     showAllPrepTimer: ReturnType<typeof setTimeout>;
     announcementTimer: ReturnType<typeof setTimeout>;
+    announcementEmptyTimer: ReturnType<typeof setTimeout>;
     componentBlurTimer: ReturnType<typeof setTimeout>;
     elementChangeEventTimer: ReturnType<typeof setTimeout>;
 
@@ -259,15 +260,38 @@ export default class Autocomplete {
         if (!this.srAnnouncements || !text || typeof text !== 'string') {
             return;
         }
-        // in immediate case, do not user timer
+        // in immediate case, do not use timer
         if (delay === 0) {
             this.srAnnouncements.textContent = text;
+
+            this.emptyAnnouncement();
             return;
         }
 
         clearTimeout(this.announcementTimer);
         this.announcementTimer = setTimeout(() => {
             this.srAnnouncements.textContent = text;
+
+            this.emptyAnnouncement();
+        }, delay);
+    }
+
+    /**
+     * empty the screen reader announcement
+     */
+    emptyAnnouncement(delay: number = 2000) {
+        if (!this.srAnnouncements) {
+            return;
+        }
+        // in immediate case, do not use timer
+        if (delay === 0) {
+            this.srAnnouncements.textContent = '';
+            return;
+        }
+
+        clearTimeout(this.announcementEmptyTimer);
+        this.announcementEmptyTimer = setTimeout(() => {
+            this.srAnnouncements.textContent = '';
         }, delay);
     }
 
