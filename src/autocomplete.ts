@@ -1530,13 +1530,13 @@ export default class Autocomplete {
         );
         // add the screen reader assistance element
         newHtml.push(
-            `<span class="sr-only ${cssName}__sr-only ${cssName}__sr-assistance" ` +
-                `id="${this.ids.SR_ASSISTANCE}">${o.srAssistiveText}</span>`
+            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-assistance" ` +
+                `id="${this.ids.SR_ASSISTANCE}">${o.srAssistiveText}</p>`
         );
         // add element for added screen reader announcements
         newHtml.push(
-            `<span class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
-                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></span>`
+            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
+                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></p>`
         );
 
         // close all and append
