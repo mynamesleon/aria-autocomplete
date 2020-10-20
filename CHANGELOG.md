@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2020-xx-xx
+
+### Added
+
+-   Add `keepUserInput` option. Keep user input even if there are no results.
+
+
 ## [1.2.0] - 2020-10-01
 
 ### Added
