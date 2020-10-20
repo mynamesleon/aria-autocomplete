@@ -974,7 +974,7 @@ export default class Autocomplete {
                     // set original input value
                     if (this.elementIsInput && this.input.value !== '') {
                         originalElement.value = this.input.value;
-                        dispatchEvent(this.element, 'change');
+                        dispatchEvent(originalElement, 'change');
                     }
                 } else {
                     if (inputOrDdl && originalElement.value !== '') {
