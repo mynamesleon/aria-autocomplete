@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
     -   aria-describedby for the suggestions list.
     -   screenreader texts as p instead of span.
     -   `sr-assistance` hidden with display none.
+    -   `sr-announcements` emptied 2s after each announcement.
 
 ## [1.2.0] - 2020-10-01
 
