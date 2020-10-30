@@ -431,28 +431,6 @@ export default class Autocomplete {
     }
 
     /**
-     * set the aria-describedby attribute on the input
-     */
-    setInputDescription() {
-        const exists = this.input.getAttribute('aria-describedby');
-        const current = trimString(exists);
-        let describedBy = current.replace(this.ids.SR_ASSISTANCE, '');
-
-        if (!this.input.value.length) {
-            describedBy = `${describedBy} ${this.ids.SR_ASSISTANCE}`;
-        }
-
-        // set or remove attribute, but only if necessary
-        if ((describedBy = trimString(describedBy))) {
-            if (describedBy !== current) {
-                this.input.setAttribute('aria-describedby', describedBy);
-            }
-        } else if (exists) {
-            this.input.removeAttribute('aria-describedby');
-        }
-    }
-
-    /**
      * reset classes and aria-selected attribute for all visible filtered options
      */
     resetOptionAttributes(options: HTMLElement[] = getChildrenOf(this.list)) {
@@ -875,9 +853,6 @@ export default class Autocomplete {
             ) {
                 value = '';
             }
-
-            // handle aria-describedby
-            this.setInputDescription();
 
             // length check
             if (!forceShowAll && value.length < this.options.minLength) {
@@ -1483,9 +1458,6 @@ export default class Autocomplete {
             }
         }
 
-        // setup input description - done here in case value is affected above
-        this.setInputDescription();
-
         // disable the control if the invoked element was disabled
         if (!!(this.element as HTMLInputElement | HTMLSelectElement).disabled) {
             this.disable(true);
@@ -1508,7 +1480,8 @@ export default class Autocomplete {
             ? ` placeholder="${o.placeholder}" aria-placeholder="${o.placeholder}"`
             : '';
         newHtml.push(
-            `<input type="text" autocomplete="off" aria-expanded="false" aria-autocomplete="list" ` +
+            `<input type="text" autocomplete="off" aria-expanded="false" ` +
+                `aria-autocomplete="list" aria-describedby="${this.ids.SR_ASSISTANCE}" ` +
                 `role="combobox" id="${this.ids.INPUT}" aria-owns="${this.ids.LIST}" ` +
                 `class="${cssName}__input${inputClass}"${name}${placeholder} />`
         );
