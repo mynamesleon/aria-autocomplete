@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 -   `onAsyncBeforeSend` callback option, to allow adjustments to the xhr object before it is sent (e.g. adding auth headers)
 -   `onAsyncComplete` callback option, that fires after async call successfully completes and all items have rendered
 -   for all async related callbacks, and when the `source` is a function, there is now an additional final param that indicates if it is the first/starting call.
+-   `aria-describedby` attribute to the selected items in multiple mode, and the show all button, explicitly linking them to the control label
 
 ### Fixed
 

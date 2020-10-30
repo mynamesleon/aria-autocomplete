@@ -37,6 +37,7 @@ export default class Autocomplete {
     elementIsSelect: boolean;
 
     // elements
+    label: HTMLLabelElement;
     list: HTMLUListElement;
     input: HTMLInputElement;
     wrapper: HTMLDivElement;
@@ -341,6 +342,7 @@ export default class Autocomplete {
         span.setAttribute('class', `${this.cssNameSpace}__selected`);
         span.setAttribute('role', 'button');
         span.setAttribute('tabindex', '0');
+        span.setAttribute('aria-describedby', this.ids.LABEL);
         span[SELECTED_OPTION_PROP] = entry;
         span.textContent = label;
         return span;
@@ -1452,12 +1454,9 @@ export default class Autocomplete {
     setInputStartingStates(setAriaAttrs: boolean = true) {
         if (setAriaAttrs) {
             // update corresponding label to now focus on the new input
-            if (this.ids.ELEMENT) {
-                const label = document.querySelector('[for="' + this.ids.ELEMENT + '"]');
-                if (label) {
-                    label[ORIGINALLY_LABEL_FOR_PROP] = this.ids.ELEMENT;
-                    label.setAttribute('for', this.ids.INPUT);
-                }
+            if (this.label) {
+                this.label[ORIGINALLY_LABEL_FOR_PROP] = this.ids.ELEMENT;
+                this.label.setAttribute('for', this.ids.INPUT);
             }
 
             // update aria-describedby and aria-labelledby attributes if present
@@ -1517,8 +1516,9 @@ export default class Autocomplete {
         // button to show all available options
         if (o.showAllControl) {
             newHtml.push(
-                `<span role="button" aria-label="${o.srShowAllText}" class="${cssName}__show-all" ` +
-                    `tabindex="0" id="${this.ids.BUTTON}" aria-expanded="false"></span>`
+                `<span role="button" tabindex="0" id="${this.ids.BUTTON}" ` +
+                    `aria-label="${o.srShowAllText}" class="${cssName}__show-all" ` +
+                    `aria-describedby="${this.ids.LABEL}" aria-expanded="false"></span>`
             );
         }
         // add the list holder
@@ -1550,10 +1550,9 @@ export default class Autocomplete {
      */
     destroy() {
         // return original label 'for' attribute back to element id
-        const label: HTMLLabelElement = document.querySelector('[for="' + this.ids.INPUT + '"]');
-        if (label && label[ORIGINALLY_LABEL_FOR_PROP]) {
-            label.setAttribute('for', label[ORIGINALLY_LABEL_FOR_PROP]);
-            delete label[ORIGINALLY_LABEL_FOR_PROP];
+        if (this.label && this.label[ORIGINALLY_LABEL_FOR_PROP]) {
+            this.label.setAttribute('for', this.label[ORIGINALLY_LABEL_FOR_PROP]);
+            delete this.label[ORIGINALLY_LABEL_FOR_PROP];
         }
 
         // remove the document click if still bound
@@ -1582,7 +1581,7 @@ export default class Autocomplete {
         clearTimeout(this.elementChangeEventTimer);
 
         // clear stored element vars
-        ['element', 'list', 'input', 'wrapper', 'showAll', 'srAnnouncements'].forEach(
+        ['element', 'label', 'list', 'input', 'wrapper', 'showAll', 'srAnnouncements'].forEach(
             (entry: string) => (this[entry] = null)
         );
     }
@@ -1593,10 +1592,16 @@ export default class Autocomplete {
     init(element: HTMLElement, options?: IAriaAutocompleteOptions) {
         this.selected = [];
         this.element = element;
-        this.ids = new AutocompleteIds(element.id, options.id);
+        this.label = document.querySelector('[for="' + this.element.id + '"]');
+        this.ids = new AutocompleteIds(this.element.id, this.label ? this.label.id : null, options.id);
         this.elementIsInput = element.nodeName === 'INPUT';
         this.elementIsSelect = element.nodeName === 'SELECT';
         this.options = new AutocompleteOptions(options);
+
+        // ensure label has an id, for use in `aria-describedby` attributes later
+        if (this.label && !this.label.id) {
+            this.label.id = this.ids.LABEL;
+        }
 
         // set these internally so that the component has to be properly destroyed to change them
         this.source = this.options.source;
