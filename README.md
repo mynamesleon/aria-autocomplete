@@ -292,8 +292,7 @@ The full list of options, and their defaults:
     onAsyncComplete: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => void;
 
     /**
-     * Callback after async call succeeds, but before results render - receives the xhr object.
-     * Can be used to format the results by returning an Array
+     * Callback if async call fails.
      */
     onAsyncError: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => any[] | void;
 
