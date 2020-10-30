@@ -42,6 +42,7 @@ export default class Autocomplete {
     input: HTMLInputElement;
     wrapper: HTMLDivElement;
     showAll: HTMLSpanElement;
+    deleteAll: HTMLSpanElement;
     srAssistance: HTMLParagraphElement;
     srAnnouncements: HTMLParagraphElement;
 
@@ -196,11 +197,16 @@ export default class Autocomplete {
             return;
         }
         this.deletionsDisabled = false;
-        removeClass(this.wrapper, `${this.cssNameSpace}__wrapper--deletions-disabled`);
+        const nameSpace = this.cssNameSpace;
+        removeClass(this.wrapper, `${nameSpace}__wrapper--deletions-disabled`);
         this.getSelectedElems().forEach((element: HTMLElement) => {
-            removeClass(element, `${this.cssNameSpace}__selected--disabled`);
+            removeClass(element, `${nameSpace}__selected--disabled`);
             element.setAttribute('tabindex', '0');
         });
+        if (this.deleteAll) {
+            removeClass(this.deleteAll, `${nameSpace}__delete-all--disabled ${nameSpace}__selected--disabled`);
+            this.deleteAll.setAttribute('tabindex', '0');
+        }
     }
 
     /**
@@ -211,11 +217,16 @@ export default class Autocomplete {
             return;
         }
         this.deletionsDisabled = true;
-        addClass(this.wrapper, `${this.cssNameSpace}__wrapper--deletions-disabled`);
+        const nameSpace = this.cssNameSpace;
+        addClass(this.wrapper, `${nameSpace}__wrapper--deletions-disabled`);
         this.getSelectedElems().forEach((element: HTMLElement) => {
-            addClass(element, `${this.cssNameSpace}__selected--disabled`);
+            addClass(element, `${nameSpace}__selected--disabled`);
             element.setAttribute('tabindex', '-1');
         });
+        if (this.deleteAll) {
+            addClass(this.deleteAll, `${nameSpace}__delete-all--disabled ${nameSpace}__selected--disabled`);
+            this.deleteAll.setAttribute('tabindex', '-1');
+        }
     }
 
     /**
@@ -312,6 +323,44 @@ export default class Autocomplete {
     }
 
     /**
+     * delete all selected items
+     */
+    deleteAllSelected() {
+        // prevent removing if deletions are disabled
+        if (this.deletionsDisabled) {
+            return;
+        }
+
+        // cycle through and de-select
+        let i = this.selected.length;
+        while (i--) {
+            const option: any = mergeObjects(this.selected[i]);
+            // set option or checkbox to not be selected
+            setElementState(option.element, false, this);
+            // fire on delete before updating the DOM
+            this.triggerOptionCallback('onDelete', [option]);
+        }
+
+        // reset selected array
+        // use splice to modify it to maintain API reference
+        this.selected.splice(0);
+
+        // update original element values based on now selected items
+        this.setSourceElementValues();
+
+        // re-build the selected items markup
+        this.buildMultiSelected();
+
+        // update input size in autoGrow mode
+        this.triggerAutoGrow();
+
+        // use `srDeletedText` option for now for generic `deleted` announcement;
+        // if this causes issues across locales, build up full deleted string
+        // e.g. `deleted option 1, deleted option 2, etc.`
+        this.announce(this.options.srDeletedText, 0);
+    }
+
+    /**
      * remove object from selected options array
      */
     removeEntryFromSelected(entry: any, keepFocus: boolean = false) {
@@ -354,16 +403,21 @@ export default class Autocomplete {
     /**
      * create a DOM element for entry in selected array
      */
-    createSelectedElemFrom(entry: any): HTMLSpanElement {
+    createSelectedElemFrom(entry: any, isDeleteAll?: boolean): HTMLSpanElement {
         const label = entry.label;
+        const nameSpace = this.cssNameSpace;
+        const selected = `${nameSpace}__selected`;
         const span = document.createElement('span');
-        span.setAttribute('aria-label', `${this.options.srDeleteText} ${label}`);
-        span.setAttribute('class', `${this.cssNameSpace}__selected`);
+        const className = isDeleteAll ? `${nameSpace}__delete-all ${selected} ${selected}--delete-all` : selected;
+        span.setAttribute('aria-describedby', this.ids.LABEL);
+        span.setAttribute('class', className);
         span.setAttribute('role', 'button');
         span.setAttribute('tabindex', '0');
-        span.setAttribute('aria-describedby', this.ids.LABEL);
-        span[SELECTED_OPTION_PROP] = entry;
         span.textContent = label;
+        if (!isDeleteAll) {
+            span.setAttribute('aria-label', `${this.options.srDeleteText} ${label}`);
+            span[SELECTED_OPTION_PROP] = entry;
+        }
         return span;
     }
 
@@ -405,7 +459,7 @@ export default class Autocomplete {
                 }
             }
             // if no match was found, remove from the dom
-            this.wrapper.removeChild(element);
+            element.parentNode.removeChild(element);
         });
 
         // cycle through selected array, and add elements for each to the DOM
@@ -447,6 +501,19 @@ export default class Autocomplete {
             this.input.removeAttribute('placeholder');
         } else if (this.options.placeholder) {
             this.input.setAttribute('placeholder', this.options.placeholder);
+        }
+
+        // remove delete all control if only 1 selected item (or none)
+        if (this.selected.length <= 1) {
+            if (this.deleteAll) {
+                this.deleteAll.parentNode.removeChild(this.deleteAll);
+                this.deleteAll = null;
+            }
+        }
+        // add the delete all control
+        else if (this.options.deleteAllControl && !this.deleteAll && selectedElems[0]) {
+            this.deleteAll = this.createSelectedElemFrom({ label: this.options.deleteAllText }, true);
+            selectedElems[0].parentNode.insertBefore(this.deleteAll, selectedElems[0]);
         }
 
         // focus specified selected element (e.g. move to next element when deleting one)
@@ -949,6 +1016,8 @@ export default class Autocomplete {
             if (
                 !force &&
                 activeElem &&
+                // exception for delete all button
+                !(this.deleteAll && this.deleteAll === activeElem) &&
                 // exception for selected items, as these sit below the input by default
                 !this.isSelectedElem(activeElem) &&
                 // must base this on the wrapper to allow scrolling the list in IE
@@ -1072,6 +1141,11 @@ export default class Autocomplete {
         // this needs to be possible even when the autocomplete is disabled
         if (this.isSelectedElem(target)) {
             this.removeEntryFromSelected(target[SELECTED_OPTION_PROP], true);
+            return;
+        }
+
+        if (this.deleteAll && target === this.deleteAll) {
+            this.deleteAllSelected();
             return;
         }
 
@@ -1226,6 +1300,9 @@ export default class Autocomplete {
             }
             if (this.isSelectedElem(event.target as Element)) {
                 this.removeEntryFromSelected(event.target[SELECTED_OPTION_PROP], true);
+            }
+            if (this.deleteAll && event.target === this.deleteAll) {
+                this.deleteAllSelected();
             }
         });
 
@@ -1570,7 +1647,7 @@ export default class Autocomplete {
         }
 
         // remove the whole wrapper
-        this.element.parentNode.removeChild(this.wrapper);
+        this.wrapper.parentNode.removeChild(this.wrapper);
         delete this.element[API_STORAGE_PROP];
 
         // re-show original element
@@ -1582,12 +1659,21 @@ export default class Autocomplete {
         clearTimeout(this.showAllPrepTimer);
         clearTimeout(this.announcementTimer);
         clearTimeout(this.componentBlurTimer);
+        clearTimeout(this.clearAnnouncementTimer);
         clearTimeout(this.elementChangeEventTimer);
 
         // clear stored element vars
-        ['element', 'label', 'list', 'input', 'wrapper', 'showAll', 'srAssistance', 'srAnnouncements'].forEach(
-            (entry: string) => (this[entry] = null)
-        );
+        [
+            'list',
+            'input',
+            'label',
+            'element',
+            'wrapper',
+            'showAll',
+            'deleteAll',
+            'srAssistance',
+            'srAnnouncements',
+        ].forEach((entry: string) => (this[entry] = null));
     }
 
     /**

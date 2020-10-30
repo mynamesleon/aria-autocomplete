@@ -14,6 +14,8 @@ export interface IAriaAutocompleteOptions {
     maxItems?: number;
     multipleSeparator?: string;
     deleteOnBackspace?: boolean;
+    deleteAllControl?: boolean;
+    deleteAllText?: string;
     asyncQueryParam?: string;
     asyncMaxResultsParam?: string;
     placeholder?: string;

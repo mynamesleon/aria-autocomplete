@@ -157,6 +157,17 @@ The full list of options, and their defaults:
     deleteOnBackspace: boolean = false;
 
     /**
+     * In multiple mode, if more than 1 item is selected,
+     * add a button at the beginning of the selected items as a shortcut to delete all
+     */
+    deleteAllControl: boolean = false;
+
+    /**
+     * Text to use in the deleteAllControl
+     */
+    deleteAllText: string = `Delete all`;
+
+    /**
      * In async mode, parameter to use when adding the input value to the
      * endpoint String. e.g. https://some-endpoint?q=norway&limit=9999
      */

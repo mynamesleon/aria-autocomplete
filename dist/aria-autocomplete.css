@@ -133,6 +133,9 @@
   word-break: break-word;
   cursor: pointer;
 }
+.aria-autocomplete__selected--disabled {
+  opacity: 0.7;
+}
 .aria-autocomplete__selected:hover,
 .aria-autocomplete__selected:focus {
   background: #474747;
@@ -154,6 +157,15 @@
   .aria-autocomplete__selected:after {
     display: none;
   }
+}
+.aria-autocomplete__selected--delete-all {
+  border-color: #db0000;
+  background: #db0000;
+  color: #fff;
+}
+.aria-autocomplete__selected--delete-all:hover,
+.aria-autocomplete__selected--delete-all:focus {
+  background: #a80000;
 }
 .aria-autocomplete__wrapper--multiple .aria-autocomplete__input {
   margin-bottom: 5px;
