@@ -5,6 +5,7 @@ export default class {
     PREFIX: string;
     LIST: string;
     INPUT: string;
+    LABEL: string;
     BUTTON: string;
     OPTION: string;
     WRAPPER: string;
@@ -12,7 +13,7 @@ export default class {
     OPTION_SELECTED: string;
     SR_ANNOUNCEMENTS: string;
 
-    constructor(elementId: string, optionId?: string) {
+    constructor(elementId: string, labelId: string, optionId?: string) {
         index += 1;
         this.ELEMENT = elementId;
         const id = optionId || elementId || '';
@@ -22,6 +23,7 @@ export default class {
         this.BUTTON = `${this.PREFIX}-button`;
         this.OPTION = `${this.PREFIX}-option`;
         this.WRAPPER = `${this.PREFIX}-wrapper`;
+        this.LABEL = labelId || `${this.PREFIX}-label`;
         this.INPUT = optionId || `${this.PREFIX}-input`;
         this.SR_ASSISTANCE = `${this.PREFIX}-sr-assistance`;
         this.OPTION_SELECTED = `${this.PREFIX}-option-selected`;
