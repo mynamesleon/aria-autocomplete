@@ -16,6 +16,10 @@ All notable changes to this project will be documented in this file.
 -   for all async related callbacks, and when the `source` is a function, there is now an additional final param that indicates if it is the first/starting call.
 -   `aria-describedby` attribute to the selected items in multiple mode, and the show all button, explicitly linking them to the control label
 
+### Changed
+
+-   persist the `aria-describedby` attribute on the generated input, instead of removing it when the input has a value
+
 ### Fixed
 
 -   The `name` option now works correctly.
