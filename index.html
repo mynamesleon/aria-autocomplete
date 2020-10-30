@@ -293,9 +293,8 @@
                                 maxResults: 20,
                                 multiple: true,
                                 placeholder: 'Type to search',
-                                source: function (query, render) {
+                                source: function (query, render, isStartingCall) {
                                     var result = [];
-                                    var isStartingCall = this === window;
                                     var value = query.toLowerCase().trim();
                                     var arrToCheck = isStartingCall ? value.split(',') : [value];
                                     countryListAllIsoData.forEach(function (entry) {
@@ -323,7 +322,7 @@
     maxResults: 20,
     multiple: true,
     placeholder: 'Type to search',
-    source: (query: string, render: (toRender: any[]) => void) => {
+    source: (query: string, render: (toRender: any[]) => void, isFirstCall: boolean) => {
         const toRender: any[] = [];
         // build up your Array here, then render...
         render(toRender);
@@ -350,9 +349,8 @@
                                 asyncQueryParam: 'q',
                                 maxResults: 25,
                                 sourceMapping: { 'value': 'code3', 'label': 'name' },
-                                onAsyncSuccess: function (query, xhr) {
+                                onAsyncSuccess: function (query, xhr, isStartingCall) {
                                     var result = [];
-                                    var isStartingCall = this === window;
                                     var value = query.toLowerCase().trim();
                                     var response = JSON.parse(xhr.responseText);
                                     var propToCheck = isStartingCall ? 'value' : 'name';
@@ -368,7 +366,7 @@
                         <pre><code class="lang-typescript">AriaAutocomplete(document.getElementById('input'), {
     source: 'some-url-here/endpoint',
     onAsyncPrep: (url: string) => url,
-    onAsyncSuccess: (query: string, xhr: XMLHttpRequest) => {
+    onAsyncSuccess: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => {
         return JSON.parse(xhr.responseText);
     },
     asyncMaxResultsParam: 'limit',
@@ -382,7 +380,7 @@
                         <p>You can also use the <code>onAsyncPrep</code> callback to modify the URL.</p>
                         <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
                     </div>
-                    <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API (assuming you use an ordinary function expression instead of arrow functions). The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. So you can check for the API's existence, or check the context against the window object, to check if it's the starting call.</p>
+                    <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API (assuming you use an ordinary function expression instead of arrow functions). The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. So you can check for the API's existence, or check the context against the window object, to check if it's the starting call (or use the provided final param in the relevant callbacks).</p>
                 </section>
             
                 <section id="options">
@@ -482,23 +480,29 @@
                             </dd>
                             <dt>onAsyncPrep: <code>Function</code></dt>
                             <dd>
-                                Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String<br>
-                                Default: <code>(url: string) => url</code>
+                                Callback before async call is made - receives the URL. Can be used to format the endpoint URL by returning a String, and for changes to the XHR object.<br>
+                                Note: this is before the <code>onload</code> and <code>onerror</code> functions are attached, and before the <code>open</code> method is called
+                                Default: <code>(url: string, xhr: XMLHttpRequest, isFirstCall: boolean) => url</code>
                             </dd>
                             <dt>onAsyncBeforeSend: <code>Function</code></dt>
                             <dd>
                                 Callback before async call is sent - receives the XHR object. Can be used for final changes to the XHR object, such as adding auth headers<br>
-                                Default: <code>(xhr: XMLHttpRequest) => {}</code>
+                                Default: <code>(query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => {}</code>
                             </dd>
                             <dt>onAsyncSuccess: <code>Function</code></dt>
                             <dd>
-                                After async call completes - is passed the value and the XHR Object. Can be used to format the results by returning an Array<br>
-                                Default: <code>(query: string, xhr: XMLHttpRequest) => xhr.responseText</code>
+                                After async call succeeds, but before the results render - is passed the value and the XHR Object. Can be used to format the results by returning an Array<br>
+                                Default: <code>(query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => xhr.responseText</code>
+                            </dd>
+                            <dt>onAsyncComplete: <code>Function</code></dt>
+                            <dd>
+                                After async call completes successfully, and after the results have rendered.<br>
+                                Default: <code>(query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => {}</code>
                             </dd>
                             <dt>onAsyncError: <code>Function</code></dt>
                             <dd>
                                 If async call fails - is passed the value and the XHR Object.
-                                <br>Default: <code>(query, xhr: XMLHttpRequest) => {}</code>
+                                <br>Default: <code>(query, xhr: XMLHttpRequest, isFirstCall: boolean) => {}</code>
                             </dd>
                             <dt>onItemRender: <code>Function</code></dt>
                             <dd>

@@ -93,6 +93,9 @@ export function setElementState(element: HTMLInputElement | HTMLOptionElement, s
  * process an array of strings or objects to ensure needed props exist
  */
 export function processSourceArray(sourceArray: any[], mapping: any = {}, setCleanedLabel: boolean = true): any[] {
+    if (!Array.isArray(sourceArray)) {
+        return sourceArray ? [sourceArray] : [];
+    }
     const toReturn = [];
     const mapValue = mapping['value'];
     const mapLabel = mapping['label'];

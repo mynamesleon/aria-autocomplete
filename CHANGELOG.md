@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2020-10-01
+## [1.2.0] - 2020-10-30
 
 ### Added
 
@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
 -   `id` option to set a specific ID on the generated input
 -   the function usage of the `source` option can now take a Promise which resolves with the items to render, instead of having to use the provided second argument callback
 -   `onAsyncBeforeSend` callback option, to allow adjustments to the xhr object before it is sent (e.g. adding auth headers)
+-   `onAsyncComplete` callback option, that fires after async call successfully completes and all items have rendered
+-   for all async related callbacks, and when the `source` is a function, there is now an additional final param that indicates if it is the first/starting call.
 
 ### Fixed
 

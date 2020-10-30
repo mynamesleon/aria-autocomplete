@@ -30,10 +30,11 @@ export interface IAriaAutocompleteOptions {
     srAssistiveText?: string;
     srResultsText?(length: number): string | void;
     onSearch?(value: string): string | void;
-    onAsyncPrep?(url: string): string | void;
-    onAsyncBeforeSend?(xhr: XMLHttpRequest): void;
-    onAsyncSuccess?(query: string, xhr: XMLHttpRequest): any[] | void;
-    onAsyncError?(query: string, xhr: XMLHttpRequest): void;
+    onAsyncPrep?(url: string, xhr: XMLHttpRequest, isFirstCall: boolean): string | void;
+    onAsyncBeforeSend?(query: string, xhr: XMLHttpRequest, isFirstCall: boolean): void;
+    onAsyncSuccess?(query: string, xhr: XMLHttpRequest, isFirstCall: boolean): any[] | void;
+    onAsyncComplete?(query: string, xhr: XMLHttpRequest, isFirstCall: boolean): void;
+    onAsyncError?(query: string, xhr: XMLHttpRequest, isFirstCall: boolean): void;
     onResponse?(options: any[]): any[] | void;
     onItemRender?(sourceEntry: any): string | void;
     onConfirm?(selected: any): void;
@@ -55,8 +56,8 @@ export interface IAriaAutocompleteApi {
     open(): void;
     close(): void;
     enable(): void;
-    disable(disableDeletions: boolean): void;
-    filter(val: string): void;
+    disable(disableDeletions?: boolean): void;
+    filter(value: string): void;
     destroy(): void;
 }
 

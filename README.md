@@ -87,7 +87,7 @@ The full list of options, and their defaults:
     /**
      * Specify source. See examples file for more specific usage.
      * @example ['Afghanistan', 'Albania', 'Algeria', ...more]
-     * @example (query, render) => render(arrayToUse)
+     * @example (query, render, isFirstCall) => render(arrayToUse)
      */
     source: string[] | any[] | string | Function;
 
@@ -249,26 +249,40 @@ The full list of options, and their defaults:
     onSearch: (value: string) => string | void;
 
     /**
-     * Callback before async call is made - receives the URL.
-     * Can be used to format the endpoint URL by returning a String
+     * Callback before async call is made - receives the URL, and the XHR object.
+     * Can be used to format the endpoint URL by returning a String,
+     * and for changes to the XHR object.
+     * Note: this is before the onload and onerror functions are attached
+     * and before the `open` method is called
      */
-    onAsyncPrep: (url: string) => string | void;
+    onAsyncPrep: (url: string, xhr: XMLHttpRequest, isFirstCall: boolean) => string | void;
 
     /**
      * Callback before async call is sent - receives the XHR object.
      * Can be used for final changes to the XHR object, such as adding auth headers
      */
-    onAsyncBeforeSend: (xhr: XMLHttpRequest) => void;
+    onAsyncBeforeSend: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => void;
 
     /**
-     * Callback after async call completes - receives the xhr object.
+     * Callback after async call succeeds, but before results render - receives the xhr object.
      * Can be used to format the results by returning an Array
      */
-    onAsyncSuccess: (xhr: XMLHttpRequest) => any[] | void;
+    onAsyncSuccess: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => any[] | void;
 
     /**
-     * Callback prior to rendering - receives the options that are going
-     * to render. Can be used to format the results by returning an Array
+     * Callback after async call completes successfully, and after the results have rendered.
+     */
+    onAsyncComplete: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => void;
+
+    /**
+     * Callback after async call succeeds, but before results render - receives the xhr object.
+     * Can be used to format the results by returning an Array
+     */
+    onAsyncError: (query: string, xhr: XMLHttpRequest, isFirstCall: boolean) => any[] | void;
+
+    /**
+     * Callback prior to rendering - receives the options that are going to render.
+     * Can be used to format the results by returning an Array
      */
     onResponse: (options: any[]) => any[] | void;
 

@@ -302,7 +302,7 @@ export default class Autocomplete {
 
         // check for explicit match first
         let index: number = this.selected.indexOf(entry);
-        // if object reference check did not work found, do a manual value check
+        // if object reference check did not work, do a manual value check
         if (index === -1) {
             for (let i = 0, l = this.selected.length; i < l; i += 1) {
                 if (this.selected[i].value === entry.value) {
@@ -619,8 +619,8 @@ export default class Autocomplete {
         // if in multiple mode, exclude items already in the selected array
         const updated: any[] = this.removeSelectedFromResults(results);
         // allow callback to alter the response before rendering
-        const callback: any = this.triggerOptionCallback('onResponse', updated);
-        this.filteredSource = callback ? processSourceArray(callback, mapping) : updated;
+        const callback: any = this.triggerOptionCallback('onResponse', [updated]);
+        this.filteredSource = Array.isArray(callback) ? processSourceArray(callback, mapping) : updated;
 
         // build up the list html
         const optionId: string = this.ids.OPTION;
@@ -666,7 +666,9 @@ export default class Autocomplete {
         if (!announce) {
             announce = this.triggerOptionCallback('srResultsText', [lengthToUse]);
         }
-        this.announce(announce);
+        if (announce) {
+            this.announce(announce);
+        }
 
         // render the list, only if we have to
         // time taken for string comparison is worth it to not have to re-parse and re-render the list
@@ -713,7 +715,12 @@ export default class Autocomplete {
             `${encodeURIComponent(this.options.asyncQueryParam)}=${encodeURIComponent(value)}&` +
             `${encodeURIComponent(this.options.asyncMaxResultsParam)}=` +
             `${unlimited ? 9999 : baseAmount + this.options.maxResults}`;
-        url = this.triggerOptionCallback('onAsyncPrep', [url], context) || url;
+
+        // allow url modification via the onAsyncPrep callback
+        const prepUrl = this.triggerOptionCallback('onAsyncPrep', [url, xhr, isFirstCall], context);
+        if (prepUrl && typeof prepUrl === 'string') {
+            url = prepUrl;
+        }
 
         xhr.open('GET', url);
         xhr.onload = () => {
@@ -723,8 +730,8 @@ export default class Autocomplete {
             if (xhr.status >= 200 && xhr.status < 300) {
                 // return forceShowAll to previous state before the options render
                 this.forceShowAll = isShowAll;
-                const callbackResponse = this.triggerOptionCallback('onAsyncSuccess', [value, xhr], context);
-                const source = callbackResponse || xhr.responseText;
+                const response = this.triggerOptionCallback('onAsyncSuccess', [value, xhr, isFirstCall], context);
+                const source = response || xhr.responseText;
                 const items: any[] = processSourceArray(source, this.options.sourceMapping, false);
 
                 if (isFirstCall) {
@@ -733,10 +740,12 @@ export default class Autocomplete {
                 } else {
                     this.setListOptions(items);
                 }
+
+                this.triggerOptionCallback('onAsyncComplete', [value, xhr, isFirstCall], context);
             }
         };
         xhr.onerror = () => {
-            this.triggerOptionCallback('onAsyncError', [value, xhr], context);
+            this.triggerOptionCallback('onAsyncError', [value, xhr, isFirstCall], context);
         };
 
         // allow the creation of an uncancellable call to use on first load
@@ -746,7 +755,7 @@ export default class Autocomplete {
 
         // before send option callback, to allow adjustments to the xhr object,
         // e.g. adding auth headers
-        this.triggerOptionCallback('onAsyncBeforeSend', [xhr], context);
+        this.triggerOptionCallback('onAsyncBeforeSend', [value, xhr, isFirstCall], context);
         xhr.send();
     }
 
@@ -789,7 +798,7 @@ export default class Autocomplete {
                 this.setListOptions(result);
             };
             // check for `then` function on the result to allow use of a promise
-            const result = this.source.call(this.api, this.term, render);
+            const result = this.source.call(this.api, this.term, render, false);
             if (result && typeof result.then === 'function') {
                 result.then((toRender: any[]) => render(toRender));
             }
@@ -1401,7 +1410,7 @@ export default class Autocomplete {
             this.setInputStartingStates(false);
         };
         // check for `then` function on the result to allow use of a promise
-        const result = (this.source as Function).call(undefined, originalElement.value, render);
+        const result = (this.source as Function).call(undefined, originalElement.value, render, true);
         if (result && typeof result.then === 'function') {
             result.then((response: any[]) => render(response));
         }

@@ -40,8 +40,8 @@ export default class AutocompleteApi {
         this.enable.call(this);
     }
 
-    disable(this: Autocomplete) {
-        this.disable.call(this);
+    disable(this: Autocomplete, disableDeletions?: boolean) {
+        this.disable.call(this, disableDeletions);
     }
 
     filter(this: Autocomplete, val: string) {
