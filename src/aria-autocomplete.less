@@ -1,5 +1,6 @@
 @near-black: #434143;
 @dark-grey: #606060;
+@delete-red: #db0000;
 @speech: reader, speech, aural;
 
 .input-style() {
@@ -160,6 +161,10 @@
         word-break: break-word;
         cursor: pointer;
 
+        &--disabled {
+            opacity: 0.7;
+        }
+
         &:hover,
         &:focus {
             background: darken(@dark-grey, 10%);
@@ -180,6 +185,17 @@
 
             @media speech {
                 display: none;
+            }
+        }
+
+        &--delete-all {
+            border-color: @delete-red;
+            background: @delete-red;
+            color: #fff;
+
+            &:hover,
+            &:focus {
+                background: darken(@delete-red, 10%);
             }
         }
     }

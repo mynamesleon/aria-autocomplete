@@ -65,6 +65,10 @@
             h2 {
                 font-size: 1.75rem;
             }
+            label {
+                display: inline-block;
+                margin-bottom: 0.1875rem;
+            }
             .button {
                 display: inline-block;
                 padding: 0.4375rem 1rem;
@@ -280,7 +284,8 @@
                         <p>Any pre-selected <code>&lt;option&gt;</code> or checkbox elements are respected, and the <code>multiple</code> option will also be set to <code>true</code> automatically if the <code>&lt;select&gt;</code> has that attribute set; if checkboxes are used, the <code>multiple</code> option will always be set to <code>true</code>.</p>
                     </div>
                     <div class="tile" id="example-3">
-                        <h3>3. Function as Source, with multi-select, but <i>without</i> autogrow</h3>
+                        <h3>3. Function as Source</h3>
+                        <p><b>(With multi-select and delete all control, but without autogrow)</b></p>
                         <p>If you use a Function for the <code>source</code> with your own filtering logic, it will be passed the search query, and a render Function, which expects an Array (using either of the formats mentioned above).</p>
                         <label for="countrylist-function">
                             Select up to 4 countries by country code
@@ -292,6 +297,7 @@
                                 maxItems: 4,
                                 maxResults: 20,
                                 multiple: true,
+                                deleteAllControl: true,
                                 placeholder: 'Type to search',
                                 source: function (query, render, isStartingCall) {
                                     var result = [];
@@ -321,6 +327,7 @@
     maxItems: 4,
     maxResults: 20,
     multiple: true,
+    deleteAllControl: true,
     placeholder: 'Type to search',
     source: (query: string, render: (toRender: any[]) => void, isFirstCall: boolean) => {
         const toRender: any[] = [];
@@ -422,6 +429,10 @@
                                 <dd>In multiple mode, if the original element was an input, the character that separates the values<br>Default: <code>`,`</code></dd>
                                 <dt>deleteOnBackspace: <code>boolean</code></dt>
                                 <dd>If input is empty and in multiple mode, delete last selected item on backspace<br>Default: <code>false</code></dd>
+                                <dt>deleteAllControl: <code>boolean</code></dt>
+                                <dd>In multiple mode, if more than 1 item is selected, add a button at the beginning of the selected items as a shortcut to delete all<br>Default: <code>false</code></dd>
+                                <dt>deleteAllText: <code>string</code></dt>
+                                <dd>Text to use in the <code>deleteAllControl</code><br>Default: <code>`Delete all`</code></dd>
                             </div>
                         </dl>
                     </div>
