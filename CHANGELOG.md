@@ -13,12 +13,15 @@ All notable changes to this project will be documented in this file.
 -   the function usage of the `source` option can now take a Promise which resolves with the items to render, instead of having to use the provided second argument callback
 -   `onAsyncBeforeSend` callback option, to allow adjustments to the xhr object before it is sent (e.g. adding auth headers)
 -   `onAsyncComplete` callback option, that fires after async call successfully completes and all items have rendered
+-   `srAutoClear` option that takes a boolean, or number, to allow a delay before automatically clearing the screen reader announcement element
 -   for all async related callbacks, and when the `source` is a function, there is now an additional final param that indicates if it is the first/starting call.
--   `aria-describedby` attribute to the selected items in multiple mode, and the show all button, explicitly linking them to the control label
+-   the selected items in multiple mode, and the show all button, will now have their `aria-describedby` set to link them to the control label
 
 ### Changed
 
 -   persist the `aria-describedby` attribute on the generated input, instead of removing it when the input has a value
+-   in multiple mode, when deleting a selected item by clicking it or using enter, move focus to the next available selected item
+-   set the `aria-describedby` attribute on the list container to reference the control's label
 
 ### Fixed
 
