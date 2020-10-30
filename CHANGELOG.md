@@ -21,7 +21,8 @@ All notable changes to this project will be documented in this file.
 
 -   persist the `aria-describedby` attribute on the generated input, instead of removing it when the input has a value
 -   in multiple mode, when deleting a selected item by clicking it or using enter, move focus to the next available selected item
--   set the `aria-describedby` attribute on the list container to reference the control's label
+-   set the `aria-describedby` attribute on the list container to reference the control's
+-   do not hide the list when focus moves from the input to the show all control
 
 ### Fixed
 
@@ -29,6 +30,7 @@ All notable changes to this project will be documented in this file.
 -   In certain cases, the change event fired on the original input before the API's `selected` array was updated.
 -   Added a workaround for an IE11 bug where the options were shown on load if the `minLength` was set to 0 on a multi-select autocomplete with starting values. This was due to the input's placeholder being removed, which erroneously triggers the `input` event in IE11.
 -   Edge case errors when destroying the component immediately after certain actions (such as selecting an item, or blurring off of the component).
+-   In multiple mode, moved the selected items to be after the list to fix issue on mobile when navigating by swipe, as it was possible to reach the selected items first, causing the list to disappear.
 
 ## [1.1.4] - 2020-07-05
 
