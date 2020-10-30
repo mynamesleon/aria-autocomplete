@@ -5,11 +5,9 @@
 
 Accessible, extensible, plain JavaScript autocomplete with multi-select.
 
-I've used a lot of autocomplete plugins, but the combination of **accessibility**, **performance**, and **functionality** that I needed wasn't out there. So I've written this from the ground up for that purpose, building on the [brilliant accessibility of GOV.UK's accessible-autocomplete](https://accessibility.blog.gov.uk/2018/05/15/what-we-learned-from-getting-our-autocomplete-tested-for-accessibility/) - with more functionality, a smaller file size, and (in my testing) better performance.
+[Try out the examples](https://mynamesleon.github.io/aria-autocomplete/).
 
-[Try out the examples](https://mynamesleon.github.io/aria-autocomplete/)
-
-Key design goals and features are:
+Key design goals and features:
 
 -   **multiple selection**
 -   **extensible source options**: Array of Strings, Array of Objects, a Function, or an endpoint String
@@ -17,6 +15,10 @@ Key design goals and features are:
 -   **accessibility**: Use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
 -   **compatibility**: Broad browser and device support (IE9+)
 -   **starting values**: Automatic selection based on starting values, including for checkboxes, `select` options, and for async handling.
+
+Built from the ground up for the **accessibility**, **performance**, and **functionality** combination that I couldn't find in any other autocomplete plugins.
+
+The more general aim here was to build upon the [brilliant accessibility of GOV.UK's accessible-autocomplete](https://accessibility.blog.gov.uk/2018/05/15/what-we-learned-from-getting-our-autocomplete-tested-for-accessibility/), but with more functionality, a smaller file size, and (in my testing) better performance (and without using Preact).
 
 ## Installation / usage
 
