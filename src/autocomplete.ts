@@ -75,6 +75,7 @@ export default class Autocomplete {
     showAllPrepTimer: ReturnType<typeof setTimeout>;
     announcementTimer: ReturnType<typeof setTimeout>;
     componentBlurTimer: ReturnType<typeof setTimeout>;
+    clearAnnouncementTimer: ReturnType<typeof setTimeout>;
     elementChangeEventTimer: ReturnType<typeof setTimeout>;
 
     // storage for InputAutoWidth class instance
@@ -252,13 +253,25 @@ export default class Autocomplete {
     }
 
     /**
+     * empty the screen reader announcement element after a delay
+     */
+    clearAnnouncement(clearAfter: number) {
+        clearTimeout(this.clearAnnouncementTimer);
+        this.clearAnnouncementTimer = setTimeout(() => {
+            if (this.srAnnouncements) {
+                this.srAnnouncements.textContent = '';
+            }
+        }, clearAfter);
+    }
+
+    /**
      * make a screen reader announcement
      */
     announce(text: string, delay: number = 400) {
         if (!this.srAnnouncements || !text || typeof text !== 'string') {
             return;
         }
-        // in immediate case, do not user timer
+        // in immediate case, do not use timer
         if (delay === 0) {
             this.srAnnouncements.textContent = text;
             return;
@@ -267,6 +280,11 @@ export default class Autocomplete {
         clearTimeout(this.announcementTimer);
         this.announcementTimer = setTimeout(() => {
             this.srAnnouncements.textContent = text;
+            // clear the announcement
+            const autoClear = this.options.srAutoClear;
+            if (autoClear === true || (typeof autoClear === 'number' && autoClear > -1)) {
+                this.clearAnnouncement(typeof autoClear === 'number' ? autoClear : 2000);
+            }
         }, delay);
     }
 
@@ -275,7 +293,7 @@ export default class Autocomplete {
      */
     isSelectedElem(element: Element): boolean {
         const sourceEntry = element && element[SELECTED_OPTION_PROP];
-        return this.multiple && sourceEntry && typeof sourceEntry === 'object';
+        return this.multiple && !!sourceEntry && typeof sourceEntry === 'object';
     }
 
     /**
@@ -295,7 +313,7 @@ export default class Autocomplete {
     /**
      * remove object from selected options array
      */
-    removeEntryFromSelected(entry: any) {
+    removeEntryFromSelected(entry: any, keepFocus: boolean = false) {
         // prevent removing if deletions are disabled
         if (this.deletionsDisabled) {
             return;
@@ -324,7 +342,7 @@ export default class Autocomplete {
             // update original element values based on now selected items
             this.setSourceElementValues();
             // re-build the selected items markup
-            this.buildMultiSelected();
+            this.buildMultiSelected(keepFocus ? index : null);
             // update input size in autoGrow mode
             this.triggerAutoGrow();
             // make sure to announce deletion to screen reader users
@@ -352,7 +370,7 @@ export default class Autocomplete {
      * re-build the html showing the selected items
      * note: there are a lot of loops here - could affect performance
      */
-    buildMultiSelected() {
+    buildMultiSelected(focusIndex?: number) {
         // only do anything in multiple mode
         if (!this.multiple) {
             return;
@@ -412,7 +430,8 @@ export default class Autocomplete {
         }
 
         // set ids on selected DOM elements
-        const ids: string[] = this.getSelectedElems().map((element: HTMLElement, index: number) => {
+        const selectedElems = this.getSelectedElems();
+        const ids: string[] = selectedElems.map((element: HTMLElement, index: number) => {
             const id = `${this.ids.OPTION_SELECTED}-${index}`;
             element.setAttribute('id', id);
             return id;
@@ -427,6 +446,16 @@ export default class Autocomplete {
             this.input.removeAttribute('placeholder');
         } else if (this.options.placeholder) {
             this.input.setAttribute('placeholder', this.options.placeholder);
+        }
+
+        // focus specified selected element (e.g. move to next element when deleting one)
+        if (typeof focusIndex === 'number') {
+            // focus specified index if possible
+            // otherwise, check for an element before it, or for the first/any selected elem
+            const toFocus = selectedElems[focusIndex] || selectedElems[focusIndex - 1] || selectedElems[0];
+            if (toFocus && typeof toFocus.focus === 'function') {
+                toFocus.focus();
+            }
         }
     }
 
@@ -1041,7 +1070,7 @@ export default class Autocomplete {
         // if in multiple mode, and event target was a selected item, remove it;
         // this needs to be possible even when the autocomplete is disabled
         if (this.isSelectedElem(target)) {
-            this.removeEntryFromSelected(target[SELECTED_OPTION_PROP]);
+            this.removeEntryFromSelected(target[SELECTED_OPTION_PROP], true);
             return;
         }
 
@@ -1195,7 +1224,7 @@ export default class Autocomplete {
                 return;
             }
             if (this.isSelectedElem(event.target as Element)) {
-                this.removeEntryFromSelected(event.target[SELECTED_OPTION_PROP]);
+                this.removeEntryFromSelected(event.target[SELECTED_OPTION_PROP], true);
             }
         });
 
@@ -1494,23 +1523,24 @@ export default class Autocomplete {
                     `aria-describedby="${this.ids.LABEL}" aria-expanded="false"></span>`
             );
         }
+
         // add the list holder
         const explainerText = o.srListLabelText;
         const listClass = o.listClassName ? ` ${o.listClassName}` : '';
         const explainer = explainerText ? ` aria-label="${explainerText}"` : '';
         newHtml.push(
-            `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" role="listbox" ` +
+            `<ul id="${this.ids.LIST}" class="${cssName}__list${listClass}" ` +
+                `role="listbox" aria-describedby="${this.ids.LABEL}" ` +
                 `aria-hidden="true" hidden="hidden"${explainer}></ul>`
         );
+
         // add the screen reader assistance element
-        newHtml.push(
-            `<span class="sr-only ${cssName}__sr-only ${cssName}__sr-assistance" ` +
-                `id="${this.ids.SR_ASSISTANCE}">${o.srAssistiveText}</span>`
-        );
+        newHtml.push(`<p id="${this.ids.SR_ASSISTANCE}" style="display:none;">${o.srAssistiveText}</p>`);
+
         // add element for added screen reader announcements
         newHtml.push(
-            `<span class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
-                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></span>`
+            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
+                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></p>`
         );
 
         // close all and append

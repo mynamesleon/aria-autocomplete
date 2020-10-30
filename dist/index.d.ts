@@ -22,6 +22,7 @@ export interface IAriaAutocompleteOptions {
     listClassName?: string;
     inputClassName?: string;
     wrapperClassName?: string;
+    srAutoClear?: boolean | number;
     srDeleteText?: string;
     srDeletedText?: string;
     srShowAllText?: string;

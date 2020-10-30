@@ -201,6 +201,12 @@ The full list of options, and their defaults:
     wrapperClassName: string;
 
     /**
+     * Automatically clear the screen reader announcement element after the specified delay
+     * Defaults to 2 seconds if true
+     */
+    srAutoClear: boolean | number = false;
+
+    /**
      * Screen reader text used in multiple mode for element deletion.
      * Prepended to option label in aria-label attribute e.g. 'delete Canada'
      */
