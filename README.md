@@ -108,6 +108,12 @@ The full list of options, and their defaults:
     alsoSearchIn: string[] = [];
 
     /**
+     * If no exact match is found,
+     * create an entry in the options list for the current search text
+     */
+    create: boolean | ((value: string) => string | object) = false;
+
+    /**
      * Input delay after typing before running a search
      */
     delay: number = 100;
