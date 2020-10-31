@@ -90,33 +90,34 @@ export function setElementState(element: HTMLInputElement | HTMLOptionElement, s
 }
 
 /**
+ * process a results entry string or object to ensure needed props exist
+ */
+export function processSourceEntry(entry: string | any, mapping: any = {}): any {
+    let result: any = {};
+    const mapValue = mapping['value'];
+    const mapLabel = mapping['label'];
+    if (typeof entry === 'string') {
+        result.value = result.label = entry;
+    } else {
+        // generate new object to not modify original
+        // ensure value and label exist, and maintain any other properties
+        result = mergeObjects(entry);
+        result.value = (result[mapValue] || result.value || result.label || '').toString();
+        result.label = (result[mapLabel] || result.label || result.value || '').toString();
+    }
+    // set a cleaned label for static source filtering (in filter method)
+    result[CLEANED_LABEL_PROP] = cleanString(result.label);
+    return result;
+}
+
+/**
  * process an array of strings or objects to ensure needed props exist
  */
-export function processSourceArray(sourceArray: any[], mapping: any = {}, setCleanedLabel: boolean = true): any[] {
+export function processSourceArray(sourceArray: any[], mapping: any = {}): any[] {
     if (!Array.isArray(sourceArray)) {
         return sourceArray ? [sourceArray] : [];
     }
-    const toReturn = [];
-    const mapValue = mapping['value'];
-    const mapLabel = mapping['label'];
-    sourceArray.forEach((entry: string | any) => {
-        let result: any = {};
-        if (typeof entry === 'string') {
-            result.value = result.label = entry;
-        } else {
-            // generate new object to not modify original
-            // ensure value and label exist, and maintain any other properties
-            result = mergeObjects(entry);
-            result.value = (result[mapValue] || result.value || result.label || '').toString();
-            result.label = (result[mapLabel] || result.label || result.value || '').toString();
-        }
-        // whether to set a cleaned label for static source filtering (in filter method)
-        if (setCleanedLabel !== false) {
-            result[CLEANED_LABEL_PROP] = cleanString(result.label);
-        }
-        toReturn.push(result);
-    });
-    return toReturn;
+    return sourceArray.map((entry: string | any) => processSourceEntry(entry, mapping));
 }
 
 /**
