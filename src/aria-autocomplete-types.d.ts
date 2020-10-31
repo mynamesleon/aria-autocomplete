@@ -1,9 +1,10 @@
 export interface IAriaAutocompleteOptions {
     id?: string;
     name?: string;
-    source?: string | string[] | any[] | Function;
+    source?: string | string[] | any[] | Function | Promise<any[]>;
     sourceMapping?: any;
     alsoSearchIn?: string[];
+    create?: boolean | ((value: string) => string | any);
     delay?: number;
     minLength?: number;
     maxResults?: number;

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2020-10-30
+## [1.2.0] - 2020-10-31
 
 ### Added
 
@@ -13,8 +13,9 @@ All notable changes to this project will be documented in this file.
 -   the function usage of the `source` option can now take a Promise which resolves with the items to render, instead of having to use the provided second argument callback
 -   `onAsyncBeforeSend` callback option, to allow adjustments to the xhr object before it is sent (e.g. adding auth headers)
 -   `onAsyncComplete` callback option, that fires after async call successfully completes and all items have rendered
--   `srAutoClear` option that takes a boolean, or number, to allow a delay before automatically clearing the screen reader announcement element
+-   `srAutoClear` option that takes a boolean, or number, to allow a delay before automatically clearing the screen reader announcement element - defaults to 5 seconds
 -   `deleteAllControl` and `deleteAllText` options to render a button enabling quick deletion of all selected items (when there are at least 2 selected items)
+-   `create` option to allow adding a results entry for the current search text (if no exact results match is found)
 -   for all async related callbacks, and when the `source` is a function, there is now an additional final param that indicates if it is the first/starting call.
 -   the selected items in multiple mode, and the show all button, will now have their `aria-describedby` set to link them to the control label
 
@@ -24,6 +25,7 @@ All notable changes to this project will be documented in this file.
 -   in multiple mode, when deleting a selected item by clicking it or using enter, move focus to the next available selected item
 -   set the `aria-describedby` attribute on the list container to reference the control's
 -   do not hide the list when focus moves from the input to the show all control
+-   moved the screen reader announcement element to be before the generated input, so that if users navigate past the input, they will not encounter the announcement element out of context
 
 ### Fixed
 
@@ -32,6 +34,7 @@ All notable changes to this project will be documented in this file.
 -   Added a workaround for an IE11 bug where the options were shown on load if the `minLength` was set to 0 on a multi-select autocomplete with starting values. This was due to the input's placeholder being removed, which erroneously triggers the `input` event in IE11.
 -   Edge case errors when destroying the component immediately after certain actions (such as selecting an item, or blurring off of the component).
 -   In multiple mode, moved the selected items to be after the list to fix issue on mobile when navigating by swipe, as it was possible to reach the selected items first, causing the list to disappear.
+-   Issue with `confirmOnBlur` option not working correctly when a results option did not currently have focus.
 
 ## [1.1.4] - 2020-07-05
 

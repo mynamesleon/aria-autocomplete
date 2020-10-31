@@ -89,7 +89,10 @@ The full list of options, and their defaults:
     /**
      * Specify source. See examples file for more specific usage.
      * @example ['Afghanistan', 'Albania', 'Algeria', ...more]
+     * @example [{ label: 'Afghanistan', value: 'AFG' }, ...more]
+     * @example 'https://some-endpoint.somewhere/available'
      * @example (query, render, isFirstCall) => render(arrayToUse)
+     * @example (query) => async () => arrayToUse
      */
     source: string[] | any[] | string | Function;
 
@@ -103,6 +106,12 @@ The full list of options, and their defaults:
      * `label` will always be used
      */
     alsoSearchIn: string[] = [];
+
+    /**
+     * If no exact match is found,
+     * create an entry in the options list for the current search text
+     */
+    create: boolean | ((value: string) => string | object) = false;
 
     /**
      * Input delay after typing before running a search
@@ -215,9 +224,9 @@ The full list of options, and their defaults:
 
     /**
      * Automatically clear the screen reader announcement element after the specified delay
-     * Defaults to 2 seconds if true
+     * Number is in milliseconds. If true, defaults to 5000.
      */
-    srAutoClear: boolean | number = false;
+    srAutoClear: boolean | number = 5000;
 
     /**
      * Screen reader text used in multiple mode for element deletion.

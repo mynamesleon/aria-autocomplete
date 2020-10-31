@@ -25,6 +25,7 @@ import {
     getChildrenOf,
     setElementState,
     prepSearchInArray,
+    processSourceEntry,
     processSourceArray,
     searchSourceEntryFor,
 } from './autocomplete-helpers';
@@ -34,7 +35,8 @@ export default class Autocomplete {
     options: IAriaAutocompleteOptions;
     element: HTMLElement | HTMLInputElement | HTMLSelectElement;
     elementIsInput: boolean;
-    elementIsSelect: boolean;
+    sourceFromSelect: boolean;
+    sourceFromCheckboxList: boolean;
 
     // elements
     label: HTMLLabelElement;
@@ -51,7 +53,7 @@ export default class Autocomplete {
     ids: AutocompleteIds;
     xhr: XMLHttpRequest;
     term: string;
-    source: string | any[] | Function;
+    source: string | string[] | any[] | Function | Promise<any[]>;
     menuOpen: boolean;
     multiple: boolean;
     disabled: boolean;
@@ -61,7 +63,7 @@ export default class Autocomplete {
     filtering: boolean;
     cssNameSpace: string;
     forceShowAll: boolean;
-    filteredSource: Object[]; // filtered source items to render
+    filteredSource: any[]; // filtered source items to render
     currentListHtml: string;
     inputPollingValue: string;
     deletionsDisabled: boolean;
@@ -283,21 +285,24 @@ export default class Autocomplete {
         if (!this.srAnnouncements || !text || typeof text !== 'string') {
             return;
         }
+
+        const setAnnouncementText = () => {
+            this.srAnnouncements.textContent = text;
+            // clear the announcement
+            const { srAutoClear: autoClear } = this.options;
+            if (autoClear === true || (typeof autoClear === 'number' && autoClear > -1)) {
+                this.clearAnnouncement(typeof autoClear === 'number' ? autoClear : 5000);
+            }
+        };
+
         // in immediate case, do not use timer
         if (delay === 0) {
-            this.srAnnouncements.textContent = text;
+            setAnnouncementText();
             return;
         }
 
         clearTimeout(this.announcementTimer);
-        this.announcementTimer = setTimeout(() => {
-            this.srAnnouncements.textContent = text;
-            // clear the announcement
-            const autoClear = this.options.srAutoClear;
-            if (autoClear === true || (typeof autoClear === 'number' && autoClear > -1)) {
-                this.clearAnnouncement(typeof autoClear === 'number' ? autoClear : 2000);
-            }
-        }, delay);
+        this.announcementTimer = setTimeout(() => setAnnouncementText(), delay);
     }
 
     /**
@@ -599,7 +604,7 @@ export default class Autocomplete {
         }
 
         // included in case of multi-select mode used with a <select> element as the source
-        if (!this.selected.length && this.elementIsSelect) {
+        if (!this.selected.length && this.sourceFromSelect) {
             (this.element as HTMLSelectElement).value = '';
         }
 
@@ -641,6 +646,8 @@ export default class Autocomplete {
 
         // (re)set values of any DOM elements based on selected array
         if (!alreadySelected) {
+            // add entry to the DOM if necessary
+            this.addResultsEntryToDomAndSource(option);
             this.selected.push(option);
             this.setSourceElementValues();
             // rebuild multi-selected if needed
@@ -687,12 +694,134 @@ export default class Autocomplete {
     }
 
     /**
+     * in create mode, if source options were from a dropdown or checkboxlist,
+     * append the chosen option at list start and update internal source
+     * @todo: confirm performance and cloned result is as expected in IE9+
+     */
+    addResultsEntryToDomAndSource(option: any) {
+        const { create } = this.options;
+
+        // better safe than sorry...
+        // only applies to create mode, and if the option has a value
+        // if the source is an endpoint, or function, we can't update it or the DOM
+        if (!option || !option.value || !create || !Array.isArray(this.source)) {
+            return;
+        }
+
+        // if a matching source entry already exists, it does not need to be added;
+        // use this check to assume a matching element already exists in the DOM as well for performance
+        // so that we don't need to do any DOM interrogation
+        const { label, value } = option;
+        if (
+            this.indexOfValueIn(this.source, value, 'value') > -1 ||
+            this.indexOfValueIn(this.source, label, 'label') > -1
+        ) {
+            return;
+        }
+
+        let element: HTMLOptionElement | HTMLInputElement;
+        const { sourceFromSelect, sourceFromCheckboxList } = this;
+
+        // dropdown list case
+        if (sourceFromSelect) {
+            const existingOption: HTMLOptionElement = this.element.querySelector('option');
+            const newOption = existingOption.cloneNode(true) as HTMLOptionElement;
+            newOption.textContent = label;
+            newOption.value = value;
+            element = newOption;
+            // insert the new option at the beginning of the list
+            existingOption.parentNode.insertBefore(newOption, existingOption);
+        }
+        // checkboxlist case
+        else if (sourceFromCheckboxList) {
+            const existingCheckbox = this.element.querySelector('input[type="checkbox"]');
+            const newCheckbox = existingCheckbox.cloneNode(true) as HTMLInputElement;
+            const existingLabel = existingCheckbox.closest('label');
+            const newLabel = document.createElement('label');
+            newLabel.textContent = label;
+            newCheckbox.value = value;
+            element = newCheckbox;
+            // if the detected existing checkbox in the list had a label parent,
+            // insert the new label as a sibling, otherwise just insert next to checkbox
+            newLabel.appendChild(newCheckbox);
+            const insertNextTo = existingLabel || existingCheckbox;
+            insertNextTo.parentNode.insertBefore(newLabel, insertNextTo);
+        }
+
+        // add the element to the option so that it is correctly updated
+        // within the `setSourceElementValues` method
+        if (element) {
+            option.element = element;
+            // for safety, remove the cloned element id to prevent duplicates
+            element.removeAttribute('id');
+        }
+
+        // update the `source` array so that the option will be available again
+        // if it's deleted from the selected list;
+        // place at the beginning to take precedence over existing options
+        this.source.unshift(option);
+    }
+
+    /**
+     * when `create` option is true, or a function that returns a value,
+     * add an entry to the results for the current search term
+     */
+    prependCreatedResultsEntry(results: any[]) {
+        const { create } = this.options;
+        const cleanedValue = cleanString(this.term);
+
+        // if the option is falsy or not a function, or the search value is empty, do nothing
+        if (!cleanedValue || !(create === true || typeof create === 'function')) {
+            return;
+        }
+
+        let entryToAdd: any;
+        const trimmedValue = trimString(this.term);
+        const { sourceMapping: mapping } = this.options;
+
+        // simple entry creation when set to true, based on the trimmed value (not cleaned value)
+        if (create === true) {
+            entryToAdd = processSourceEntry(trimmedValue, mapping);
+        }
+
+        // when function, check the result first...
+        if (typeof create === 'function') {
+            const result = create(trimmedValue);
+            const resultType = typeof result;
+            // check that the result was a string or object
+            // if devs want to add multiple entries, they can use the `onResponse` callback
+            if (result && (resultType === 'string' || (resultType === 'object' && !Array.isArray(result)))) {
+                entryToAdd = processSourceEntry(result, mapping);
+            }
+        }
+
+        // only add it if there's actually something to add
+        if (!entryToAdd || !entryToAdd.label || !entryToAdd.value) {
+            return;
+        }
+
+        // if there's an exact label match in the existing results, give original entry precedence
+        if (this.indexOfValueIn(results, entryToAdd[CLEANED_LABEL_PROP], CLEANED_LABEL_PROP) > -1) {
+            return;
+        }
+
+        // also do not proceed if there's an exact value match in the original results
+        if (this.indexOfValueIn(results, entryToAdd.value, 'value') > -1) {
+            return;
+        }
+
+        // finally, add the entry by modifying the original array
+        results.unshift(entryToAdd);
+    }
+
+    /**
      * final filtering and render for list options
+     * @todo add handling for disabled results
      */
     setListOptions(results: any[]) {
-        const toShow: string[] = [];
+        this.prependCreatedResultsEntry(results);
         // now commit to setting the filtered source
-        const mapping: any = this.options.sourceMapping;
+        const { sourceMapping: mapping } = this.options;
         // if in multiple mode, exclude items already in the selected array
         const updated: any[] = this.removeSelectedFromResults(results);
         // allow callback to alter the response before rendering
@@ -708,6 +837,7 @@ export default class Autocomplete {
         const maxResults: number = this.forceShowAll ? 9999 : this.options.maxResults;
         const lengthToUse: number = maxResults < length ? maxResults : length;
 
+        const toShow: string[] = [];
         for (let i = 0; i < lengthToUse; i += 1) {
             const thisSource: any = this.filteredSource[i];
             const callbackResponse = checkCallback && this.triggerOptionCallback('onItemRender', [thisSource]);
@@ -730,7 +860,7 @@ export default class Autocomplete {
 
         // no results text handling
         let announce: string;
-        const noText: string = this.options.noResultsText;
+        const { noResultsText: noText } = this.options;
         if (!toShow.length && typeof noText === 'string' && noText.length) {
             announce = noText;
             toShow.push(`<li class="${optionClassName} ${optionClassName}--no-results">${noText}</li>`);
@@ -809,7 +939,7 @@ export default class Autocomplete {
                 this.forceShowAll = isShowAll;
                 const response = this.triggerOptionCallback('onAsyncSuccess', [value, xhr, isFirstCall], context);
                 const source = response || xhr.responseText;
-                const items: any[] = processSourceArray(source, this.options.sourceMapping, false);
+                const items: any[] = processSourceArray(source, this.options.sourceMapping);
 
                 if (isFirstCall) {
                     this.prepSelectedFromArray(items);
@@ -889,18 +1019,19 @@ export default class Autocomplete {
 
         // build up results from static list
         const toReturn: any[] = [];
-        if (this.source && this.source.length) {
+        const source = this.source as any[];
+        if (source && source.length) {
             // build up array of source entry props to search in
             let toCheck: string[] = [CLEANED_LABEL_PROP];
             if (!forceShowAll) {
                 value = cleanString(value, true);
-                const searchIn: string[] = this.options.alsoSearchIn;
+                const { alsoSearchIn: searchIn } = this.options;
                 if (Array.isArray(searchIn) && searchIn.length) {
                     toCheck = prepSearchInArray(toCheck.concat(searchIn));
                 }
             }
             // include everything in forceShowAll case
-            (this.source as any[]).forEach((entry: any) => {
+            source.forEach((entry: any) => {
                 if (forceShowAll || searchSourceEntryFor(entry, value, toCheck)) {
                     toReturn.push(entry);
                 }
@@ -1037,7 +1168,7 @@ export default class Autocomplete {
                 let toUse: number = this.currentSelectedIndex;
                 if (typeof toUse !== 'number' || toUse === -1) {
                     // otherwise check for exact match between current input value and available items
-                    toUse = this.indexOfValueIn.call(this, this.filteredSource);
+                    toUse = this.indexOfValueIn.call(this, this.filteredSource, this.term, 'label');
                 }
                 this.handleOptionSelect({}, toUse, false);
             }
@@ -1051,7 +1182,7 @@ export default class Autocomplete {
                 if (this.selected.length) {
                     this.removeEntryFromSelected(this.selected[0]);
                 }
-                const inputOrDdl: boolean = this.elementIsInput || this.elementIsSelect;
+                const inputOrDdl: boolean = this.elementIsInput || this.sourceFromSelect;
                 const originalElement = this.element as HTMLInputElement | HTMLSelectElement;
                 if (inputOrDdl && originalElement.value !== '') {
                     originalElement.value = '';
@@ -1093,8 +1224,9 @@ export default class Autocomplete {
         event.preventDefault();
         // if closed, and text is long enough, run search
         if (!this.menuOpen) {
-            this.forceShowAll = this.options.minLength < 1;
-            if (this.forceShowAll || this.input.value.length >= this.options.minLength) {
+            const { minLength } = this.options;
+            this.forceShowAll = minLength < 1;
+            if (this.forceShowAll || this.input.value.length >= minLength) {
                 this.filterPrep(event);
             }
         }
@@ -1204,7 +1336,7 @@ export default class Autocomplete {
             this.multiple
         ) {
             this.removeEntryFromSelected(this.selected[selectedLength - 1]);
-            return;
+            // do not return here, to allow the search results to update
         }
 
         // any printable character not on input, return focus to input
@@ -1378,20 +1510,18 @@ export default class Autocomplete {
             if (!checkbox.value) {
                 continue;
             }
-            const toPush: any = { element: checkbox, value: checkbox.value };
+            const entry: any = { value: checkbox.value };
             // label searching
             let checkboxLabelElem: HTMLElement = checkbox.closest('label');
             if (!checkboxLabelElem && checkbox.id) {
                 checkboxLabelElem = document.querySelector('[for="' + checkbox.id + '"]');
             }
             if (checkboxLabelElem) {
-                toPush.label = checkboxLabelElem.textContent;
+                entry.label = checkboxLabelElem.textContent;
             }
-            // if no label so far, re-use value
-            if (!toPush.label) {
-                toPush.label = toPush.value;
-            }
-            toPush[CLEANED_LABEL_PROP] = cleanString(toPush.label);
+            // if there was no label, `processSourceEntry` will re-use the value
+            const toPush = processSourceEntry(entry);
+            toPush.element = checkbox;
             this.source.push(toPush);
             // add to selected if applicable
             if (checkbox.checked) {
@@ -1423,12 +1553,8 @@ export default class Autocomplete {
             if (!option.value) {
                 continue;
             }
-            const toPush: any = {
-                element: option,
-                value: option.value,
-                label: option.textContent,
-            };
-            toPush[CLEANED_LABEL_PROP] = cleanString(toPush.label);
+            const toPush = processSourceEntry({ value: option.value, label: option.textContent });
+            toPush.element = option;
             this.source.push(toPush);
             // add to selected if applicable
             if (option.selected) {
@@ -1444,8 +1570,7 @@ export default class Autocomplete {
         const value = this.elementIsInput && (this.element as HTMLInputElement).value;
         if (value && source && source.length) {
             // account for multiple mode
-            const multiple: boolean = this.options.multiple;
-            const separator: string = this.options.multipleSeparator;
+            const { multiple, multipleSeparator: separator } = this.options;
             const valueArr: string[] = multiple ? value.split(separator) : [value];
 
             valueArr.forEach((val: string) => {
@@ -1520,14 +1645,19 @@ export default class Autocomplete {
         }
 
         // dropdown source
-        if (this.elementIsSelect) {
+        this.sourceFromSelect = this.element.nodeName === 'SELECT';
+        if (this.sourceFromSelect) {
             return this.prepListSourceDdl();
         }
 
         // checkboxlist source
-        if (this.element.querySelector('input[type="checkbox"]')) {
-            this.prepListSourceCheckboxes();
+        this.sourceFromCheckboxList = !!this.element.querySelector('input[type="checkbox"]');
+        if (this.sourceFromCheckboxList) {
+            return this.prepListSourceCheckboxes();
         }
+
+        // defensive fallback
+        this.source = [];
     }
 
     /**
@@ -1580,6 +1710,14 @@ export default class Autocomplete {
         const wrapperClass = o.wrapperClassName ? ` ${o.wrapperClassName}` : '';
         const newHtml = [`<div id="${this.ids.WRAPPER}" class="${cssName}__wrapper${wrapperClass}">`];
 
+        // add element for added screen reader announcements
+        // added before the main input, so that if screen reader users navigate past the input
+        // they will not encounter this element out of context
+        newHtml.push(
+            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
+                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></p>`
+        );
+
         // add input
         const name = o.name ? ` name="${o.name}"` : ``;
         const inputClass = o.inputClassName ? ` ${o.inputClassName}` : '';
@@ -1614,12 +1752,6 @@ export default class Autocomplete {
 
         // add the screen reader assistance element
         newHtml.push(`<p id="${this.ids.SR_ASSISTANCE}" style="display:none;">${o.srAssistiveText}</p>`);
-
-        // add element for added screen reader announcements
-        newHtml.push(
-            `<p class="sr-only ${cssName}__sr-only ${cssName}__sr-announcements" ` +
-                `id="${this.ids.SR_ANNOUNCEMENTS}" aria-live="polite" aria-atomic="true"></p>`
-        );
 
         // close all and append
         newHtml.push(`</div>`);
@@ -1685,7 +1817,6 @@ export default class Autocomplete {
         this.label = document.querySelector('[for="' + this.element.id + '"]');
         this.ids = new AutocompleteIds(this.element.id, this.label ? this.label.id : null, options.id);
         this.elementIsInput = element.nodeName === 'INPUT';
-        this.elementIsSelect = element.nodeName === 'SELECT';
         this.options = new AutocompleteOptions(options);
 
         // ensure label has an id, for use in `aria-describedby` attributes later
