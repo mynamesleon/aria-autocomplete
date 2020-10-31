@@ -285,21 +285,24 @@ export default class Autocomplete {
         if (!this.srAnnouncements || !text || typeof text !== 'string') {
             return;
         }
-        // in immediate case, do not use timer
-        if (delay === 0) {
-            this.srAnnouncements.textContent = text;
-            return;
-        }
 
-        clearTimeout(this.announcementTimer);
-        this.announcementTimer = setTimeout(() => {
+        const setAnnouncementText = () => {
             this.srAnnouncements.textContent = text;
             // clear the announcement
             const { srAutoClear: autoClear } = this.options;
             if (autoClear === true || (typeof autoClear === 'number' && autoClear > -1)) {
                 this.clearAnnouncement(typeof autoClear === 'number' ? autoClear : 5000);
             }
-        }, delay);
+        };
+
+        // in immediate case, do not use timer
+        if (delay === 0) {
+            setAnnouncementText();
+            return;
+        }
+
+        clearTimeout(this.announcementTimer);
+        this.announcementTimer = setTimeout(() => setAnnouncementText(), delay);
     }
 
     /**
