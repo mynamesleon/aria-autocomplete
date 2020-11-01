@@ -711,9 +711,8 @@ export default class Autocomplete {
             !create ||
             !option ||
             !option.value ||
-            !sourceFromSelect ||
-            !sourceFromCheckboxList ||
-            !Array.isArray(this.source)
+            !Array.isArray(this.source) ||
+            !(sourceFromSelect || sourceFromCheckboxList)
         ) {
             return;
         }
