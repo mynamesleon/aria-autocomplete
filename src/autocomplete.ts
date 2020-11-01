@@ -546,7 +546,7 @@ export default class Autocomplete {
     /**
      * move focus to correct option, or to input (on up and down arrows)
      */
-    setOptionFocus(event: Event, index: number) {
+    setOptionFocus(event: Event | object, index: number, triggerDomFocus: boolean = true) {
         const options: HTMLElement[] = getChildrenOf(this.list);
         // set aria-selected to false and remove focused class
         this.resetOptionAttributes(options);
@@ -555,7 +555,7 @@ export default class Autocomplete {
         if (index < 0 || !options.length) {
             this.currentSelectedIndex = -1;
             // focus on input, only if event was from another element
-            if (event && event.target !== this.input) {
+            if (event && (event as Event).target !== this.input) {
                 this.input.focus();
             }
             return;
@@ -574,7 +574,9 @@ export default class Autocomplete {
             this.currentSelectedIndex = index;
             addClass(toFocus, `${this.cssNameSpace}__option--focused focused focus`);
             toFocus.setAttribute('aria-selected', 'true');
-            toFocus.focus();
+            if (triggerDomFocus) {
+                toFocus.focus();
+            }
             return;
         }
 
@@ -700,11 +702,19 @@ export default class Autocomplete {
      */
     addResultsEntryToDomAndSource(option: any) {
         const { create } = this.options;
+        const { sourceFromSelect, sourceFromCheckboxList } = this;
 
-        // better safe than sorry...
-        // only applies to create mode, and if the option has a value
-        // if the source is an endpoint, or function, we can't update it or the DOM
-        if (!option || !option.value || !create || !Array.isArray(this.source)) {
+        // only applies to create mode, and if the option has a value;
+        // limit this method to only affect dropdown and checkbox list sources;
+        // if the source is not an array, we can't update it or the DOM;
+        if (
+            !create ||
+            !option ||
+            !option.value ||
+            !sourceFromSelect ||
+            !sourceFromCheckboxList ||
+            !Array.isArray(this.source)
+        ) {
             return;
         }
 
@@ -720,8 +730,6 @@ export default class Autocomplete {
         }
 
         let element: HTMLOptionElement | HTMLInputElement;
-        const { sourceFromSelect, sourceFromCheckboxList } = this;
-
         // dropdown list case
         if (sourceFromSelect) {
             const existingOption: HTMLOptionElement = this.element.querySelector('option');
@@ -732,6 +740,7 @@ export default class Autocomplete {
             // insert the new option at the beginning of the list
             existingOption.parentNode.insertBefore(newOption, existingOption);
         }
+
         // checkboxlist case
         else if (sourceFromCheckboxList) {
             const existingCheckbox = this.element.querySelector('input[type="checkbox"]');
@@ -764,29 +773,28 @@ export default class Autocomplete {
 
     /**
      * when `create` option is true, or a function that returns a value,
-     * add an entry to the results for the current search term
+     * add an entry to the `results` for the specified search term;
+     * modifies the provided `results` array
      */
-    prependCreatedResultsEntry(results: any[]) {
+    prependEntryInCreateMode(fromTerm: string, results: any[]): boolean {
         const { create } = this.options;
-        const cleanedValue = cleanString(this.term);
-
         // if the option is falsy or not a function, or the search value is empty, do nothing
-        if (!cleanedValue || !(create === true || typeof create === 'function')) {
+        if (!(create === true || typeof create === 'function') || !cleanString(fromTerm)) {
             return;
         }
 
         let entryToAdd: any;
-        const trimmedValue = trimString(this.term);
+        const trimmedTerm = trimString(fromTerm);
         const { sourceMapping: mapping } = this.options;
 
         // simple entry creation when set to true, based on the trimmed value (not cleaned value)
         if (create === true) {
-            entryToAdd = processSourceEntry(trimmedValue, mapping);
+            entryToAdd = processSourceEntry(trimmedTerm, mapping);
         }
 
         // when function, check the result first...
         if (typeof create === 'function') {
-            const result = create(trimmedValue);
+            const result = create(trimmedTerm);
             const resultType = typeof result;
             // check that the result was a string or object
             // if devs want to add multiple entries, they can use the `onResponse` callback
@@ -796,17 +804,15 @@ export default class Autocomplete {
         }
 
         // only add it if there's actually something to add
-        if (!entryToAdd || !entryToAdd.label || !entryToAdd.value) {
-            return;
-        }
-
-        // if there's an exact label match in the existing results, give original entry precedence
-        if (this.indexOfValueIn(results, entryToAdd[CLEANED_LABEL_PROP], CLEANED_LABEL_PROP) > -1) {
-            return;
-        }
-
-        // also do not proceed if there's an exact value match in the original results
-        if (this.indexOfValueIn(results, entryToAdd.value, 'value') > -1) {
+        if (
+            !entryToAdd ||
+            !entryToAdd.label ||
+            !entryToAdd.value ||
+            // if there's an exact label match in the results, give original entry precedence
+            this.indexOfValueIn(results, entryToAdd[CLEANED_LABEL_PROP], CLEANED_LABEL_PROP) > -1 ||
+            // also keep unique values in the results
+            this.indexOfValueIn(results, entryToAdd.value, 'value') > -1
+        ) {
             return;
         }
 
@@ -819,13 +825,13 @@ export default class Autocomplete {
      * @todo add handling for disabled results
      */
     setListOptions(results: any[]) {
-        this.prependCreatedResultsEntry(results);
-        // now commit to setting the filtered source
         const { sourceMapping: mapping } = this.options;
+        this.prependEntryInCreateMode(this.term, results);
         // if in multiple mode, exclude items already in the selected array
         const updated: any[] = this.removeSelectedFromResults(results);
         // allow callback to alter the response before rendering
         const callback: any = this.triggerOptionCallback('onResponse', [updated]);
+        // at last, set the fully filtered source
         this.filteredSource = Array.isArray(callback) ? processSourceArray(callback, mapping) : updated;
 
         // build up the list html
@@ -849,19 +855,20 @@ export default class Autocomplete {
             );
         }
 
+        const noResults = !toShow.length;
         // set has-results or no-results class on the list element
-        if (toShow.length) {
-            addClass(this.list, `${cssNameSpace}__list--has-results`);
-            removeClass(this.list, `${cssNameSpace}__list--no-results`);
-        } else {
+        if (noResults) {
             removeClass(this.list, `${cssNameSpace}__list--has-results`);
             addClass(this.list, `${cssNameSpace}__list--no-results`);
+        } else {
+            addClass(this.list, `${cssNameSpace}__list--has-results`);
+            removeClass(this.list, `${cssNameSpace}__list--no-results`);
         }
 
         // no results text handling
         let announce: string;
         const { noResultsText: noText } = this.options;
-        if (!toShow.length && typeof noText === 'string' && noText.length) {
+        if (noResults && typeof noText === 'string' && noText.length) {
             announce = noText;
             toShow.push(`<li class="${optionClassName} ${optionClassName}--no-results">${noText}</li>`);
         }
@@ -889,7 +896,8 @@ export default class Autocomplete {
             this.resetOptionAttributes();
         }
 
-        // if toShow array is empty, make sure not to render the menu
+        // if `toShow` array is empty, make sure not to render the menu
+        // must check `toShow` length in case a "no results" entry was added
         if (!toShow.length) {
             this.hide();
             this.forceShowAll = false;
@@ -1564,22 +1572,30 @@ export default class Autocomplete {
     }
 
     /**
-     * build up selected array if starting element was an input, and had a value
+     * build up selected array if starting element was an input, and had a value;
+     * only used when the autocomplete first initialises
      */
     prepSelectedFromArray(source: any[]) {
         const value = this.elementIsInput && (this.element as HTMLInputElement).value;
-        if (value && source && source.length) {
+        if (value && Array.isArray(source) && source.length) {
             // account for multiple mode
             const { multiple, multipleSeparator: separator } = this.options;
             const valueArr: string[] = multiple ? value.split(separator) : [value];
 
+            // create a shallow copy of the source to allow modifying
+            // (prepending entries in create mode)
+            const copiedSource = source.slice();
+
             valueArr.forEach((val: string) => {
                 // make sure it is not already in the selected array
-                // but is in the source array (check via 'value', not 'label')
                 if (this.indexOfValueIn(this.selected, val, 'value') === -1) {
-                    const indexInSource = this.indexOfValueIn(source, val, 'value');
+                    // account for create mode
+                    this.prependEntryInCreateMode(val, copiedSource);
+
+                    // confirm value is in the source array (check via 'value', not 'label')
+                    const indexInSource = this.indexOfValueIn(copiedSource, val, 'value');
                     if (indexInSource > -1) {
-                        this.selected.push(source[indexInSource]);
+                        this.selected.push(copiedSource[indexInSource]);
                     }
                 }
             });

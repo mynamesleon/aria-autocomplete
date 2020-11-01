@@ -94,7 +94,7 @@ The full list of options, and their defaults:
      * @example (query, render, isFirstCall) => render(arrayToUse)
      * @example (query) => async () => arrayToUse
      */
-    source: string[] | any[] | string | Function;
+    source: string[] | any[] | string | Function | Promise<any[]>;
 
     /**
      * Properties to use for label and value when source is an Array of Objects

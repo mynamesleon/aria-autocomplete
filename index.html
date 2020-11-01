@@ -390,6 +390,44 @@
                         <p>You can also use the <code>onAsyncPrep</code> callback to modify the URL.</p>
                         <p>This example has no filtering in the request, as it's just requesting a JSON file, so it's doing some basic filtering in the <code>onAsyncSuccess</code> callback. The initialised input's starting value is "CAN" (the code3 property for Canada).</p>
                     </div>
+                    <div class="tile" id="example-5">
+                        <h3>5. Array as Source, with Result Creation and Multi-Select</h3>
+                        <p>This example simulates a tagging input. It has a small <code>source</code> array, but with result creation enabled, and includes starting values not included in the <code>source</code>.</p>
+                        <label for="contacts-array">Select some people</label>
+                        <input type="text" value="Sophie,Alan (not in the list),John,Josie (not in the list)" id="contacts-array" />
+                        <script>
+                            AriaAutocomplete(document.getElementById('contacts-array'), {
+                                source: ['Sophie', 'John', 'Grace', 'Mark', 'Steve', 'Cassandra'],
+                                onItemRender: function (itemData) {
+                                    var label = itemData.label;
+                                    if (this.options.source.indexOf(label) === -1) {
+                                        return 'Add ' + label + '...';
+                                    }
+                                    return label;
+                                },
+                                deleteOnBackspace: true,
+                                autoGrow: true,
+                                multiple: true,
+                                minLength: 0,
+                                create: true
+                            });
+                        </script>
+                        <pre><code class="lang-typescript">const autocomplete = AriaAutocomplete(document.getElementById('input'), {
+    source: ['Sophie', 'John', ...more],
+    onItemRender: ({ label }) => {
+        if (!autocomplete.options.source.includes(label)) {
+            return `Add ${label}...`;
+        }
+        return label;
+    },
+    deleteOnBackspace: true,
+    autoGrow: true,
+    multiple: true,
+    minLength: 0,
+    create: true
+});
+</code></pre>
+                    </div>
                     <p>All component options that accept a Function will have their context (<code>this</code>) set to include the full autocomplete API (assuming you use an ordinary function expression instead of arrow functions). The only exception to this is the Function and Endpoint starting cases mentioned above, where the context is not manually set. So you can check for the API's existence, or check the context against the window object, to check if it's the starting call (or use the provided final param in the relevant callbacks).</p>
                 </section>
             
@@ -402,7 +440,7 @@
                             <div>
                                 <dt>name: <code>string</code></dt>
                                 <dd>Give the autocomplete a name so that (in single-select mode) its value will be included in form submissions.<br>(Instead of using this option, I would advise initialising the autocomplete on an existing input that will be submitted; this approach is compatible with the control in multiple mode)</dd>
-                                <dt>source: <code>string[] | any[] | string | Function | Promise</code></dt>
+                                <dt>source: <code>string[] | any[] | string | Function | Promise<any[]></code></dt>
                                 <dd>string for async endpoint, array of strings, array of objects with value and label, or function</dd>
                                 <dt>sourceMapping: <code>Object</code></dt>
                                 <dd>an object detailing the properties to use for the label and value when using an Array of Objects as the source - see Array examples above.</dd>
