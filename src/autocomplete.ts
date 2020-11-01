@@ -19,6 +19,7 @@ import {
 
 import {
     trimString,
+    escapeHtml,
     cleanString,
     mergeObjects,
     dispatchEvent,
@@ -846,11 +847,11 @@ export default class Autocomplete {
         for (let i = 0; i < lengthToUse; i += 1) {
             const thisSource: any = this.filteredSource[i];
             const callbackResponse = checkCallback && this.triggerOptionCallback('onItemRender', [thisSource]);
-            const itemContent = callbackResponse || thisSource.label;
+            const itemContent = typeof callbackResponse === 'string' ? callbackResponse : thisSource.label;
             toShow.push(
                 `<li tabindex="-1" aria-selected="false" role="option" class="${optionClassName}" ` +
                     `id="${optionId}--${i}" aria-posinset="${i + 1}" ` +
-                    `aria-setsize="${lengthToUse}">${itemContent}</li>`
+                    `aria-setsize="${lengthToUse}">${escapeHtml(itemContent)}</li>`
             );
         }
 
@@ -869,7 +870,9 @@ export default class Autocomplete {
         const { noResultsText: noText } = this.options;
         if (noResults && typeof noText === 'string' && noText.length) {
             announce = noText;
-            toShow.push(`<li class="${optionClassName} ${optionClassName}--no-results">${noText}</li>`);
+            toShow.push(
+                `<li class="${optionClassName} ${optionClassName}--no-results">${escapeHtml(noText)}</li>`
+            );
         }
 
         // remove loading class(es) and reset variables
@@ -1766,7 +1769,9 @@ export default class Autocomplete {
         );
 
         // add the screen reader assistance element
-        newHtml.push(`<p id="${this.ids.SR_ASSISTANCE}" style="display:none;">${o.srAssistiveText}</p>`);
+        newHtml.push(
+            `<p id="${this.ids.SR_ASSISTANCE}" style="display:none;">${escapeHtml(o.srAssistiveText)}</p>`
+        );
 
         // close all and append
         newHtml.push(`</div>`);

@@ -1,10 +1,20 @@
-import { CLEANED_LABEL_PROP } from './autocomplete-constants';
+import { CLEANED_LABEL_PROP, UNESCAPED_HTML_REGEX, HTML_REPLACEMENTS } from './autocomplete-constants';
 
 /**
  * remove start and end whitespace from string
  */
 export function trimString(theString?: any): string {
     return theString == null ? '' : (theString + '').trim();
+}
+
+/**
+ * convert &, <, >, ", and ' in a string to their HTML entities
+ */
+export function escapeHtml(value: string): string {
+    if (typeof value !== 'string' || !value) {
+        return '';
+    }
+    return value.replace(UNESCAPED_HTML_REGEX, (character) => HTML_REPLACEMENTS[character]);
 }
 
 const REGEX_AMPERSAND = /&/g;

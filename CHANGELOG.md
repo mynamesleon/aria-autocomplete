@@ -2,12 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.2] - 2020-11-01
+## [1.2.3] - 2020-11-01
 
 ### Fixed
 
 -   The `create` option not applying to starting values.
 -   The `create` option persistence now correctly only applies when the autocomplete is used to progressively enhance a `<select>` or checkbox list.
+-   Various HTML injection risks, particularly with the `create` and `onItemRender` options.
 
 ## [1.2.0] - 2020-10-31
 
@@ -85,7 +86,7 @@ All notable changes to this project will be documented in this file.
 -   Issue when clicking on a single-select autocomplete with minLength of 0 with a current selection, which was correctly searching with an empty string, but the polling method was then triggering a search with the value afterwards.
 -   Screen reader announcements for results ignoring the number of results rendered
 
-[1.2.2]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.0...v1.2.2
+[1.2.3]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.0...v1.2.3
 [1.2.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.4...v1.2.0
 [1.1.4]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.2...v1.1.3

@@ -16,5 +16,14 @@ export const KEYCODES = {
     UP: 38,
     RIGHT: 39,
     DOWN: 40,
-    DELETE: 46
+    DELETE: 46,
+};
+
+export const UNESCAPED_HTML_REGEX = /[&<>"']/g;
+export const HTML_REPLACEMENTS = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
 };
