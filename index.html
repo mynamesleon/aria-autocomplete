@@ -509,8 +509,13 @@
                         <h3>Screen reader enhancements</h3>
                         <dl>
                             <div>
+                                <dt>srDelay: <code>number</code></dt>
+                                <dd>
+                                    Set the delay in milliseconds before screen reader announcements are made.<br>
+                                    Note: if this is too short, some default announcements may interrupt it.<br>
+                                    Default: <code>5000</code></dd>
                                 <dt>srAutoClear: <code>boolean | number</code></dt>
-                                <dd>Automatically clear the screen reader announcement element after the specified delay. Number is in milliseconds.<br>Default: <code>5000</code></dd>
+                                <dd>Automatically clear the screen reader announcement element after the specified delay. Number is in milliseconds.<br>Default: <code>10000</code></dd>
                                 <dt>srDeleteText: <code>string</code></dt>
                                 <dd>In multi mode, screen reader text used for element deletion - prepended to label<br>Default: <code>`delete`</code></dd>
                                 <dt>srDeletedText: <code>string</code></dt>
@@ -523,6 +528,11 @@
                                 <dd>Screen reader explainer added to the list element via aria-label attribute<br>Default: <code>`Search suggestions`</code></dd>
                                 <dt>srAssistiveText: <code>string</code></dt>
                                 <dd>Screen reader description used for main input when empty<br>Default: <code>`When results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.`</code></dd>
+                                <dt>srAssistiveTextAutoClear: <code>boolean</code></dt>
+                                <dd>
+                                    Automatically remove the srAssistiveText once user input is detected, to reduce screen reader verbosity.<br>
+                                    The text is re-associated with the generated input if its value is emptied.<br>
+                                    Default: <code>5000</code></dd>
                                 <dt>srResultsText: <code>Function</code></dt>
                                 <dd>Screen reader announcement after results are rendered<br>Default: <code>length => `${length} ${length === 1 ? 'result' : 'results'} available.`</code></dd>
                             </div>

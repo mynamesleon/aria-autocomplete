@@ -282,7 +282,7 @@ export default class Autocomplete {
     /**
      * make a screen reader announcement
      */
-    announce(text: string, delay: number = 400) {
+    announce(text: string, delay: number = this.options.srDelay) {
         if (!this.srAnnouncements || !text || typeof text !== 'string') {
             return;
         }
@@ -292,7 +292,7 @@ export default class Autocomplete {
             // clear the announcement
             const { srAutoClear: autoClear } = this.options;
             if (autoClear === true || (typeof autoClear === 'number' && autoClear > -1)) {
-                this.clearAnnouncement(typeof autoClear === 'number' ? autoClear : 5000);
+                this.clearAnnouncement(typeof autoClear === 'number' ? autoClear : 10000);
             }
         };
 
@@ -304,6 +304,28 @@ export default class Autocomplete {
 
         clearTimeout(this.announcementTimer);
         this.announcementTimer = setTimeout(() => setAnnouncementText(), delay);
+    }
+
+    /**
+     * set the aria-describedby attribute on the input
+     */
+    setInputDescription() {
+        const exists = this.input.getAttribute('aria-describedby');
+        const current = trimString(exists);
+        let describedBy = current.replace(this.ids.SR_ASSISTANCE, '');
+
+        if (!this.input.value.length) {
+            describedBy = `${describedBy} ${this.ids.SR_ASSISTANCE}`;
+        }
+
+        // set or remove attribute, but only if necessary
+        if ((describedBy = trimString(describedBy))) {
+            if (describedBy !== current) {
+                this.input.setAttribute('aria-describedby', describedBy);
+            }
+        } else if (exists) {
+            this.input.removeAttribute('aria-describedby');
+        }
     }
 
     /**
@@ -1090,6 +1112,11 @@ export default class Autocomplete {
                     trimString(this.selected[0].label) === trimString(value))
             ) {
                 value = '';
+            }
+
+            // handle aria-describedby updates
+            if (event && event.type && this.options.srAssistiveTextAutoClear) {
+                this.setInputDescription();
             }
 
             // length check

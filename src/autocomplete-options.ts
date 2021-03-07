@@ -146,10 +146,17 @@ export default class AutocompleteOptions {
     wrapperClassName: string;
 
     /**
-     * Automatically clear the screen reader announcement element after the specified delay
-     * Number is in milliseconds. If true, defaults to 5000.
+     * Set the delay (in milliseconds) before screen reader announcements are made.
+     * Note: if this is too short, some default announcements may interrupt it,
+     * particularly with screen readers that re-announce input values after a pause in typing.
      */
-    srAutoClear: boolean | number = 5000;
+    srDelay: number = 1400;
+
+    /**
+     * Automatically clear the screen reader announcement element after the specified delay
+     * Number is in milliseconds. If true, defaults to 10000.
+     */
+    srAutoClear: boolean | number = 10000;
 
     /**
      * Screen reader text used in multiple mode for element deletion.
@@ -186,6 +193,13 @@ export default class AutocompleteOptions {
     srAssistiveText: string =
         `When results are available use up and down arrows to review and ` +
         `enter to select. Touch device users, explore by touch or with swipe gestures.`;
+
+    /**
+     * Automatically remove the srAssistiveText once user input is detected,
+     * to reduce screen reader verbosity.
+     * The text is re-associated with the generated input if its value is emptied
+     */
+    srAssistiveTextAutoClear: boolean = true;
 
     /**
      * Screen reader announcement after results are rendered

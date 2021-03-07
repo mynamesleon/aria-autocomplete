@@ -25,6 +25,7 @@ export interface IAriaAutocompleteOptions {
     listClassName?: string;
     inputClassName?: string;
     wrapperClassName?: string;
+    srDelay?: number;
     srAutoClear?: boolean | number;
     srDeleteText?: string;
     srDeletedText?: string;
@@ -32,6 +33,7 @@ export interface IAriaAutocompleteOptions {
     srSelectedText?: string;
     srListLabelText?: string;
     srAssistiveText?: string;
+    srAssistiveTextAutoClear?: boolean;
     srResultsText?(length: number): string | void;
     onSearch?(value: string): string | void;
     onAsyncPrep?(url: string, xhr: XMLHttpRequest, isFirstCall: boolean): string | void;

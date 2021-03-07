@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2021-03-07
+
+### Added
+
+-   `srDelay` option to specify the delay before custom screen reader announcements are made. This now defaults to 1400 milliseconds, instead of 400 as before.
+-   `srAssistiveTextAutoClear` option to allow the assistive text option to be removed when user input is detected, to decrease screen reader verbosity. The assistive text is re-associated with the generated input if its value is cleared.
+
+### Changed
+
+-   increased the default `srAutoClear` value to 10000 milliseconds.
+
 ## [1.2.3] - 2020-11-01
 
 ### Fixed
@@ -86,6 +97,7 @@ All notable changes to this project will be documented in this file.
 -   Issue when clicking on a single-select autocomplete with minLength of 0 with a current selection, which was correctly searching with an empty string, but the polling method was then triggering a search with the value afterwards.
 -   Screen reader announcements for results ignoring the number of results rendered
 
+[1.3.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.0...v1.2.3
 [1.2.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.4...v1.2.0
 [1.1.4]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.3...v1.1.4
