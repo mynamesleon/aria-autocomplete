@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2021-03-22
+
+### Changed
+
+-   adjusted the `confirmOnBlur` string matching behaviour to used the "cleaned" version of the search term and option label when blurring off of the field without a currently focused menu option.
+
 ## [1.3.0] - 2021-03-07
 
 ### Added

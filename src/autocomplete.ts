@@ -1204,8 +1204,9 @@ export default class Autocomplete {
                 // if blurring from an option (currentSelectedIndex > -1), select it
                 let toUse: number = this.currentSelectedIndex;
                 if (typeof toUse !== 'number' || toUse === -1) {
-                    // otherwise check for exact match between current input value and available items
-                    toUse = this.indexOfValueIn.call(this, this.filteredSource, this.term, 'label');
+                    // otherwise check for exact match of cleaned values 
+                    // between current input value and available items
+                    toUse = this.indexOfValueIn.call(this, this.filteredSource, cleanString(this.term), CLEANED_LABEL_PROP);
                 }
                 this.handleOptionSelect({}, toUse, false);
             }
