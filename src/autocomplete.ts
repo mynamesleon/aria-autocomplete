@@ -245,7 +245,10 @@ export default class Autocomplete {
      * set input value to specific string, and related component vars
      */
     setInputValue(value?: string, setPollingValue: boolean = false) {
-        this.input.value = this.term = value;
+        this.term = value;
+        if (this.input) {
+            this.input.value = value;
+        }
         if (setPollingValue) {
             this.inputPollingValue = value;
         }
@@ -689,7 +692,7 @@ export default class Autocomplete {
         this.announce(`${option.label} ${this.options.srSelectedText}`, 0);
 
         // return focus to input
-        if (!this.disabled && focusInputAfterSelection !== false) {
+        if (!this.disabled && focusInputAfterSelection !== false && this.input) {
             this.input.focus();
         }
 
@@ -1204,9 +1207,10 @@ export default class Autocomplete {
                 // if blurring from an option (currentSelectedIndex > -1), select it
                 let toUse: number = this.currentSelectedIndex;
                 if (typeof toUse !== 'number' || toUse === -1) {
-                    // otherwise check for exact match of cleaned values 
+                    // otherwise check for exact match of cleaned values
                     // between current input value and available items
-                    toUse = this.indexOfValueIn.call(this, this.filteredSource, cleanString(this.term), CLEANED_LABEL_PROP);
+                    const cleanedTerm = cleanString(this.term);
+                    toUse = this.indexOfValueIn.call(this, this.filteredSource, cleanedTerm, CLEANED_LABEL_PROP);
                 }
                 this.handleOptionSelect({}, toUse, false);
             }

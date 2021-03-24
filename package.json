@@ -1,6 +1,6 @@
 {
     "name": "aria-autocomplete",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "description": "Accessible, extensible, JavaScript autocomplete with multi-select",
     "main": "dist/aria-autocomplete.min.js",
     "style": "dist/aria-autocomplete.css",

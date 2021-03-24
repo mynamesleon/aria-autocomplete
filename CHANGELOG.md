@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.1] - 2021-03-22
+## [1.3.2] - 2021-03-24
 
 ### Changed
 
 -   adjusted the `confirmOnBlur` string matching behaviour to used the "cleaned" version of the search term and option label when blurring off of the field without a currently focused menu option.
+-   defensive adjustment to setting the input value and moving focus to it after the component area is blurred.
 
 ## [1.3.0] - 2021-03-07
 
@@ -103,6 +104,7 @@ All notable changes to this project will be documented in this file.
 -   Issue when clicking on a single-select autocomplete with minLength of 0 with a current selection, which was correctly searching with an empty string, but the polling method was then triggering a search with the value afterwards.
 -   Screen reader announcements for results ignoring the number of results rendered
 
+[1.3.2]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.3.0...v1.3.2
 [1.3.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.0...v1.2.3
 [1.2.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.4...v1.2.0
