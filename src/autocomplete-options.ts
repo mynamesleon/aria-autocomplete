@@ -34,7 +34,7 @@ export default class AutocompleteOptions {
      * If no exact match is found,
      * create an entry in the options list for the current search text
      */
-    create: boolean | ((value: string) => string | object) = false;
+    create: boolean | ((value: string) => string | any | void) = false;
 
     /**
      * Input delay after typing before running a search
@@ -61,7 +61,7 @@ export default class AutocompleteOptions {
      * Confirm currently active selection when blurring off of the control. If
      * no active selection, will compare current input value against available labels
      */
-    confirmOnBlur: boolean = true;
+    confirmOnBlur: boolean | ((value: string, options: any[]) => string | void) = true;
 
     /**
      * Allow multiple items to be selected

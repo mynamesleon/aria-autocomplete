@@ -11,7 +11,7 @@
         <meta name="twitter:title" content="Aria-Autocomplete" />
         <meta
             name="twitter:description"
-            content="Accessible, extensible, plain JavaScript autocomplete with multi-select"
+            content="Fast, accessible, extensible, plain JavaScript autocomplete with multi-select"
         />
         <link rel="stylesheet" href="dist/aria-autocomplete.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/a11y-dark.min.css" />
@@ -449,7 +449,11 @@
                             </div>
                             <div>
                                 <dt>create: <code>boolean | Function</code></dt>
-                                <dd>If no exact match is found, create an entry in the results list for the current search text<br>Default: <code>false</code></dd>
+                                <dd>
+                                    If no exact match is found, create an entry in the results list for the current search text.
+                                    Can use a function that receives the search term, and returns a string or an object (like a normal static source entry).
+                                    <br>Default: <code>false</code>
+                                </dd>
                                 <dt>delay: <code>number</code></dt>
                                 <dd>input delay before running a search<br>Default: <code>100</code></dd>
                                 <dt>minLength: <code>number</code></dt>
@@ -458,8 +462,12 @@
                                 <dd>Maximum number of results to render<br>Default: <code>9999</code></dd>
                                 <dt>showAllControl: <code>boolean</code></dt>
                                 <dd>Render a button that triggers showing all options<br>Default: <code>false</code></dd>
-                                <dt>confirmOnBlur: <code>boolean</code></dt>
-                                <dd>Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for an exact text match<br>Default: <code>true</code></dd>
+                                <dt>confirmOnBlur: <code>boolean | Function</code></dt>
+                                <dd>
+                                    Confirm current selection (from using arrow keys) when blurring off of the control. Will also check for a label match if there is no current selection.<br>
+                                    Can use a function which receives the search term and results, and returns a string to be used to compare against the result labels.<br>
+                                    Default: <code>true</code>
+                                </dd>
                             </div>
                             <div>
                                 <dt>multiple: <code>boolean</code></dt>
@@ -513,7 +521,8 @@
                                 <dd>
                                     Set the delay in milliseconds before screen reader announcements are made.<br>
                                     Note: if this is too short, some default announcements may interrupt it.<br>
-                                    Default: <code>5000</code></dd>
+                                    Default: <code>5000</code>
+                                </dd>
                                 <dt>srAutoClear: <code>boolean | number</code></dt>
                                 <dd>Automatically clear the screen reader announcement element after the specified delay. Number is in milliseconds.<br>Default: <code>10000</code></dd>
                                 <dt>srDeleteText: <code>string</code></dt>
@@ -532,7 +541,8 @@
                                 <dd>
                                     Automatically remove the srAssistiveText once user input is detected, to reduce screen reader verbosity.<br>
                                     The text is re-associated with the generated input if its value is emptied.<br>
-                                    Default: <code>5000</code></dd>
+                                    Default: <code>5000</code>
+                                </dd>
                                 <dt>srResultsText: <code>Function</code></dt>
                                 <dd>Screen reader announcement after results are rendered<br>Default: <code>length => `${length} ${length === 1 ? 'result' : 'results'} available.`</code></dd>
                             </div>

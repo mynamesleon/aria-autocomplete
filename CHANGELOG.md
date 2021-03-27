@@ -2,12 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.2] - 2021-03-24
+## [1.4.0] - 2021-03-27
+
+### Added
+
+-   the ability to provide a function for the `confirmOnBlur` option that can return a string to compare against the search result labels.
+-   page up and page down key handling within the options list to move the current focus position up or down by 10 options.
+-   handling for disabled options, including ones based on disabled checkboxes and disabled select options.
 
 ### Changed
 
--   adjusted the `confirmOnBlur` string matching behaviour to used the "cleaned" version of the search term and option label when blurring off of the field without a currently focused menu option.
+-   adjusted the `confirmOnBlur` string matching behaviour to use the "cleaned" version of the search term and option label when blurring off of the field without a currently focused menu option.
 -   defensive adjustment to setting the input value and moving focus to it after the component area is blurred.
+
+### Fixed
+
+-   the `create` option when used as a function not being called with the API as context.
 
 ## [1.3.0] - 2021-03-07
 
@@ -104,7 +114,7 @@ All notable changes to this project will be documented in this file.
 -   Issue when clicking on a single-select autocomplete with minLength of 0 with a current selection, which was correctly searching with an empty string, but the polling method was then triggering a search with the value afterwards.
 -   Screen reader announcements for results ignoring the number of results rendered
 
-[1.3.2]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.3.0...v1.3.2
+[1.4.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.2.0...v1.2.3
 [1.2.0]: https://github.com/mynamesleon/aria-autocomplete/compare/v1.1.4...v1.2.0

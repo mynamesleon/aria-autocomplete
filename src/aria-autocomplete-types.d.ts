@@ -4,12 +4,12 @@ export interface IAriaAutocompleteOptions {
     source?: string | string[] | any[] | Function | Promise<any[]>;
     sourceMapping?: any;
     alsoSearchIn?: string[];
-    create?: boolean | ((value: string) => string | any);
+    create?: boolean | ((value: string) => string | any | void);
     delay?: number;
     minLength?: number;
     maxResults?: number;
     showAllControl?: boolean;
-    confirmOnBlur?: boolean;
+    confirmOnBlur?: boolean | ((value: string, results: any[]) => string | void);
     multiple?: boolean;
     autoGrow?: boolean;
     maxItems?: number;

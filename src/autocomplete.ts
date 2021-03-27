@@ -564,7 +564,10 @@ export default class Autocomplete {
     resetOptionAttributes(options: HTMLElement[] = getChildrenOf(this.list)) {
         const classToRemove = `${this.cssNameSpace}__option--focused focused focus`;
         options.forEach((option: HTMLElement) => {
-            option.setAttribute('aria-selected', 'false');
+            // omit the aria-selected attribute from non-selectable options
+            if (option.getAttribute('aria-disabled') !== 'true') {
+                option.setAttribute('aria-selected', 'false');
+            }
             removeClass(option, classToRemove);
         });
     }
@@ -599,7 +602,10 @@ export default class Autocomplete {
         if (toFocus && typeof toFocus.getAttribute('tabindex') === 'string') {
             this.currentSelectedIndex = index;
             addClass(toFocus, `${this.cssNameSpace}__option--focused focused focus`);
-            toFocus.setAttribute('aria-selected', 'true');
+            // omit the aria-selected attribute from non-selectable options
+            if (toFocus.getAttribute('aria-disabled') !== 'true') {
+                toFocus.setAttribute('aria-selected', 'true');
+            }
             if (triggerDomFocus) {
                 toFocus.focus();
             }
@@ -656,6 +662,11 @@ export default class Autocomplete {
 
         // generate new object from the selected item in case the original source gets altered
         const option: any = mergeObjects(this.filteredSource[index]);
+
+        // check if option or linked element is disabled
+        if (option.disabled || (option.element && option.element.disabled)) {
+            return;
+        }
 
         // detect if selected option is already in selected array
         let alreadySelected: boolean = false;
@@ -819,7 +830,7 @@ export default class Autocomplete {
 
         // when function, check the result first...
         if (typeof create === 'function') {
-            const result = create(trimmedTerm);
+            const result = this.triggerOptionCallback('create', [trimmedTerm]);
             const resultType = typeof result;
             // check that the result was a string or object
             // if devs want to add multiple entries, they can use the `onResponse` callback
@@ -847,15 +858,15 @@ export default class Autocomplete {
 
     /**
      * final filtering and render for list options
-     * @todo add handling for disabled results
      */
     setListOptions(results: any[]) {
         const { sourceMapping: mapping } = this.options;
         this.prependEntryInCreateMode(this.term, results);
         // if in multiple mode, exclude items already in the selected array
         const updated: any[] = this.removeSelectedFromResults(results);
-        // allow callback to alter the response before rendering
-        const callback: any = this.triggerOptionCallback('onResponse', [updated]);
+        // allow callback to alter the response before rendering;
+        // only provide a shallow copy of the source so that the callback cannot modify it
+        const callback: any = this.triggerOptionCallback('onResponse', [updated.slice()]);
         // at last, set the fully filtered source
         this.filteredSource = Array.isArray(callback) ? processSourceArray(callback, mapping) : updated;
 
@@ -870,12 +881,15 @@ export default class Autocomplete {
 
         const toShow: string[] = [];
         for (let i = 0; i < lengthToUse; i += 1) {
-            const thisSource: any = this.filteredSource[i];
-            const callbackResponse = checkCallback && this.triggerOptionCallback('onItemRender', [thisSource]);
-            const itemContent = typeof callbackResponse === 'string' ? callbackResponse : thisSource.label;
+            const entry: any = this.filteredSource[i];
+            const callbackResponse = checkCallback && this.triggerOptionCallback('onItemRender', [entry]);
+            const itemContent = typeof callbackResponse === 'string' ? callbackResponse : entry.label;
+            const disabled: boolean = !!(entry.disabled || (entry.element && entry.element.disabled));
+            // omit the aria-selected attribute from non-selectable options
+            const ariaSelected = !disabled ? ' aria-selected="false"' : '';
             toShow.push(
-                `<li tabindex="-1" aria-selected="false" role="option" class="${optionClassName}" ` +
-                    `id="${optionId}--${i}" aria-posinset="${i + 1}" ` +
+                `<li tabindex="-1"${ariaSelected} role="option" class="${optionClassName}" ` +
+                    `aria-disabled="${disabled}" id="${optionId}--${i}" aria-posinset="${i + 1}" ` +
                     `aria-setsize="${lengthToUse}">${escapeHtml(itemContent)}</li>`
             );
         }
@@ -1209,7 +1223,10 @@ export default class Autocomplete {
                 if (typeof toUse !== 'number' || toUse === -1) {
                     // otherwise check for exact match of cleaned values
                     // between current input value and available items
-                    const cleanedTerm = cleanString(this.term);
+                    const copiedSource = this.filteredSource.slice();
+                    const onConfirmVal = this.triggerOptionCallback('confirmOnBlur', [this.term, copiedSource]);
+                    const useOnConfirmVal = onConfirmVal && typeof onConfirmVal === 'string';
+                    const cleanedTerm = cleanString(useOnConfirmVal ? onConfirmVal : this.term);
                     toUse = this.indexOfValueIn.call(this, this.filteredSource, cleanedTerm, CLEANED_LABEL_PROP);
                 }
                 this.handleOptionSelect({}, toUse, false);
@@ -1303,6 +1320,29 @@ export default class Autocomplete {
         if (!this.disabled && this.menuOpen && event.target !== this.input) {
             event.preventDefault();
             this.setOptionFocus(event, 0);
+        }
+    }
+
+    /**
+     * page up key handling within the component; move focus up by 10
+     */
+    handlePageUpKey(event: KeyboardEvent) {
+        if (!this.disabled && this.menuOpen && event.target !== this.input) {
+            event.preventDefault();
+            const current: number = this.currentSelectedIndex;
+            const index = current > 0 && current - 10 < 0 ? 0 : current === 0 ? -1 : current - 10;
+            this.setOptionFocus(event, index);
+        }
+    }
+
+    /**
+     * page down key handling within the component; move down by 10
+     */
+    handlePageDownKey(event: KeyboardEvent) {
+        if (!this.disabled && this.menuOpen && event.target !== this.input) {
+            event.preventDefault();
+            const current: number = this.currentSelectedIndex;
+            this.setOptionFocus(event, current < 0 ? 0 : current + 10);
         }
     }
 
@@ -1413,6 +1453,12 @@ export default class Autocomplete {
                 break;
             case KEYCODES.ENTER:
                 this.handleEnterKey(event);
+                break;
+            case KEYCODES.PAGEUP:
+                this.handlePageUpKey(event);
+                break;
+            case KEYCODES.PAGEDOWN:
+                this.handlePageDownKey(event);
                 break;
             case KEYCODES.ESCAPE:
                 this.handleComponentBlur(event, true);

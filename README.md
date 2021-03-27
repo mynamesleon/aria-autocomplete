@@ -3,18 +3,19 @@
 [![npm version](https://img.shields.io/npm/v/aria-autocomplete.svg)](http://npm.im/aria-autocomplete)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/aria-autocomplete/dist/aria-autocomplete.min.js?compression=gzip)](https://unpkg.com/aria-autocomplete/dist/aria-autocomplete.min.js)
 
-Accessible, extensible, plain JavaScript autocomplete with multi-select.
+Fast, accessible, extensible, plain JavaScript autocomplete with multi-select.
 
 [Try out the examples](https://mynamesleon.github.io/aria-autocomplete/).
 
 Key design goals and features:
 
--   **multiple selection**
+-   **support multiple selection**
 -   **extensible source options**: Array of Strings, Array of Objects, a Function, or an endpoint String
 -   **progressive enhancement**: Automatic source building through specifying a `<select>` as the element, or an element with child checkboxes.
 -   **accessibility**: Use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
 -   **compatibility**: Broad browser and device support (IE9+)
 -   **starting values**: Automatic selection based on starting values, including for checkboxes, `select` options, and for async handling.
+-   **small**: only 10 kB gzipped
 
 Built from the ground up for the **accessibility**, **performance**, and **functionality** combination that I couldn't find in any other autocomplete plugins.
 
@@ -68,9 +69,9 @@ You can grab the minified JS from the `dist` directory, or straight from unpkg:
 
 ## Performance
 
-I wrote this from the ground up largely because I needed an autocomplete with better performance than others I'd tried. I've optimised the JavaScript where I can, but in some browsers the list _rendering_ will still be a hit to performance. In my testing, modern browsers can render huge lists (1000+ items) just fine (on my laptop, averaging 40ms in Chrome, and under 20ms in Firefox).
+While this was written from the ground up to have better performance than other autocompletes I've tested, in much older browser the _rendering_ of large lists will still be a hit to performance. In my testing, modern browsers can render even _huge_ lists (1000+ items) just fine (on my laptop, averaging <40ms in Chrome, and <20ms in Firefox).
 
-As we all know however, Internet Explorer _sucks_. If you need to support Internet Explorer, I suggest using a sensible combination for the `delay`, `maxResults`, and possibly `minLength` options, to prevent the browser from freezing as your users type, and to reduce the rendering impact. Testing on my laptop, the list rendering in IE11 would take on average: 55ms for 250 items, 300ms for 650 items, and over 600ms for 1000 items.
+As we all know however, Internet Explorer _sucks_. If you need to support Internet Explorer, I suggest using a sensible combination for the `delay`, `maxResults`, and possibly `minLength` options, to prevent the browser stuttering as your users type, and to reduce the rendering impact. Testing on my laptop, the list rendering in IE11 would take on average: 55ms for 250 items, 300ms for 650 items, and over 600ms for 1000 items.
 
 ## Options
 
@@ -135,10 +136,15 @@ The full list of options, and their defaults:
     showAllControl: boolean = false;
 
     /**
-     * Confirm currently active selection when blurring off of the control. If
-     * no active selection, will compare current input value against available labels
+     * Confirm currently active selection when blurring off of the control.
+     * If no active selection, will compare current input value against available labels.
+     * Can also be a function that receives the search term and results, which can
+     * return a string to be used in the comparison instead of the original search term.
+     * Note: the comparison will be done with "cleaned" versions of the value and labels
+     * (ignoring quotes, commas, colons, and hyphens, normalising "&" and "and",
+     * and removing duplicate whitespace)
      */
-    confirmOnBlur: boolean = true;
+    confirmOnBlur: boolean | ((value: string, options: any[]) => string | void) = true;
 
     /**
      * Allow multiple items to be selected
