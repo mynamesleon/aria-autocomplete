@@ -255,6 +255,15 @@ export default class Autocomplete {
         this.triggerAutoGrow();
     }
 
+    setOriginalElementValue(newValue: string) {
+        const inputOrDdl: boolean = this.elementIsInput || this.sourceFromSelect;
+        const originalElement = this.element as HTMLInputElement | HTMLSelectElement;
+        if (inputOrDdl && originalElement.value !== newValue) {
+            originalElement.value = newValue;
+            dispatchEvent(originalElement, 'change');
+        }
+    }
+
     /**
      * check if value (or current input value) is contained in a selection of options;
      * checks for exact string match
@@ -394,9 +403,9 @@ export default class Autocomplete {
     /**
      * remove object from selected options array
      */
-    removeEntryFromSelected(entry: any, keepFocus: boolean = false) {
+    removeEntryFromSelected(entry: any, keepFocus: boolean = false): boolean|void {
         // prevent removing if deletions are disabled
-        if (this.deletionsDisabled) {
+        if (this.deletionsDisabled || !entry) {
             return;
         }
 
@@ -428,6 +437,30 @@ export default class Autocomplete {
             this.triggerAutoGrow();
             // make sure to announce deletion to screen reader users
             this.announce(`${label} ${this.options.srDeletedText}`, 0);
+        }
+    }
+
+    /**
+     * delete the last selected entry (or a specified one)
+     * and update the visible (and original) input(s)
+     */
+    deleteEntry(entry?: any) {
+        const entryIsNullOrUndefined = entry === null || typeof entry === 'undefined';
+        // if no entry is passed in, delete the last one
+        if (entryIsNullOrUndefined && this.selected.length) {
+            entry = this.selected[this.selected.length - 1];
+        }
+        // if a non-entry-like object is passed in,
+        // assume it is the value of the entry to delete
+        if (!entryIsNullOrUndefined && typeof entry !== 'object') {
+            entry = { value: entry };
+        }
+        // clear the entry
+        this.removeEntryFromSelected(entry);
+        // in single select mode, clear current input, and original input or ddl
+        if (!this.multiple) {
+            this.setOriginalElementValue('');
+            this.setInputValue('', true);
         }
     }
 
@@ -1238,16 +1271,7 @@ export default class Autocomplete {
 
             // in single select case, if current value and chosen value differ, clear selected and input value
             if (!this.multiple && this.indexOfValueIn.call(this, this.selected) === -1) {
-                if (this.selected.length) {
-                    this.removeEntryFromSelected(this.selected[0]);
-                }
-                const inputOrDdl: boolean = this.elementIsInput || this.sourceFromSelect;
-                const originalElement = this.element as HTMLInputElement | HTMLSelectElement;
-                if (inputOrDdl && originalElement.value !== '') {
-                    originalElement.value = '';
-                    dispatchEvent(originalElement, 'change');
-                }
-                this.setInputValue('', true);
+                this.deleteEntry();
             }
 
             // always clear input value in multiple mode
