@@ -15,7 +15,7 @@ Key design goals and features:
 -   **accessibility**: Use of ARIA attributes, custom screen reader announcements, and testing with assistive technologies
 -   **compatibility**: Broad browser and device support (IE9+)
 -   **starting values**: Automatic selection based on starting values, including for checkboxes, `select` options, and for async handling.
--   **small**: only 10 kB gzipped
+-   **small**: less than 11 kB gzipped
 
 Built from the ground up for the **accessibility**, **performance**, and **functionality** combination that I couldn't find in any other autocomplete plugins.
 

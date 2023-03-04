@@ -64,6 +64,8 @@ export interface IAriaAutocompleteApi {
     enable(): void;
     disable(disableDeletions?: boolean): void;
     filter(value: string): void;
+    delete(entry?: any): void;
+    deleteAll(): void;
     destroy(): void;
 }
 

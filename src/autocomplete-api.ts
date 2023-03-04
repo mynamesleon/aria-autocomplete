@@ -24,6 +24,8 @@ export default class AutocompleteApi {
         this.disable = this.disable.bind(instance);
         this.filter = this.filter.bind(instance);
         this.destroy = this.destroy.bind(instance);
+        this.delete = this.delete.bind(instance);
+        this.deleteAll = this.deleteAll.bind(instance);
         // store API on the Tablist element
         instance.element[API_STORAGE_PROP] = this;
     }
@@ -50,5 +52,17 @@ export default class AutocompleteApi {
 
     destroy(this: Autocomplete) {
         this.destroy.call(this);
+    }
+
+    delete(this: Autocomplete, entry?: any) {
+        this.deleteEntry.call(this, this.multiple ? entry : null);
+    }
+
+    deleteAll(this: Autocomplete) {
+        if (this.multiple) {
+            this.deleteAllSelected.call(this);
+        } else {
+            this.deleteEntry.call(this);
+        }
     }
 }
