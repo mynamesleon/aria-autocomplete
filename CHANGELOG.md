@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2023-12-23
+
+### Added
+
+- `setOption(option, value)` method to the API to fix issue that assigning values directly to the `api.options` object has no effect
+
 ## [1.5.0] - 2023-03-04
 
 ### Added
