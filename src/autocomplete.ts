@@ -1593,7 +1593,7 @@ export default class Autocomplete {
         });
         // trigger options selection
         this.list.addEventListener('click', (event) => {
-            if (event.target !== this.list) {
+            if (!this.disabled && event.target !== this.list) {
                 const options = getChildrenOf(this.list);
                 if (options.length) {
                     const optionIndex = options.indexOf(event.target as HTMLElement);
